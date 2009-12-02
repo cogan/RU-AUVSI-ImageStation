@@ -1,0 +1,66 @@
+#NoneInterface.py
+
+from Interface import *
+
+class NoneInterface(Interface):
+    """interface class to use when there is no connection selected."""
+    
+    def take_picture(self, picture_num):
+        """snap a picture."""
+        raise InterfaceError("no interface selected")
+        
+    def resume_search(self):
+        """have the camera resume it's search pattern."""
+        raise InterfaceError("no interface selected")
+        
+    def lock_target(self, xa, ya):
+        """lock onto a target given pixels xa and ya."""
+        raise InterfaceError("no interface selected")
+        
+    def download_to_flc(self):
+        """download pictures form the camera memory onto the
+        flight linux computer."""
+        raise InterfaceError("no interface selected")
+
+    def generate_crop(self, picture_num, xa, ya, xb, yb):
+        """generate a crop of an image given the image number,
+        xa, ya, xb, and yb. which represent the top left and bottom right
+        corners of a rectangle."""
+        raise InterfaceError("no interface selected")
+        
+    def request_info(self, picture_num):
+        """get all positional info about a picture
+        i.e camera angles, plane angles, gps coordinates"""
+        raise InterfaceError("no interface selected")
+        
+    def request_size(self, picture_num, crop_num):
+        """get the size of a crop"""
+        raise InterfaceError("no interface selected")
+        
+    def download_segment(self, picture_num, crop_num, segment_num): 
+        """download a segment of an image"""
+        raise InterfaceError("no interface selected")
+        
+    def camera_pan_left(self, increment):
+        """have the camera pan left."""
+        raise InterfaceError("no interface selected")
+        
+    def camera_pan_right(self, increment):
+        """have the camera pan right."""
+        raise InterfaceError("no interface selected")
+        
+    def camera_tilt_up(self, increment):
+        """have the camera tilt upwards."""
+        raise InterfaceError("no interface selected")
+        
+    def camera_tilt_down(self, increment):
+        """have the camera tilt down."""
+        raise InterfaceError("no interface selected")
+    
+    def camera_reset(self):
+        """have the camera set itself to it's home coordinates"""
+        raise InterfaceError("no interface selected")
+                
+    def ping(self):
+        """ping the plane"""
+        return 0

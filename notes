@@ -1,0 +1,9 @@
+"Cogan, what do you plan to do when you graduate"?
+"Get a job, I guess"
+"Have you considered applying to Grad School at all?"
+"To be honest, not really"
+
+call a function method with a string.
+getattr(object, method)(*args)
+i.e. getattr(self.interface, current_request)(*args)
+http://mail.python.org/pipermail/tutor/2006-July/048135.html
