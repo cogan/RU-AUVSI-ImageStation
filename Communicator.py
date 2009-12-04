@@ -151,10 +151,10 @@ class Communicator(Subject):
             #add a new picture to the list and create crop[0] for
             # that picture, the thumbnail crop
             self.picture_list.append(Picture())
-            self.picture_count = len(picture_list)
+            self.picture_count = len(self.picture_list)
             self.picture_list[self.picture_count-1].crop_list.append(Crop())
-            self.picture_list[self.picture_count-1].crop_list[0].path = \
-                self.project_path + "pic" + str(self.picture_count-1) + "crop0.jpg"
+            self.picture_list[self.picture_count-1].crop_list[1].path = \
+                self.project_path + "pic" + str(self.picture_count-1) + "crop1.jpg"
             
             self.notify("PICTURE_TAKEN", picture_num=self.picture_count-1)
             
@@ -221,8 +221,8 @@ class Communicator(Subject):
             # been taken (if this is called more than once it will loop from
             # 0 again, but it's not a big deal because a picture can never
             # become unavailable once it is available)
-            for i in range(0, self.picture_count-1):
-                self.picture_list[i].crop_list[0].available = True
+            for i in range(0, self.picture_count):
+                self.picture_list[i].crop_list[1].available = True
 
             self.notify("DOWNLOADED_TO_FLC", picture_count=self.picture_count)
         except InterfaceError as e:
@@ -281,6 +281,8 @@ class Communicator(Subject):
         picture_num = kwargs['picture_num']
         crop_num = kwargs['crop_num']
         
+        print "sending request to download image"
+        
         #check if the picture in question is available for download
         if (self.picture_list[picture_num].crop_list[crop_num].available == True):
         
@@ -297,13 +299,15 @@ class Communicator(Subject):
                         # give off a notification
                         pass
                         
+                    print "requesting size of picture %d, crop %d" % (picture_num, crop_num)
+                    
                     #now we get the size of the crop
                     crop_size = self.interface.request_size(picture_num, crop_num)
                     self.picture_list[picture_num].crop_list[crop_num].size = crop_size
                     
                     #now that we have the size calculate the amount of 
                     # segments needed to dl the full pic
-                    self.picture_list[picture_num].crop_list[crop_num].calculate_segments_total()
+                    self.picture_list[picture_num].crop_list[crop_num].calculate_total_segments()
                     
                     #notify observers
                     self.notify("SIZE_CALCULATED", \
@@ -319,7 +323,7 @@ class Communicator(Subject):
             #the picture has size info, download it
             else:
                 segment_num = self.picture_list[picture_num].crop_list[crop_num].segments_downloaded
-                print "downloading segment %d" % (segment_num,)
+                print "downloading segment %d of picture %d crop %d" % (segment_num, picture_num, crop_num)
                 try:
                     segment_data = self.interface.download_segment( \
                         picture_num = picture_num, \

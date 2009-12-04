@@ -10,6 +10,7 @@ class Crop:
             completed = False, \
             inqueue = False, \
             segments_downloaded = 0, \
+            segments_total = 0, \
             size = 0, \
             path = ""):
         """constructor"""
@@ -19,10 +20,14 @@ class Crop:
         self.inqueue = inqueue
         self.size = size
         self.segments_downloaded = segments_downloaded
+        self.segments_total = segments_total
         self.path = path
         
         #picture data
         self.segment_size = 250
+
+    def calculate_total_segments(self):
+        self.segments_total = math.ceil(float(self.size)/float(self.segment_size))  
         
     def total_segments(self):
         return math.ceil(float(self.size)/float(self.segment_size))

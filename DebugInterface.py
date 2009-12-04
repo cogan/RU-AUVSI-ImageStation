@@ -1,47 +1,18 @@
-#SerialInterface.py
+#DebugInterface.py
 
 from Interface import *
 from NmeaEncoder import *
 from NmeaDecoder import *
 
-import serial
 import time
 
-class SerialInterface(Interface):
-    """interface class to use when there is no connection selected."""
+class DebugInterface(Interface):
+    """interface class to use when debugging."""
     
     def __init__(self, port="/dev/ttyUSB0", baud=9600):
         """constructor"""
         
-        #indicates whether there is a connection on the selected port
-        self.enabled = False
-        
-        #create a connection on the selected port
-        self.initialize_connection(port, baud)
-        
-        #talker identifier = IS (ImageStation)
-        self.identifier = "IS"
-        
-        #set encoder and decoder
-        self.encoder = NmeaEncoder(self.identifier)
-        self.decoder = NmeaDecoder()
-        
-        # FOR REFERENCE: Dictionary of sentence identifiers
-        # 
-        # "take_picture" : "CPT"
-        # "resume_search" : ""
-        # "lock_target" : "",
-        # "download_to_flc" : "FLC"
-        # "generate_crop" : "CRP"
-        # "request_info" : "INF"
-        # "request_size" : "PSZ"
-        # "download_segment" : "DPC"
-        # "camera_pan_left" : "CLT"
-        # "camera_pan_right" : "CRT"
-        # "camera_tilt_up" : "CUP"
-        # "camera_tilt_down" : "CDN"
-        # "camera_reset" : "CRE"
-        # "ping" : "PNG"
+        print "Using the debugging interface"
     
     #*
     #* Define Abstract functions
@@ -49,97 +20,39 @@ class SerialInterface(Interface):
     
     def take_picture(self, picture_num):
         """snap a picture."""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("CPT", picture_num)
-                return self.tx_rx_decode(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
+        pass
     
     def resume_search(self):
         """have the camera resume it's search pattern."""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("")
-                return self.tx_rx_decode(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
+        pass
         
     def lock_target(self, xa, ya):
         """lock onto a target given pixels xa and ya."""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("", xa, ya)
-                return self.tx_rx_decode(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
+        pass
         
     def download_to_flc(self):
         """download pictures form the camera memory onto the
         flight linux computer."""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("FLC")
-                return self.tx_rx_decode(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
+        pass
 
     def generate_crop(self, picture_num, xa, ya, xb, yb):
         """generate a crop of an image given the image number,
         xa, ya, xb, and yb. which represent the top left and bottom right
         corners of a rectangle."""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("CRP", picture_num, \
-                                                    xa, ya, xb, yb)
-                return self.tx_rx_decode(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
+        pass
         
     def request_info(self, picture_num):
         """get all positional info about a picture
         i.e camera angles, plane angles, gps coordinates"""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("INF", picture_num)
-                return self.tx_rx_decode(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
+        pass
         
     def request_size(self, picture_num, crop_num):
         """get the size of a crop"""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("PSZ", picture_num, crop_num)
-                return self.tx_rx_decode(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
+        return 10043
         
     def download_segment(self, picture_num, crop_num, segment_num): 
         """download a segment of an image"""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("DPC", picture_num, \
-                                                    crop_num, segment_num)
-                return self.tx_rx_decode_bin(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
+        time.sleep(1)
         
     def camera_pan_left(self, increment):
         """have the camera pan left."""
@@ -213,22 +126,6 @@ class SerialInterface(Interface):
     #*
     #* Non-Abstract functions
     #*
-    
-    def initialize_connection(self, port, baud):
-        """try to create a connection on the specified serial port."""
-        try:
-            self.ser = serial.Serial(port)
-            self.ser.baudrate = baud
-            self.ser.bytesize = 8
-            self.ser.stopbits = 1
-            self.ser.rtscts = 1
-            self.ser.timeout = 1
-            self.enabled = True
-            print "serial connection successful"
-        except serial.serialutil.SerialException as e:
-            self.enabled = False
-            print "serial connection failed"
-            print e
 
     def tx_rx_decode(self, msg_to_send):
         """transmit to the plane, recieve a response, and decode it."""
@@ -251,11 +148,9 @@ class SerialInterface(Interface):
                 except DecodeError as e:
                     attempts += 1
                     error_msg = e.value
-                    #flush the serial line
             else: #timeout
                 attempts += 1
                 error_msg = "waiting for response timed out"
-                #flush the serial line
                 
         # attempts > 3, failure
         raise InterfaceError(error_msg)
@@ -277,11 +172,9 @@ class SerialInterface(Interface):
                 except DecodeError as e:
                     attempts += 1
                     error_msg = e.value
-                    #flush the serial line
             else: #timeout
                 attempts += 1
                 error_msg = e.value
-                #flush the serial line
                 
             # get and decode the message containing image data
             response2 = self.ser.read(length)
@@ -291,11 +184,9 @@ class SerialInterface(Interface):
                 except DecodeError as e:
                     attempts += 1
                     error_msg = e.value
-                    #flush the serial line
             else: #timeout
                 attempts += 1
                 error_msg = e.value
-                #flush the serial line
                 
         # attempts > 3, failure
         raise InterfaceError(error_msg)

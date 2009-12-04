@@ -113,7 +113,7 @@ class CameraControl:
         except KeyError as e:
             pass
 
-    def _handle_picture_taken(self):
+    def _handle_picture_taken(self, picture_num):
         pass
 
     def _handle_camera_reset(self):
