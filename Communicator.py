@@ -10,6 +10,8 @@ import time
 from Subject import *
 from SerialInterface import *
 from NoneInterface import *
+from Picture import *
+from Crop import *
 
 class Communicator(Subject):
     """class for communicating with the airplane and storing airplane data"""
@@ -20,7 +22,10 @@ class Communicator(Subject):
 
         #create new project
         #TODO figure this out better
-        #self.project_path = self.new_project()
+        self.project_path = "/home/cogan/Desktop/ImageStationProject/"
+        if not os.path.isdir(self.project_path):
+            #make the directory
+            os.mkdir(self.project_path)
 
         #these hold tuples that indicate the next command/request
         # to be issued.  The string is the function to be called, and the
@@ -141,15 +146,17 @@ class Communicator(Subject):
         print "Communicator sending request to take picture"
         try:
             #send the number of the picture about to be taken for data checking
-            self.interface.take_picture(self.picture_count+1)
+            self.interface.take_picture(self.picture_count)
             
             #add a new picture to the list and create crop[0] for
             # that picture, the thumbnail crop
             self.picture_list.append(Picture())
-            self.picture_count = len(picture_list)-1
-            self.picture_list[self.picture_count].crop_list.append(Crop())
+            self.picture_count = len(picture_list)
+            self.picture_list[self.picture_count-1].crop_list.append(Crop())
+            self.picture_list[self.picture_count-1].crop_list[0].path = \
+                self.project_path + "pic" + str(self.picture_count-1) + "crop0.jpg"
             
-            self.notify("PICTURE_TAKEN", picture_num=self.picture_count)
+            self.notify("PICTURE_TAKEN", picture_num=self.picture_count-1)
             
         except InterfaceError as e:
             self.notify("INTERFACE_ERROR", \
@@ -212,9 +219,9 @@ class Communicator(Subject):
 
             #generate make thumbnails available for all pictures that have
             # been taken (if this is called more than once it will loop from
-            # 1 again, but it's not a big deal because a picture can never
+            # 0 again, but it's not a big deal because a picture can never
             # become unavailable once it is available)
-            for i in range(0, self.picture_count):
+            for i in range(0, self.picture_count-1):
                 self.picture_list[i].crop_list[0].available = True
 
             self.notify("DOWNLOADED_TO_FLC", picture_count=self.picture_count)
@@ -248,7 +255,10 @@ class Communicator(Subject):
                 xa=xa, ya=ya, xb=xb, yb=yb)
 
             #add a new crop to the crop_list
-            self.picture_list[picture_num].crop_list.append(Crop(available=True))
+            self.picture_list[picture_num].crop_list.append(Crop())
+            self.picture_list[picture_num].crop_list[crop_num].available = True
+            self.picture_list[picture_num].crop_list[crop_num].path = \
+                self.project_path + "pic" + str(picture_num) + "crop" + str(crop_num) + ".jpg"
             
             self.notify("CROP_GENERATED", \
                 picture_num=picture_num, 
@@ -284,15 +294,23 @@ class Communicator(Subject):
                     # camera angles, and gps info at the time the pic was taken
                     if crop_num == 0:
                         #TODO something = self.interface.request_info(picture_num)
+                        # give off a notification
                         pass
                         
                     #now we get the size of the crop
-                    self.picture_list[picture_num].crop_list[crop_num].size \
-                        = self.interface.request_size(picture_num, crop_num)
-                
+                    crop_size = self.interface.request_size(picture_num, crop_num)
+                    self.picture_list[picture_num].crop_list[crop_num].size = crop_size
+                    
                     #now that we have the size calculate the amount of 
                     # segments needed to dl the full pic
                     self.picture_list[picture_num].crop_list[crop_num].calculate_segments_total()
+                    
+                    #notify observers
+                    self.notify("SIZE_CALCULATED", \
+                    			picture_num=picture_num, \
+                        		crop_num=crop_num, \
+                        		size=crop_size)
+                    
                 except InterfaceError as e:
                     self.notify("INTERFACE_ERROR", \
                         msg=e.value, \
@@ -300,7 +318,7 @@ class Communicator(Subject):
 
             #the picture has size info, download it
             else:
-                segment_num = self.picture_list[picture_num].crop_list[crop_num].segments_downloaded + 1
+                segment_num = self.picture_list[picture_num].crop_list[crop_num].segments_downloaded
                 print "downloading segment %d" % (segment_num,)
                 try:
                     segment_data = self.interface.download_segment( \
@@ -309,18 +327,15 @@ class Communicator(Subject):
                         segment_num = segment_num)
 
                     #store the data with the corresponding picture
-                    #TODO save the picture on the harddrive
-                    #TODO it should be like p001c002.jpg
-                    #have some crop function like crop.save(segment_data, segment_num)
+                    self.picture_list[picture_num].crop_list[crop_num].save_segment(segment_data)
 
-                    #update the amount of segments downloaded and calc %
-                    self.picture_list[picture_num].crop_list[crop_num].segments_downloaded = segment_num
                     percent_complete = \
-                        float(self.model.picture_list[pic_num].crop_list[crop_num].segments_downloaded) / \
-                        float(self.model.picture_list[pic_num].crop_list[crop_num].segments_total)
+                        math.ceil((self.model.picture_list[pic_num].crop_list[crop_num].segments_downloaded*100) / \
+                            self.model.picture_list[pic_num].crop_list[crop_num].total_segments())
 
                     #check for completion
-                    if percent_complete == 1:
+                    if self.model.picture_list[pic_num].crop_list[crop_num].segments_downloaded == \
+                        self.model.picture_list[pic_num].crop_list[crop_num].total_segments():
                         print "picture %d crop %d completed downloading" % (picture_num,crop_num)
                         self.picture_list[picture_num].crop_list[crop_num].completed = True
                     
@@ -478,4 +493,5 @@ class Communicator(Subject):
                 getattr(self, self.current_request[0])(**self.current_request[1])
             else:
                 #ping the plane
-                self._execute_ping()
+                #self._execute_ping()
+                pass

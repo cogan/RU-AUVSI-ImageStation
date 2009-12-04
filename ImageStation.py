@@ -34,6 +34,7 @@ class ImageStation:
             "LOCKED_TARGET" : self._handle_locked_target, \
             "DOWNLOADED_TO_FLC" : self._handle_downloaded_to_flc, \
             "CROP_GENERATED" : self._handle_crop_generated, \
+            "SIZE_CALCULATED" : self._handle_size_calculated, \
             "IMAGE_DOWNLOADED" : self._handle_image_downloaded, \
             "PING" : self._handle_ping, \
             "INTERFACE_ERROR" : self._handle_interface_error }
@@ -412,26 +413,50 @@ class ImageStation:
     #* Functions related to images
     #*
     
-    def add_to_queue(self, name, crop_num, pic_num):
+    def insert_in_tree(self, pic_name, crop_num, pic_num, is_crop=False):
+        """inserts a row into the imagetree"""
+        # insert the picture/crop name in column 0
+        if (is_crop == False):
+            myiter = self.tree_store.append(None, None)
+            self.tree_store.set_value(myiter, \
+                0, '<span foreground="#A0A0A0"><b>' + pic_name + '</b></span>')
+        elif (is_crop == True):
+            #determine iter that points to row containing pic_num
+            # in column 1
+            for i in range(0, len(self.tree_store)):
+                if (pic_num == self.tree_store[i][1]):
+                    #found the parent, insert the child
+                    parent = self.tree_store[i].iter
+                    myiter = self.tree_store.append(parent, None)
+                    self.tree_store.set_value(myiter, 0, '<span foreground="#000000"><b>' + pic_name + '</b></span>')
+                    break
+
+        # fill in the remaining columns
+        self.tree_store.set_value(myiter, 1, pic_num)
+        self.tree_store.set_value(myiter, 2, crop_num)
+        self.tree_store.set_value(myiter, 3, "0%")
+        return myiter
+    
+    def add_to_queue(self, name, pic_num, crop_num):
         """adds an item to the queue"""
         #if the picture is not already in the queue
         #and if it is not already downloaded
         if ((self.model.picture_list[pic_num].crop_list[crop_num].inqueue == False) & \
                     (self.model.picture_list[pic_num].crop_list[crop_num].completed == False)):
             #insert in queue
-            myiter = self.liststore.append(None, None)
+            myiter = self.list_store.append(None, None)
             #set the data in column 0
             #if the picture is ready for download set color to black
             if (self.model.picture_list[pic_num].crop_list[crop_num].available == True):
-                self.liststore.set_value(myiter, \
+                self.list_store.set_value(myiter, \
                     0, '<span foreground="#000000"><b>' + name + '</b></span>')
             #otherwise set to gray
             else:
-                self.liststore.set_value(myiter, \
+                self.list_store.set_value(myiter, \
                     0, '<span foreground="#A0A0A0"><b>' + name + '</b></span>')
             #set the data in column 1 and 2
-            self.liststore.set_value(myiter, 1, crop_num)
-            self.liststore.set_value(myiter, 2, pic_num)
+            self.list_store.set_value(myiter, 1, pic_num)
+            self.list_store.set_value(myiter, 2, crop_num)
             #let model know picture is inqueue
             self.model.picture_list[pic_num].crop_list[crop_num].inqueue = True
             #call queue_changed function
@@ -444,13 +469,12 @@ class ImageStation:
         print "queue change called"
         try:
             #if there are items in queue send info to model
-            self.raw_name = self.liststore[0][0]
-            self.pic_name = self.remove_markup(self.raw_name)
-            self.crop_num = self.liststore[0][1]
-            self.pic_num = self.liststore[0][2]
-            self.model.set_request_flag(1, self.crop_num, self.pic_num)
+            self.pic_num = self.liststore[0][1]
+            self.crop_num = self.liststore[0][2]
+            self.model.download_image(pic_num, crop_num)
         except Exception:
-            self.model.set_request_flag(0)
+        	#nothing on the queue
+            pass
     
     def remove_markup(self, string):
         """removes markup from strings in liststore and treestore"""
@@ -458,35 +482,10 @@ class ImageStation:
         #if other markup is applied this script will need to be changed
         #30 - length of beginning markup
         #11 - length of ending markup
+        #TODO: 12/03/09 this should be replaced with a regular expression.
         return string[30:len(string)-11]
-    
-    def insert_in_tree(self, pic_name, crop_num, pic_num, is_crop=False):
-        """inserts a row into the imagetree"""
-        #insert the picture name in column 0
-        if (is_crop == False):
-            myiter = self.treestore.append(None, None)
-            self.treestore.set_value(myiter, \
-                0, '<span foreground="#A0A0A0"><b>' + pic_name + '</b></span>')
-        elif (is_crop == True):
-            #determine iter that points to row containing pic_num
-            #in column 3
-            for i in range(0, len(self.treestore)):
-                if (pic_num == self.treestore[i][3]):
-                    #found the parent, insert the child
-                    parent = self.treestore[i].iter
-                    myiter = self.treestore.append(parent, None)
-                    self.treestore.set_value(myiter, 0, '<span foreground="#000000"><b>' + pic_name + '</b></span>')
-                    break
-
-        #insert the appropriate mark in column 1
-        self.treestore.set_value(myiter, 1, 'X')
-
-        #insert crop number and picture number in column 2 and 3
-        self.treestore.set_value(myiter, 2, crop_num)
-        self.treestore.set_value(myiter, 3, pic_num)
         
-        return myiter
-        
+    #TODO: make this check for completion when displaying an image
     def display_image(self, crop_num, pic_num):
         """displays the appropriate image in the drawing_area"""
         #set style and gc necessary for drawing
@@ -576,7 +575,10 @@ class ImageStation:
             pass
 
     def _handle_picture_taken(self, picture_num):
-        pass
+        #add the picture to tree!
+        picture_name = "image_" + str(picture_num)
+        self.insert_in_tree(self.picture_name, picture_num, 0, False)
+        self.add_to_queue(picture_name, picture_num, 0)
         
     def _handle_search_resumed(self):
         pass
@@ -585,13 +587,63 @@ class ImageStation:
         pass
         
     def _handle_downloaded_to_flc(self, picture_count):
-        pass
+        print "complete download to flc, %d pictures now available" % (picture_count,)
+        for i in range(0, picture_count-1):
+            #change to active in the treeview
+            self.treestore[i][0] = '<span foreground="#000000"><b>picture_' + str(i+1) + '</b></span>'
+            
+            #TODO: possibly change this to look at some numeric column instead of
+            # comparing the picture names
+            
+            #change to active in the queue, but first check if the queue is empty
+            try:
+                self.list_store[0][0]
+                is_empty = False
+            except Exception as e:
+            	print "if you see this fix this generic exception in _handle_downloaded_to_flc in ImageStation.py"
+            	print e;
+                is_empty = True
+            #if it is not adjust appropriately
+            if is_empty == False:
+                j = 0
+                while ((self.remove_markup(self.list_store[j][0]) != 'picture_' + str(i+1)) \
+                        & (j < len(self.list_store)-1)):
+                    j = j+1
+                if (self.remove_markup(self.list_store[j][0]) == 'picture_' + str(i+1)):
+                    self.list_store[j][0] = '<span foreground="#000000"><b>picture_' + str(i+1) + '</b></span>'
+        #call queue changed
+        self.queue_changed()
         
     def _handle_crop_generated(self, picture_num, crop_num):
-        pass
+        #a crop was generated, add it to the tree
+        crop_name = "crop_" + str(crop_num)
+        self.insert_in_tree(crop_name, picture_num, crop_num, True)
+        self.add_to_queue(crop_name, picture_num, crop_num)
+        
+    def _handle_size_calculated(self, picture_num, crop_num, size):
+    	print "picture %d, crop %d has size %d" % (picture_num, crop_num, size)
         
     def _handle_image_downloaded(self, picture_num, crop_num, percent_complete):
-        pass
+        #part or all of a picture has finished downloading
+        if (self.model.picture_list[pic_num].crop_list[crop_num].completed == True):
+            del self.list_store[0]
+
+        # update the progress
+        if crop_num == 0:
+            #it's the parent, just do it
+            self.treestore[picture_num][3] = str(percent_complete) + "%"
+        else:
+            #it's a child, cycle through the array to find it
+            parent = self.treestore[pic_num].iter
+            n=0
+            childiter = self.treestore.iter_nth_child(parent, n)
+            while (self.treestore.get_value(childiter, 2) != crop_num):
+                n += 1
+                childiter = self.treestore.iter_nth_child(parent, n)
+            self.treestore.set_value(childiter, 3, str(percent_complete) + "%")
+        
+        #call queue changed
+        self.queue_changed()
         
     def _handle_ping(self, latency):
         print "ping latency was: %sms" % (latency,)

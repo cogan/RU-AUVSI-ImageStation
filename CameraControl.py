@@ -56,7 +56,6 @@ class CameraControl:
     #*
     
     def take_clicked(self, widget, data=None):
-        
         self._take_picture()
     
     def reset_clicked(self, widget, data=None):
