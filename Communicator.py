@@ -10,8 +10,8 @@ import time
 from Subject import *
 from SerialInterface import *
 from NoneInterface import *
-from Picture import *
-from Crop import *
+from DebugInterface import *
+from ImageStore import *
 
 class Communicator(Subject):
     """class for communicating with the airplane and storing airplane data"""
@@ -20,25 +20,19 @@ class Communicator(Subject):
         """constructor"""
         Subject.__init__(self)
 
-        #create new project
-        #TODO figure this out better
-        self.project_path = "/home/cogan/Desktop/ImageStationProject/"
-        if not os.path.isdir(self.project_path):
-            #make the directory
-            os.mkdir(self.project_path)
-
         #these hold tuples that indicate the next command/request
         # to be issued.  The string is the function to be called, and the
         # dictionary contains the arguments (**kwargs)
         self.current_command = ("none", {})
         self.current_request = ("none", {})
         
-        #list of pictures and picture count
-        self.picture_list = []
-        self.picture_count = 0
+        #storage of pictures
+        self.image_store = ImageStore()
+        self.image_store.set_project_path("/home/cogan/Desktop/ImageStationProject/")
         
         #set default interface to none
-        self.interface = SerialInterface("/dev/ttyUSB0", 9600)
+        #self.interface = SerialInterface("/dev/ttyUSB0", 9600)
+        self.interface = DebugInterface()
 
     def set_interface(self, interface, **kwargs):
         """sets the interface used to communicate with the plane"""
@@ -46,6 +40,10 @@ class Communicator(Subject):
             self.interface = SerialInterface(**kwargs)
         elif interface == "none":
             self.interface = NoneInterface()
+        elif interface == "debug":
+            self.interface = DebugInterface()
+
+    #def get_image(pn, cn)
 
     #*
     #* Functions to be called by a "controller" to initiate Communicator actions
@@ -143,34 +141,34 @@ class Communicator(Subject):
         
         args:
         (none)"""
+        
+        #reset command flag / command acknowledged
+        self.current_command = ("none", {})
+        
         print "Communicator sending request to take picture"
         try:
             #send the number of the picture about to be taken for data checking
-            self.interface.take_picture(self.picture_count)
+            self.interface.take_picture(self.image_store.picture_count)
             
-            #add a new picture to the list and create crop[0] for
-            # that picture, the thumbnail crop
-            self.picture_list.append(Picture())
-            self.picture_count = len(self.picture_list)
-            self.picture_list[self.picture_count-1].crop_list.append(Crop())
-            self.picture_list[self.picture_count-1].crop_list[1].path = \
-                self.project_path + "pic" + str(self.picture_count-1) + "crop1.jpg"
+            #add a new picture to image store
+            pic_num = self.image_store.add_picture()
             
-            self.notify("PICTURE_TAKEN", picture_num=self.picture_count-1)
+            self.notify("PICTURE_TAKEN", picture_num=pic_num)
             
         except InterfaceError as e:
             self.notify("INTERFACE_ERROR", \
                 msg=e.value, \
                 function=sys._getframe().f_code.co_name)
-
-        #reset command flag
-        self.current_command = ("none", {})
     
     def _execute_resume_search(self, **kwargs):
         """command the plane to go into search mode
         
         args:
         (none)"""
+        
+        #reset command flag / command acknowledged
+        self.current_command = ("none", {})
+        
         print "Communicator sending request to resume search"
         try:
             self.interface.resume_search()
@@ -180,15 +178,16 @@ class Communicator(Subject):
             self.notify("INTERFACE_ERROR", \
                 msg=e.value, \
                 function=sys._getframe().f_code.co_name)
-            
-        #reset command flag
-        self.current_command = ("none", {})
         
     def _execute_lock_target(self, **kwargs):
         """command the plane to lock onto a target based on pixel values.
         
         args:
         xa, ya"""
+        
+        #reset command flag / command acknowledged
+        self.current_command = ("none", {})
+        
         #for notational convenience
         xa = kwargs['xa']
         ya = kwargs['ya']
@@ -202,9 +201,6 @@ class Communicator(Subject):
             self.notify("INTERFACE_ERROR", \
                 msg=e.value, \
                 function=sys._getframe().f_code.co_name)
-            
-        #reset command flag
-        self.current_command = ("none", {})
     
     def _execute_download_to_flc(self, **kwargs):
         """command the plane to download images from the camera memory
@@ -212,6 +208,10 @@ class Communicator(Subject):
         
         args:
         (none)"""
+        
+        #reset command flag / command acknowledged
+        self.current_command = ("none", {})
+        
         print "Communicator sending request to download to flc"
         
         try:
@@ -221,17 +221,14 @@ class Communicator(Subject):
             # been taken (if this is called more than once it will loop from
             # 0 again, but it's not a big deal because a picture can never
             # become unavailable once it is available)
-            for i in range(0, self.picture_count):
-                self.picture_list[i].crop_list[1].available = True
+            for i in range(0, self.image_store.picture_count):
+                self.image_store.get_image(i, 1).available = True
 
-            self.notify("DOWNLOADED_TO_FLC", picture_count=self.picture_count)
+            self.notify("DOWNLOADED_TO_FLC", picture_count=self.image_store.picture_count)
         except InterfaceError as e:
             self.notify("INTERFACE_ERROR", \
                 msg=e.value, \
                 function=sys._getframe().f_code.co_name)
-            
-        #reset command flag
-        self.current_command = ("none", {})
         
     def _execute_generate_crop(self, **kwargs):
         """command the plane to generate a crop from an image based on
@@ -240,36 +237,37 @@ class Communicator(Subject):
         args:
         picture_num, xa, ya, xb, yb
         """
+        
+        #reset command flag / command acknowledged
+        self.current_command = ("none", {})
+        
         #for notational convenience
         picture_num = kwargs['picture_num']
         xa = kwargs['xa']
         ya = kwargs['ya']
         xb = kwargs['xb']
         yb = kwargs['yb']
-        crop_num = len(self.picture_list[picture_num].crop_list)
         print "generating a new crop for %d" % (picture_num,)
         
         try:
             self.interface.generate_crop(picture_num=picture_num, \
-                crop_num=crop_num, \
                 xa=xa, ya=ya, xb=xb, yb=yb)
 
             #add a new crop to the crop_list
-            self.picture_list[picture_num].crop_list.append(Crop())
-            self.picture_list[picture_num].crop_list[crop_num].available = True
-            self.picture_list[picture_num].crop_list[crop_num].path = \
-                self.project_path + "pic" + str(picture_num) + "crop" + str(crop_num) + ".jpg"
+            crop_num = len(self.image_store.picture_list[picture_num].crop_list)
+            self.image_store.picture_list[picture_num].add_crop()
+            self.image_store.get_image(picture_num, crop_num).available = True
+            self.image_store.get_image(picture_num, crop_num).path = \
+                self.image_store.project_path + "pic" + str(picture_num) \
+                + "crop" + str(crop_num) + ".jpg"
             
             self.notify("CROP_GENERATED", \
                 picture_num=picture_num, 
                 crop_num=crop_num)
-        except:
+        except InterfaceError as e:
             self.notify("INTERFACE_ERROR", \
                 msg=e.value, \
                 function=sys._getframe().f_code.co_name)
-            
-        #reset command flag
-        self.current_command = ("none", {})
         
     def _execute_download_image(self, **kwargs):
         """command the plane to transmit a section of an image
@@ -277,6 +275,9 @@ class Communicator(Subject):
         args:
         picture_num, crop_num
         """
+        #reset request flag / request acknowledged
+        self.current_request = ("none", {})
+        
         #for notational convenience
         picture_num = kwargs['picture_num']
         crop_num = kwargs['crop_num']
@@ -284,17 +285,17 @@ class Communicator(Subject):
         print "sending request to download image"
         
         #check if the picture in question is available for download
-        if (self.picture_list[picture_num].crop_list[crop_num].available == True):
+        if (self.image_store.get_image(picture_num, crop_num).available == True):
         
             #if the picture has size 0, initialize the picture for download
-            if (self.picture_list[picture_num].crop_list[crop_num].size == 0):
+            if (self.image_store.get_image(picture_num, crop_num).size == 0):
                 #get the size and update the model
                 print "initializing picture %d, crop %d" % (picture_num, crop_num)
                 try:
                     #if the crop is 0, we're downloading the thumbnail, we want
                     # all the info relevant to the picture (i.e. plane angles,
                     # camera angles, and gps info at the time the pic was taken
-                    if crop_num == 0:
+                    if crop_num == 1:
                         #TODO something = self.interface.request_info(picture_num)
                         # give off a notification
                         pass
@@ -303,11 +304,11 @@ class Communicator(Subject):
                     
                     #now we get the size of the crop
                     crop_size = self.interface.request_size(picture_num, crop_num)
-                    self.picture_list[picture_num].crop_list[crop_num].size = crop_size
+                    self.image_store.get_image(picture_num, crop_num).size = crop_size
                     
                     #now that we have the size calculate the amount of 
                     # segments needed to dl the full pic
-                    self.picture_list[picture_num].crop_list[crop_num].calculate_total_segments()
+                    self.image_store.get_image(picture_num, crop_num).calculate_total_segments()
                     
                     #notify observers
                     self.notify("SIZE_CALCULATED", \
@@ -322,7 +323,7 @@ class Communicator(Subject):
 
             #the picture has size info, download it
             else:
-                segment_num = self.picture_list[picture_num].crop_list[crop_num].segments_downloaded
+                segment_num = self.image_store.get_image(picture_num, crop_num).segments_downloaded
                 print "downloading segment %d of picture %d crop %d" % (segment_num, picture_num, crop_num)
                 try:
                     segment_data = self.interface.download_segment( \
@@ -331,17 +332,17 @@ class Communicator(Subject):
                         segment_num = segment_num)
 
                     #store the data with the corresponding picture
-                    self.picture_list[picture_num].crop_list[crop_num].save_segment(segment_data)
+                    self.image_store.get_image(picture_num, crop_num).save_segment(segment_data)
 
                     percent_complete = \
-                        math.ceil((self.model.picture_list[pic_num].crop_list[crop_num].segments_downloaded*100) / \
-                            self.model.picture_list[pic_num].crop_list[crop_num].total_segments())
+                        math.ceil((self.image_store.get_image(picture_num, crop_num).segments_downloaded*100) / \
+                            self.image_store.get_image(picture_num, crop_num).total_segments())
 
                     #check for completion
-                    if self.model.picture_list[pic_num].crop_list[crop_num].segments_downloaded == \
-                        self.model.picture_list[pic_num].crop_list[crop_num].total_segments():
+                    if self.image_store.get_image(picture_num, crop_num).segments_downloaded == \
+                        self.image_store.get_image(picture_num, crop_num).total_segments():
                         print "picture %d crop %d completed downloading" % (picture_num,crop_num)
-                        self.picture_list[picture_num].crop_list[crop_num].completed = True
+                        self.image_store.get_image(picture_num, crop_num).completed = True
                     
                     #notify observers
                     self.notify("IMAGE_DOWNLOADED", \
@@ -352,15 +353,16 @@ class Communicator(Subject):
                     self.notify("INTERFACE_ERROR", \
                         msg=e.value, \
                         function=sys._getframe().f_code.co_name)
-                
-        #reset request flag
-        self.current_request = ("none", {})
 
     def _execute_camera_reset(self, **kwargs):
         """command the plane to make the plane reset the camera.
         
         args:
         (none)"""
+        
+        #reset command flag / command acknowledged
+        self.current_command = ("none", {})
+        
         print "Communicator sending request to reset camera"
         
         try:
@@ -371,15 +373,16 @@ class Communicator(Subject):
             self.notify("INTERFACE_ERROR", \
                 msg=e.value, \
                 function=sys._getframe().f_code.co_name)
-            
-        #reset command flag
-        self.current_command = ("none", {})
         
     def _execute_camera_pan_left(self, **kwargs):
         """command the plane to pan camera left by increment.
         
         args:
         increment"""
+        
+        #reset command flag / command acknowledged
+        self.current_command = ("none", {})
+        
         #for notational convenience
         increment = kwargs['increment']
         print "Communicator sending request to pan camera left"
@@ -392,15 +395,16 @@ class Communicator(Subject):
             self.notify("INTERFACE_ERROR", \
                 msg=e.value, \
                 function=sys._getframe().f_code.co_name)
-            
-        #reset command flag
-        self.current_command = ("none", {})
         
     def _execute_camera_pan_right(self, **kwargs):
         """command the plane to pan camera right by increment.
         
         args:
         increment"""
+        
+        #reset command flag / command acknowledged
+        self.current_command = ("none", {})
+        
         #for notational convenience
         increment = kwargs['increment']
         print "Communicator sending request to pan camera right"
@@ -413,15 +417,16 @@ class Communicator(Subject):
             self.notify("INTERFACE_ERROR", \
                 msg=e.value, \
                 function=sys._getframe().f_code.co_name)
-            
-        #reset command flag
-        self.current_command = ("none", {})
         
     def _execute_camera_tilt_up(self, **kwargs):
         """command the plane to tilt camera up by increment.
         
         args:
         increment"""
+        
+        #reset command flag / command acknowledged
+        self.current_command = ("none", {})
+        
         #for notational convenience
         increment = kwargs['increment']
         print "Communicator sending request to tilt camera up"
@@ -434,15 +439,16 @@ class Communicator(Subject):
             self.notify("INTERFACE_ERROR", \
                 msg=e.value, \
                 function=sys._getframe().f_code.co_name)
-            
-        #reset command flag
-        self.current_command = ("none", {})
         
     def _execute_camera_tilt_down(self, **kwargs):
         """command the plane to tilt camera down by increment.
         
         args:
         increment"""
+        
+        #reset command flag / command acknowledged
+        self.current_command = ("none", {})
+        
         #for notational convenience
         increment = kwargs['increment']
         print "Communicator sending request to tilt camera down"
@@ -455,12 +461,13 @@ class Communicator(Subject):
             self.notify("INTERFACE_ERROR", \
                 msg=e.value, \
                 function=sys._getframe().f_code.co_name)
-            
-        #reset command flag
-        self.current_command = ("none", {})
 
     def _execute_ping(self):
         """ping the plane and transmit back the latency."""
+        
+        #reset command flag / command acknowledged
+        self.current_command = ("none", {})
+        
         try:
             #record the latency 
             latency = self.interface.ping()
@@ -471,9 +478,6 @@ class Communicator(Subject):
             self.notify("INTERFACE_ERROR", \
                 msg=e.value, \
                 function=sys._getframe().f_code.co_name)
-
-        #reset command flag
-        self.current_command = ("none", {})
 
     #*
     #* Main Loop

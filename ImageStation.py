@@ -61,14 +61,15 @@ class ImageStation:
         
         connection_menu_none = gtk.RadioMenuItem(None, "None")
         connection_menu_serial = gtk.RadioMenuItem(connection_menu_none, "Serial")
+        connection_menu_debug = gtk.RadioMenuItem(connection_menu_none, "Debug")
         
         connection_menu.append(connection_menu_none)
         connection_menu.append(connection_menu_serial)
-        
-        
+        connection_menu.append(connection_menu_debug)
         
         connection_menu_none.show()
         connection_menu_serial.show()
+        connection_menu_debug.show()
         
         #*
         #* Set up TreeView
@@ -119,16 +120,17 @@ class ImageStation:
         #column 0: picture name
         #column 1: picture number
         #column 2: crop number
-        self.list_store = gtk.TreeStore(str, int, int)
+        self.list_store = gtk.ListStore(str, int, int)
 
         #listview associated with model
         self.list_view.set_model(self.list_store)
+        self.list_view.set_reorderable(True)
         
         #create column 0
         self.list_view.set_headers_visible(True)
         column0 = gtk.TreeViewColumn("Queue", gtk.CellRendererText(), markup=0)
         column0.set_resizable(True)
-        self.list_view.append_column(column0)   
+        self.list_view.append_column(column0)
         
         #create column 1
         column1 = gtk.TreeViewColumn("Pic", gtk.CellRendererText(), text=1)
@@ -142,7 +144,7 @@ class ImageStation:
         #* Set up ImageTree_Menu
         #*
         
-        self.image_tree_menu = self.widgets.get_widget("imagetree_menu")
+        self.image_tree_menu = self.widgets.get_widget("image_tree_menu")
         
         #*
         #* Set up Drawing Area
@@ -156,7 +158,7 @@ class ImageStation:
         
         # create background for drawing area
         image = gtk.Image()
-        filename = "%s/blank.jpg" % (os.path.dirname(__file__),)
+        filename = "%s/images/blank.jpg" % (os.path.dirname(__file__),)
         image.set_from_file(filename)
         self.pixbuf = image.get_pixbuf()
         
@@ -182,6 +184,8 @@ class ImageStation:
             self.connection_menu_none_activate)
         connection_menu_serial.connect("activate", \
             self.connection_menu_serial_activate)
+        connection_menu_debug.connect("activate", \
+        	self.connection_menu_debug_activate)
             
         tool_dic = { "on_tool_new_clicked" : self.tool_new_clicked, \
                 "on_tool_open_clicked" : self.tool_open_clicked, \
@@ -196,6 +200,9 @@ class ImageStation:
                 "on_image_tree_menu_display_activate" : self.image_tree_menu_display_activate, \
                 "on_image_tree_menu_add_to_queue_activate" : self.image_tree_menu_add_to_queue_activate }
         
+        image_queue_dic = { "on_image_queue_key_press_event" : self.image_queue_key_press_event, \
+                "on_image_queue_drag_end" : self.image_queue_drag_end }
+        
         drawing_dic = { "on_drawing_area_expose_event" : self.drawing_area_expose_event, \
                 "on_drawing_area_button_press_event" : self.drawing_area_button_press_event, \
                 "on_drawing_area_button_release_event" : self.drawing_area_button_release_event, \
@@ -207,6 +214,7 @@ class ImageStation:
         self.widgets.signal_autoconnect(tool_dic)
         self.widgets.signal_autoconnect(chooser_dic)
         self.widgets.signal_autoconnect(image_tree_dic)
+        self.widgets.signal_autoconnect(image_queue_dic)
         self.widgets.signal_autoconnect(drawing_dic)
         self.widgets.signal_autoconnect(general_dic)
 
@@ -247,6 +255,11 @@ class ImageStation:
         """serial clicked on connection menu."""
         if widget.get_active():
             self.communicator.set_interface("serial")
+        
+    def connection_menu_debug_activate(self, widget, data=None):
+        """serial clicked on connection menu."""
+        if widget.get_active():
+            self.communicator.set_interface("debug")
         
     #*
     #* Toolbar events
@@ -301,29 +314,46 @@ class ImageStation:
                 path, col, cellx, celly = pthinfo
                 treeview.grab_focus()
                 treeview.set_cursor(path, col, 0)
-                self.imagetree_menu.popup(None, None, None, event.button, time)
+                self.image_tree_menu.popup(None, None, None, event.button, time)
             return 1
 
     def image_tree_menu_display_activate(self, widget, data=None):
         """display picture of selected imagetree_menu item."""
-        model, treeiter = self.treeview.get_selection().get_selected()
-        self.raw_name = self.tree_store.get_value(treeiter, 0)
-        self.pic_name = self.remove_markup(self.raw_name)
-        #set currently displayed pic and crop num
-        self.crop_num = self.tree_store.get_value(treeiter, 2)
-        self.pic_num = self.tree_store.get_value(treeiter, 3)
-        self.display_image(self.crop_num, self.pic_num)
+        model, treeiter = self.image_tree.get_selection().get_selected()
+        #raw_name = self.tree_store.get_value(treeiter, 0)
+        #pic_name = self.remove_markup(raw_name)
+        pic_num = int(self.tree_store.get_value(treeiter, 1))
+        crop_num = int(self.tree_store.get_value(treeiter, 2))
+        self.cd_pic_num = pic_num
+        self.cd_crop_num = crop_num
+        self.display_image(pic_num, crop_num)
         
     def image_tree_menu_add_to_queue_activate(self, widget, data=None):
         """add selected imagetree_menu item to the download queue."""
-        #get name
-        model, treeiter = self.treeview.get_selection().get_selected()
-        self.raw_name = self.tree_store.get_value(treeiter, 0)
-        self.pic_name = self.remove_markup(self.raw_name)
-        #get index
-        self.crop_num = self.tree_store.get_value(treeiter, 2)
-        self.pic_num = self.tree_store.get_value(treeiter, 3)
-        self.add_to_queue(self.pic_name, self.crop_num, self.pic_num)
+        (model, treeiter) = self.image_tree.get_selection().get_selected()
+        raw_name = self.tree_store.get_value(treeiter, 0)
+        pic_name = self.remove_markup(raw_name)
+        pic_num = int(self.tree_store.get_value(treeiter, 1))
+        crop_num = int(self.tree_store.get_value(treeiter, 2))
+        self.add_to_queue(pic_name, pic_num, crop_num)
+    
+    #*
+    #* Image Queue events
+    #*
+    
+    def image_queue_key_press_event(self, treeview, event, data=None):
+        """button pressed in image_queue."""
+        #check for delete key press
+        if event.keyval == 65535:
+            (model, treeiter) = treeview.get_selection().get_selected()
+            pic_num = int(model.get_value(treeiter, 1))
+            crop_num = int(model.get_value(treeiter, 2))
+            model.remove(treeiter)
+            self.communicator.image_store.get_image(pic_num, crop_num).inqueue = False
+            self.queue_changed()
+    
+    def image_queue_drag_end(self, event, data=None):
+        self.queue_changed()
     
     #*
     #* Drawing Area events
@@ -401,7 +431,7 @@ class ImageStation:
         """generate a new crop for the currently selected picture using
         the area selected in the currently displayed picture."""
         if self.box_drawn == True:
-            if (self.cd_pic_num != -1) & (self.cd_crop_num == 0):
+            if (self.cd_pic_num != -1) & (self.cd_crop_num == 1):
                 self.communicator.generate_crop(picture_num=self.cd_pic_num, \
                     xa=self.xa, ya=self.ya, xb=self.xb, yb=self.yb)
             else:
@@ -441,13 +471,13 @@ class ImageStation:
         """adds an item to the queue"""
         #if the picture is not already in the queue
         #and if it is not already downloaded
-        if ((self.communicator.picture_list[pic_num].crop_list[crop_num].inqueue == False) & \
-                    (self.communicator.picture_list[pic_num].crop_list[crop_num].completed == False)):
+        if ((self.communicator.image_store.get_image(pic_num, crop_num).inqueue == False) & \
+                    (self.communicator.image_store.get_image(pic_num, crop_num).completed == False)):
             #insert in queue
-            myiter = self.list_store.append(None, None)
+            myiter = self.list_store.append(None)
             #set the data in column 0
             #if the picture is ready for download set color to black
-            if (self.communicator.picture_list[pic_num].crop_list[crop_num].available == True):
+            if (self.communicator.image_store.get_image(pic_num, crop_num).available == True):
                 self.list_store.set_value(myiter, \
                     0, '<span foreground="#000000"><b>' + name + '</b></span>')
             #otherwise set to gray
@@ -458,11 +488,13 @@ class ImageStation:
             self.list_store.set_value(myiter, 1, pic_num)
             self.list_store.set_value(myiter, 2, crop_num)
             #let model know picture is inqueue
-            self.communicator.picture_list[pic_num].crop_list[crop_num].inqueue = True
+            self.communicator.image_store.get_image(pic_num, crop_num).inqueue = True
             #call queue_changed function
             self.queue_changed()
+        elif self.communicator.image_store.get_image(pic_num, crop_num).completed == True:
+            print "image has already been downloaded"
         else:
-            print "picture is already in the queue or has already completed"
+            print "image is currently in the queue"
     
     def queue_changed(self):
         #get item at the top of the queue
@@ -472,11 +504,9 @@ class ImageStation:
             pic_num = self.list_store[0][1]
             crop_num = self.list_store[0][2]
             self.communicator.download_image(picture_num=pic_num, crop_num=crop_num)
-        except Exception as e:
+        except IndexError as e:
             #nothing on the queue
-            print "exception in queue_changed"
-            print e
-            #pass
+            pass
     
     def remove_markup(self, string):
         """removes markup from strings in list_store and tree_store"""
@@ -487,28 +517,31 @@ class ImageStation:
         #TODO: 12/03/09 this should be replaced with a regular expression.
         return string[30:len(string)-11]
         
-    #TODO: make this check for completion when displaying an image
-    def display_image(self, crop_num, pic_num):
+    def display_image(self, pic_num, crop_num):
         """displays the appropriate image in the drawing_area"""
-        #set style and gc necessary for drawing
-        #this should be moved but i need it here now for debugging
-        if (self.communicator.picture_list[pic_num].crop_list[crop_num].completed == True):
+        if (self.communicator.image_store.get_image(pic_num, crop_num).completed == True):
             self.cd_crop_num = crop_num
             self.cd_pic_num = pic_num
             try:
-                self.path = self.communicator.picture_list[pic_num].crop_list[crop_num].path
-                self.image = gtk.Image()
-                self.image.set_from_file(self.path)
-                self.pixbuf = self.image.get_pixbuf()
+                path = self.communicator.image_store.get_image(pic_num, crop_num).path
+                image = gtk.Image()
+                image.set_from_file(path)
+                self.pixbuf = image.get_pixbuf()
                 #draw the image
                 self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
-                                                0, 0, 0, 0, -1, -1)
-            except Exception:
+                                                    0, 0, 0, 0, -1, -1)
+            except ValueError as e:
                 print "picture " + str(pic_num) + " crop " + str(crop_num) + \
                     " is corrupt!"
         else:
-            #draw an it's not done image
-            print "it aint done fool"
+            #draw "incomplete" image
+            path = "%s/images/incomplete.jpg" % (os.path.dirname(__file__),)
+            image = gtk.Image()
+            image.set_from_file(path)
+            self.pixbuf = image.get_pixbuf()
+            #draw the image
+            self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
+                                                0, 0, 0, 0, -1, -1)
             
     def draw_box(self, widget, x_begin, y_begin, x_end, y_end):
         self.box_width = self.x_end - self.x_begin
@@ -624,19 +657,20 @@ class ImageStation:
         
     def _handle_size_calculated(self, picture_num, crop_num, size):
     	print "picture %d, crop %d has size %d" % (picture_num, crop_num, size)
+    	self.queue_changed()
         
     def _handle_image_downloaded(self, picture_num, crop_num, percent_complete):
         #part or all of a picture has finished downloading
-        if (self.communicator.picture_list[pic_num].crop_list[crop_num].completed == True):
+        if (self.communicator.image_store.get_image(picture_num, crop_num).completed == True):
             del self.list_store[0]
 
         # update the progress
-        if crop_num == 0:
-            #it's the parent, just do it
+        if crop_num == 1:
+            #it's the parent/thumbnail, just do it
             self.tree_store[picture_num][3] = str(percent_complete) + "%"
         else:
             #it's a child, cycle through the array to find it
-            parent = self.tree_store[pic_num].iter
+            parent = self.tree_store[picture_num].iter
             n=0
             childiter = self.tree_store.iter_nth_child(parent, n)
             while (self.tree_store.get_value(childiter, 2) != crop_num):

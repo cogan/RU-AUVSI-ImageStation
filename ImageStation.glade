@@ -10,6 +10,7 @@
     <child>
       <widget class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
+        <property name="orientation">vertical</property>
         <child>
           <widget class="GtkMenuBar" id="menubar">
             <property name="visible">True</property>
@@ -191,8 +192,9 @@
             <property name="spacing">5</property>
             <child>
               <widget class="GtkVBox" id="vbox2">
-                <property name="width_request">220</property>
+                <property name="width_request">250</property>
                 <property name="visible">True</property>
+                <property name="orientation">vertical</property>
                 <child>
                   <widget class="GtkScrolledWindow" id="scrolledwindow1">
                     <property name="visible">True</property>
@@ -203,7 +205,7 @@
                       <widget class="GtkTreeView" id="image_tree">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <signal name="button_press_event" handler="on_imagetree_button_press_event"/>
+                        <signal name="button_press_event" handler="on_image_tree_button_press_event"/>
                       </widget>
                     </child>
                   </widget>
@@ -221,7 +223,8 @@
                       <widget class="GtkTreeView" id="image_queue">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <signal name="columns_changed" handler="on_imagequeue_columns_changed"/>
+                        <signal name="drag_end" handler="on_image_queue_drag_end"/>
+                        <signal name="key_press_event" handler="on_image_queue_key_press_event"/>
                       </widget>
                     </child>
                   </widget>
@@ -264,7 +267,7 @@
         <property name="visible">True</property>
         <property name="label" translatable="yes">display</property>
         <property name="use_underline">True</property>
-        <signal name="activate" handler="on_display_activate"/>
+        <signal name="activate" handler="on_image_tree_menu_display_activate"/>
       </widget>
     </child>
     <child>
@@ -294,7 +297,7 @@
             <property name="layout_style">end</property>
             <child>
               <widget class="GtkButton" id="fcd_cancel">
-                <property name="label" translatable="yes">gtk-cancel</property>
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -309,7 +312,7 @@
             </child>
             <child>
               <widget class="GtkButton" id="fcd_save">
-                <property name="label" translatable="yes">gtk-save</property>
+                <property name="label">gtk-save</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>

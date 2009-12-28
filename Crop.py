@@ -1,6 +1,7 @@
 #Crop.py
 
 import os
+import math
 
 class Crop:
     """image"""
@@ -32,11 +33,11 @@ class Crop:
     def total_segments(self):
         return math.ceil(float(self.size)/float(self.segment_size))
         
-    def save_segment(segment_data):
+    def save_segment(self, segment_data):
         #save the data
         fout = open(self.path, 'wb')
         fout.write(segment_data)
         fout.close
         
         #update info
-        segments_downloaded = segments_downloaded + 1;
+        self.segments_downloaded = self.segments_downloaded + 1;

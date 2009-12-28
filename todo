@@ -1,0 +1,33 @@
+[x] 1. fix picture storage in model
+   -> communicator should own a copy of ImageStore class
+      --> ImageStore class is simply an array of pictures (like what the
+	  communicator currently has)
+	  --> communicator should have a method get_image(pic_num, crop_num) that
+	  will return ImageStore.picture_list[pic_num].crop_list[crop_num]
+	  (prototype already in communicator.py under set_interface)
+
+1b. Test image downloading with Michael Varga
+
+[x] 1c. Fix the rest of the interface
+	-> Get that menu to pop up when you right click an image (i think the events
+	just need to be modified in the glade file, check the old version of the
+	image station to compare)
+	-> enable dragging shit around in the queue and deleting with delete button
+
+2. Get video feed working
+   -> should include the video feed in the cameraControl class (big window for
+   video feed with controls below it)
+   -> want to use a gtk_drawing_area in case we want to add advanced
+   functionality later
+   -> probably need a seperate thread for video feed, need to look into v4l with
+   python
+
+?. Add new/save/load functionality
+   -> needs top level dir info as well as ImageStore info
+   -> use serialization to create a copy of ImageStore class to save
+   -> use that data to recreate ImageStore class to load
+   -> ImageStation needs a way to build itself from the current ImageStore
+   (maybe a method in ImageStation like snyc(), then ImageStation goes through
+   the ImageStore using get_image and populates itself
+
+
