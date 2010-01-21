@@ -3,8 +3,6 @@
   <!-- interface-requires gtk+ 2.16 -->
   <!-- interface-naming-policy toplevel-contextual -->
   <widget class="GtkWindow" id="ImageWindow">
-    <property name="width_request">460</property>
-    <property name="height_request">250</property>
     <property name="visible">True</property>
     <signal name="destroy" handler="on_ImageWindow_destroy"/>
     <child>
@@ -154,7 +152,18 @@
           </packing>
         </child>
         <child>
+          <widget class="GtkDrawingArea" id="drawing_area">
+            <property name="width_request">720</property>
+            <property name="height_request">480</property>
+            <property name="visible">True</property>
+          </widget>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
           <widget class="GtkFixed" id="fixed1">
+            <property name="height_request">220</property>
             <property name="visible">True</property>
             <child>
               <widget class="GtkButton" id="take">
@@ -284,9 +293,24 @@
                 <property name="y">170</property>
               </packing>
             </child>
+            <child>
+              <widget class="GtkButton" id="button1">
+                <property name="label" translatable="yes">button</property>
+                <property name="width_request">100</property>
+                <property name="height_request">80</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="on_button1_clicked"/>
+              </widget>
+              <packing>
+                <property name="x">561</property>
+                <property name="y">73</property>
+              </packing>
+            </child>
           </widget>
           <packing>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </widget>

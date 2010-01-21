@@ -55,6 +55,7 @@ class ImageStation:
         
         #*
         #* Set up Connection Menu (can't be done in Glade)
+        #* ***update: can be done in glade, just isn't right now***
         #*
         
         connection_menu = self.widgets.get_widget("connection_menu")

@@ -2,7 +2,8 @@
 
 #import required modules
 import sys
-import os.path
+import os
+from subprocess import Popen
 import pygtk
 pygtk.require('2.0')
 import gtk
@@ -42,12 +43,20 @@ class CameraControl:
         
         self.widgets = gtk.glade.XML("CameraControl.glade")
         
+        #*
+        #* Set up video feed
+        #*
+        
+        self.video_canvas = self.widgets.get_widget("drawing_area")
+        self.xid = self.video_canvas.window.xid
+        
         button_dic = { "on_take_clicked" : self.take_clicked, \
                     "on_reset_clicked" : self.reset_clicked, \
                     "on_pan_left_clicked" : self.pan_left_clicked, \
                     "on_pan_right_clicked" : self.pan_right_clicked, \
                     "on_tilt_up_clicked" : self.tilt_up_clicked, \
-                    "on_tilt_down_clicked" : self.tilt_down_clicked }
+                    "on_tilt_down_clicked" : self.tilt_down_clicked, \
+                    "on_button1_clicked" : self.button1_clicked }
                     
         self.widgets.signal_autoconnect(button_dic)
 
@@ -73,6 +82,9 @@ class CameraControl:
     def tilt_down_clicked(self, widget, data=None):
         self._camera_tilt_down(self.increment)
         
+    def button1_clicked(self, widget, data=None):
+        self._video()
+    
     #*
     #* Functions called by clicking on buttons and whatnot
     #*
@@ -100,7 +112,37 @@ class CameraControl:
     def _camera_tilt_down(self, inc):
         """request model to tilt camera down by increment"""
         self.communicator.camera_tilt_down(increment=inc)
-        
+      
+    def _video(self):
+        """do video stuff"""
+
+        FIFO = "/tmp/fifo%d" % time.time()
+        STDOUT = "/tmp/out%d" % time.time()
+        STDERR = "/dev/null"
+        MPLAYER_CMD="mplayer tv:// -tv driver=v4l2:input=1:norm=ntsc:device=/dev/video0 -wid %i -slave -idle"
+        #"mplayer -ao pcm:file=%s -wid %i -slave -idle -noconsolecontrols -input file=%s"
+
+        if os.path.exists(FIFO):
+            os.unlink(FIFO)
+
+        os.mkfifo(FIFO)
+
+        command = MPLAYER_CMD  % (self.xid)
+        commandList = command.split()
+        Popen(commandList, stdout=open(STDOUT,"w+b"), stderr=open(STDOUT,"r+b"))
+
+        #self.mplayerClient = open(FIFO,"w")
+        #self.progressLog = open(STDOUT,"r")
+        #self.mplayerClient.write("loadfile '%s' 0\npause" % self.videoFile)
+
+        #self.mediaButtonBox.set_sensitive(True)
+
+        win = self.video_canvas.window
+        w,h = win.get_size()
+        color = gtk.gdk.Color(red=0, green=0, blue=0, pixel=0)		
+
+        win.draw_rectangle(self.video_canvas.get_style().black_gc, True, 2,2, w,h )
+
     #*
     #* Update
     #*
