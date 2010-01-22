@@ -35,7 +35,7 @@ class Crop:
         
     def save_segment(self, segment_data):
         #save the data
-        fout = open(self.path, 'wb')
+        fout = open(self.path, 'a')
         fout.write(segment_data)
         fout.close
         

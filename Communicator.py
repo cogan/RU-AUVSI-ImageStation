@@ -31,8 +31,8 @@ class Communicator(Subject):
         self.image_store.set_project_path("/home/cogan/Desktop/ImageStationProject/")
         
         #set default interface to none
-        #self.interface = SerialInterface("/dev/ttyUSB0", 9600)
-        self.interface = DebugInterface()
+        self.interface = SerialInterface("/dev/ttyUSB0", 9600)
+        #self.interface = DebugInterface()
 
     def set_interface(self, interface, **kwargs):
         """sets the interface used to communicate with the plane"""
@@ -303,7 +303,9 @@ class Communicator(Subject):
                     print "requesting size of picture %d, crop %d" % (picture_num, crop_num)
                     
                     #now we get the size of the crop
-                    crop_size = self.interface.request_size(picture_num, crop_num)
+                    (crop_size_str,) = self.interface.request_size(picture_num, crop_num)
+                    crop_size = int(crop_size_str)
+
                     self.image_store.get_image(picture_num, crop_num).size = crop_size
                     
                     #now that we have the size calculate the amount of 
@@ -326,7 +328,7 @@ class Communicator(Subject):
                 segment_num = self.image_store.get_image(picture_num, crop_num).segments_downloaded
                 print "downloading segment %d of picture %d crop %d" % (segment_num, picture_num, crop_num)
                 try:
-                    segment_data = self.interface.download_segment( \
+                    (segment_data,) = self.interface.download_segment( \
                         picture_num = picture_num, \
                         crop_num = crop_num, \
                         segment_num = segment_num)

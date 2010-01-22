@@ -268,25 +268,42 @@ class SerialInterface(Interface):
         method must be used"""
         attempts = 0
         while (attempts < 3):
+            length = 0
             # get and decode the message containing the length
             self.ser.write(msg_to_send)
+            ### DEBUGGING ###
+            print "sending msg: %s" % (msg_to_send,)
+            ### /DEBUGGING ###
             response1 = self.ser.readline()
             if response1:
+                ### DEBUGGING ###
+                print "received msg1: %s" % (response1,)
+                ### /DEBUGGING ###
                 try:
-                    length = self.decoder.decode_bin(response1)
+                    ### DEBUGGING ###
+                    print "returned args array: %s" % (self.decoder.decode(response1),)
+                    ### /DEBUGGING ###
+                    (length_str,) = self.decoder.decode(response1)
+                    length = int(length_str)
                 except DecodeError as e:
                     attempts += 1
                     error_msg = e.value
                     #flush the serial line
             else: #timeout
                 attempts += 1
-                error_msg = e.value
+                error_msg = "waiting for response timed out"
                 #flush the serial line
                 
             # get and decode the message containing image data
             response2 = self.ser.read(length)
             if response2:
+                ### DEBUGGING ###
+                print "received msg2: %s" % (response2,)
+                ### /DEBUGGING ###
                 try:
+                    ### DEBUGGING ###
+                    print "returned args array: %s" % (repr(self.decoder.decode_bin(response2)),)
+                    ### /DEBUGGING ###
                     return self.decoder.decode_bin(response2)
                 except DecodeError as e:
                     attempts += 1
@@ -294,7 +311,7 @@ class SerialInterface(Interface):
                     #flush the serial line
             else: #timeout
                 attempts += 1
-                error_msg = e.value
+                error_msg = "waiting for response timed out"
                 #flush the serial line
                 
         # attempts > 3, failure
