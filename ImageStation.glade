@@ -89,6 +89,26 @@
               </widget>
             </child>
             <child>
+              <widget class="GtkMenuItem" id="view">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">_View</property>
+                <property name="use_underline">True</property>
+                <child>
+                  <widget class="GtkMenu" id="view_menu">
+                    <property name="visible">True</property>
+                    <child>
+                      <widget class="GtkMenuItem" id="view_menu_cc">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Show/Hide Camera Control</property>
+                        <property name="use_underline">True</property>
+                        <signal name="activate" handler="on_view_menu_cc_activate"/>
+                      </widget>
+                    </child>
+                  </widget>
+                </child>
+              </widget>
+            </child>
+            <child>
               <widget class="GtkMenuItem" id="help">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">_Help</property>
@@ -223,8 +243,8 @@
                       <widget class="GtkTreeView" id="image_queue">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <signal name="drag_end" handler="on_image_queue_drag_end"/>
                         <signal name="key_press_event" handler="on_image_queue_key_press_event"/>
+                        <signal name="drag_end" handler="on_image_queue_drag_end"/>
                       </widget>
                     </child>
                   </widget>

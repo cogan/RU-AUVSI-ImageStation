@@ -21,11 +21,11 @@ if __name__ == "__main__":
     communicator = Communicator()
 
     #create GUI components (controllers)
-    image_station = ImageStation(communicator)
-    communicator.attach(image_station)
     camera_control = CameraControl(communicator)
     communicator.attach(camera_control)
-
+    image_station = ImageStation(communicator, camera_control)
+    communicator.attach(image_station)
+    
     #create threads for the models and controllers
     ct = CommunicatorThread(communicator)
     gt = GtkThread()

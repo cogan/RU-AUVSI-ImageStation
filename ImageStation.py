@@ -10,12 +10,16 @@ import gtk.glade
 
 #import project related dependencies
 from Communicator import *
+import CameraControl
 
 class ImageStation:
     """Image Station for displaying and manipulating pictures"""
 
-    def __init__(self, communicator):
+    def __init__(self, communicator, camera_control):
         """constructor"""
+        
+        # camera_control object
+        self.camera_control = camera_control
         
         # cd = currently displayed
         self.cd_crop_num = -1
@@ -181,12 +185,11 @@ class ImageStation:
                 "on_file_menu_saveas_activate" : self.file_menu_saveas_activate, \
                 "on_file_menu_quit_activate" : self.file_menu_quit_activate }
                 
-        connection_menu_none.connect("activate", \
-            self.connection_menu_none_activate)
-        connection_menu_serial.connect("activate", \
-            self.connection_menu_serial_activate)
-        connection_menu_debug.connect("activate", \
-        	self.connection_menu_debug_activate)
+        connection_menu_none.connect("activate", self.connection_menu_none_activate)
+        connection_menu_serial.connect("activate", self.connection_menu_serial_activate)
+        connection_menu_debug.connect("activate", self.connection_menu_debug_activate)
+            
+        view_dic = { "on_view_menu_cc_activate" : self.view_menu_cc_activate }
             
         tool_dic = { "on_tool_new_clicked" : self.tool_new_clicked, \
                 "on_tool_open_clicked" : self.tool_open_clicked, \
@@ -212,6 +215,7 @@ class ImageStation:
         general_dic = { "on_ImageWindow_destroy" : self.ImageWindow_destroy }
         
         self.widgets.signal_autoconnect(file_dic)
+        self.widgets.signal_autoconnect(view_dic)
         self.widgets.signal_autoconnect(tool_dic)
         self.widgets.signal_autoconnect(chooser_dic)
         self.widgets.signal_autoconnect(image_tree_dic)
@@ -261,7 +265,18 @@ class ImageStation:
         """serial clicked on connection menu."""
         if widget.get_active():
             self.communicator.set_interface("debug")
-        
+       
+    #*
+    #* View Events
+    #*
+    
+    def view_menu_cc_activate(self, widget, data=None):
+        """show camera control clicked on view menu."""
+        if self.camera_control.window.get_property("visible") == True:
+            self.camera_control.window.hide()
+        else:
+            self.camera_control.window.show()
+
     #*
     #* Toolbar events
     #*
@@ -408,7 +423,7 @@ class ImageStation:
     def ImageWindow_destroy(self, widget, data=None):
         """window was destroyed, exit the program."""
         self._quit()
-            
+
     #*
     #* Functions related to file manipulation
     #*
