@@ -30,5 +30,3 @@ class ImageStore:
     
     def get_image(self, picture_num, crop_num):
         return self.picture_list[picture_num].crop_list[crop_num]
-        
-    

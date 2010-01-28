@@ -1,5 +1,12 @@
 #ImageStation.py
 
+#****
+#TODO:
+# get pictures for buttons and up/down arrow
+# get new pictures for 'dl to flc' and 'generate crop'
+# get new/save/load working
+#****
+
 #import required modules
 import sys
 import os
@@ -23,7 +30,6 @@ class CameraControl:
         
         # Initialize the increment for pan/tilting
         self.increment = 1
-        increment = 1
         
         # Configure the GUI with Glade
         self.initialize_gui()
@@ -82,6 +88,8 @@ class CameraControl:
         
         button_dic = { "on_take_clicked" : self.take_clicked, \
                     "on_reset_clicked" : self.reset_clicked, \
+                    "on_zoom_in_clicked" : self.zoom_in_clicked, \
+                    "on_zoom_out_clicked" : self.zoom_out_clicked, \
                     "on_pan_left_clicked" : self.pan_left_clicked, \
                     "on_pan_right_clicked" : self.pan_right_clicked, \
                     "on_tilt_up_clicked" : self.tilt_up_clicked, \
@@ -110,6 +118,12 @@ class CameraControl:
     
     def reset_clicked(self, widget, data=None):
         self._camera_reset()
+    
+    def zoom_in_clicked(self, widget, data=None):
+        self._camera_zoom_in(self.increment)
+     
+    def zoom_out_clicked(self, widget, data=None):
+        self._camera_zoom_out(self.increment) 
         
     def pan_left_clicked(self, widget, data=None):
         self._camera_pan_left(self.increment)
@@ -168,7 +182,6 @@ class CameraControl:
 
         command = MPLAYER_CMD  % (self.video_device, self.xid)
         commandList = command.split()
-        #Popen(commandList, stdout=open(STDOUT,"w+b"), stderr=open(STDOUT,"r+b"))
         self.proc_inst = Popen(commandList)
         
         win = self.video_canvas.window
@@ -187,7 +200,7 @@ class CameraControl:
             
             #change the image on the button
             image = gtk.Image()
-            image.set_from_file("images/video_down.png")
+            image.set_from_file("images/video_up.png")
             image.show()
             self.toggle_display.set_image(image)
             
@@ -200,10 +213,9 @@ class CameraControl:
             
             #change the image on the button
             image = gtk.Image()
-            image.set_from_file("images/video_up.png")
+            image.set_from_file("images/video_down.png")
             image.show()
             self.toggle_display.set_image(image)
-    
     
     def _take_picture(self):
         """request model to take a picture"""
@@ -212,7 +224,15 @@ class CameraControl:
     def _camera_reset(self):
         """request model to move camera to its home position"""
         self.communicator.camera_reset()
-        
+
+    def _camera_zoom_in(self, inc):
+        """request model to zoom in by increment"""
+        self.communicator.camera_zoom_in(increment=inc)
+    
+    def _camera_zoom_out(self, inc):
+        """request model to zoom out by increment"""
+        self.communicator.camera_zoom_out(increment=inc)
+    
     def _camera_pan_left(self, inc):
         """request model to pan camera left by increment"""
         self.communicator.camera_pan_left(increment=inc)

@@ -140,6 +140,28 @@ class SerialInterface(Interface):
                 raise InterfaceError(e.value)
         else:
             raise InterfaceError("no serial connection")
+
+    def camera_zoom_in(self, increment):
+        """have the camera zoom in."""
+        if self.enabled == True:
+            try:
+                msg_to_send = self.encoder.encode("CZI", increment)
+                return self.tx_rx_decode(msg_to_send)
+            except InterfaceError as e:
+                raise InterfaceError(e.value)
+        else:
+            raise InterfaceError("no serial connection")
+
+    def camera_zoom_out(self, increment):
+        """have the camera zoom out."""
+        if self.enabled == True:
+            try:
+                msg_to_send = self.encoder.encode("CZO", increment)
+                return self.tx_rx_decode(msg_to_send)
+            except InterfaceError as e:
+                raise InterfaceError(e.value)
+        else:
+            raise InterfaceError("no serial connection")
         
     def camera_pan_left(self, increment):
         """have the camera pan left."""

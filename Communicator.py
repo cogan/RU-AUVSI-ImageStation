@@ -103,6 +103,20 @@ class Communicator(Subject):
         (none)"""
         self.current_command = ("_execute_camera_reset", kwargs)
         
+    def camera_zoom_in(self, **kwargs):
+        """command the Communicator to zoom camera in by increment.
+        
+        args:
+        increment"""
+        self.current_command = ("_execute_camera_zoom_in", kwargs)    
+        
+    def camera_zoom_out(self, **kwargs):
+        """command the Communicator to zoom camera in by increment.
+        
+        args:
+        increment"""
+        self.current_command = ("_execute_camera_zoom_out", kwargs)  
+        
     def camera_pan_left(self, **kwargs):
         """command the Communicator to pan camera left by increment.
         
@@ -375,7 +389,51 @@ class Communicator(Subject):
             self.notify("INTERFACE_ERROR", \
                 msg=e.value, \
                 function=sys._getframe().f_code.co_name)
+
+    def _execute_camera_zoom_in(self, **kwargs):
+        """command the plane to zoom camera in.
         
+        args:
+        increment"""
+        
+        #reset command flag / command acknowledged
+        self.current_command = ("none", {})
+        
+        #for notational convenience
+        increment = kwargs['increment']
+        print "Communicator sending request to zoom in"
+        
+        try:
+            self.interface.camera_zoom_in(increment)
+            self.notify("CAMERA_ZOOM_IN")
+            
+        except InterfaceError as e:
+            self.notify("INTERFACE_ERROR", \
+                msg=e.value, \
+                function=sys._getframe().f_code.co_name)
+    
+    def _execute_camera_zoom_out(self, **kwargs):
+        """command the plane to zoom camera out.
+        
+        args:
+        increment"""
+        
+        #reset command flag / command acknowledged
+        self.current_command = ("none", {})
+        
+        #for notational convenience
+        increment = kwargs['increment']
+        print "Communicator sending request to zoom in"
+        
+        try:
+            self.interface.camera_zoom_out(increment)
+            self.notify("CAMERA_ZOOM_OUT")
+            
+        except InterfaceError as e:
+            self.notify("INTERFACE_ERROR", \
+                msg=e.value, \
+                function=sys._getframe().f_code.co_name)
+    
     def _execute_camera_pan_left(self, **kwargs):
         """command the plane to pan camera left by increment.
         

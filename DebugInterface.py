@@ -48,12 +48,12 @@ class DebugInterface(Interface):
         
     def request_size(self, picture_num, crop_num):
         """get the size of a crop"""
-        return 1000
+        return [1000,]
         
     def download_segment(self, picture_num, crop_num, segment_num): 
         """download a segment of an image"""
-        time.sleep(1)
-        return "0x123456789abcdef"
+        time.sleep(.1)
+        return ["",]
         
     def camera_pan_left(self, increment):
         """have the camera pan left."""

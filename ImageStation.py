@@ -543,9 +543,12 @@ class ImageStation:
                 image = gtk.Image()
                 image.set_from_file(path)
                 self.pixbuf = image.get_pixbuf()
-                #draw the image
+                w = self.pixbuf.get_width()
+                h = self.pixbuf.get_height()
+                #draw the image and resize
                 self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
-                                                    0, 0, 0, 0, -1, -1)
+                                                    0, 0, 0, 0, w, h)
+                self.drawing_area.window.resize(w, h)
             except ValueError as e:
                 print "picture " + str(pic_num) + " crop " + str(crop_num) + \
                     " is corrupt!"
@@ -555,9 +558,12 @@ class ImageStation:
             image = gtk.Image()
             image.set_from_file(path)
             self.pixbuf = image.get_pixbuf()
-            #draw the image
+            w = self.pixbuf.get_width()
+            h = self.pixbuf.get_height()
+            #draw the image and resize
             self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
-                                                0, 0, 0, 0, -1, -1)
+                                                0, 0, 0, 0, w, h)
+            self.drawing_area.window.resize(w, h)
             
     def draw_box(self, widget, x_begin, y_begin, x_end, y_end):
         self.box_width = self.x_end - self.x_begin
