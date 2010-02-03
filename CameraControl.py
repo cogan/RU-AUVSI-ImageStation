@@ -78,6 +78,49 @@ class CameraControl:
         self.toggle_display = self.widgets.get_widget("toggle_display")
         
         #*
+        #* Set up images on buttons
+        #*
+        
+        self.zoom_in = self.widgets.get_widget("zoom_in")
+        self.zoom_out = self.widgets.get_widget("zoom_out")
+        self.pan_counterclockwise = self.widgets.get_widget("pan_counterclockwise")
+        self.pan_clockwise = self.widgets.get_widget("pan_clockwise")
+        self.tilt_forward = self.widgets.get_widget("tilt_forward")
+        self.tilt_back = self.widgets.get_widget("tilt_back")
+        
+        image0 = gtk.Image()
+        image1 = gtk.Image()
+        image2 = gtk.Image()
+        image3 = gtk.Image()
+        image4 = gtk.Image()
+        image5 = gtk.Image()
+        
+        image0.set_from_file("images/zoom_in.png")
+        image0.show()
+        self.zoom_in.set_image(image0)
+        
+        image1.set_from_file("images/zoom_out.png")
+        image1.show()
+        self.zoom_out.set_image(image1)
+        
+        image2.set_from_file("images/clockwise.png")
+        image2.show()
+        self.pan_clockwise.set_image(image2)
+        
+        image3.set_from_file("images/counterclockwise.png")
+        image3.show()
+        self.pan_counterclockwise.set_image(image3)
+        
+        image4.set_from_file("images/up.png")
+        image4.show()
+        self.tilt_forward.set_image(image4)
+        
+        image5.set_from_file("images/down.png")
+        image5.show()
+        self.tilt_back.set_image(image5)
+        
+        
+        #*
         #* Set up drawing area
         #*
         

@@ -50,7 +50,7 @@
         </child>
         <child>
           <widget class="GtkButton" id="toggle_display">
-            <property name="height_request">25</property>
+            <property name="height_request">33</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -75,7 +75,7 @@
               <widget class="GtkButton" id="take">
                 <property name="label" translatable="yes">Take</property>
                 <property name="width_request">100</property>
-                <property name="height_request">50</property>
+                <property name="height_request">60</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -83,14 +83,14 @@
               </widget>
               <packing>
                 <property name="x">45</property>
-                <property name="y">45</property>
+                <property name="y">40</property>
               </packing>
             </child>
             <child>
               <widget class="GtkButton" id="reset">
                 <property name="label" translatable="yes">Reset</property>
                 <property name="width_request">100</property>
-                <property name="height_request">50</property>
+                <property name="height_request">60</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -98,7 +98,7 @@
               </widget>
               <packing>
                 <property name="x">45</property>
-                <property name="y">115</property>
+                <property name="y">110</property>
               </packing>
             </child>
             <child>
@@ -115,7 +115,7 @@
             <child>
               <widget class="GtkButton" id="pan_counterclockwise">
                 <property name="width_request">100</property>
-                <property name="height_request">50</property>
+                <property name="height_request">70</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -125,14 +125,14 @@
                 </child>
               </widget>
               <packing>
-                <property name="x">610</property>
-                <property name="y">80</property>
+                <property name="x">390</property>
+                <property name="y">70</property>
               </packing>
             </child>
             <child>
               <widget class="GtkButton" id="pan_clockwise">
                 <property name="width_request">100</property>
-                <property name="height_request">50</property>
+                <property name="height_request">70</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -142,14 +142,14 @@
                 </child>
               </widget>
               <packing>
-                <property name="x">390</property>
-                <property name="y">80</property>
+                <property name="x">610</property>
+                <property name="y">70</property>
               </packing>
             </child>
             <child>
               <widget class="GtkButton" id="tilt_forward">
                 <property name="width_request">100</property>
-                <property name="height_request">50</property>
+                <property name="height_request">60</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -166,7 +166,7 @@
             <child>
               <widget class="GtkButton" id="tilt_back">
                 <property name="width_request">100</property>
-                <property name="height_request">50</property>
+                <property name="height_request">60</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -177,7 +177,7 @@
               </widget>
               <packing>
                 <property name="x">500</property>
-                <property name="y">120</property>
+                <property name="y">110</property>
               </packing>
             </child>
             <child>
@@ -233,7 +233,7 @@
             <child>
               <widget class="GtkButton" id="zoom_in">
                 <property name="width_request">100</property>
-                <property name="height_request">50</property>
+                <property name="height_request">60</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -244,13 +244,13 @@
               </widget>
               <packing>
                 <property name="x">230</property>
-                <property name="y">45</property>
+                <property name="y">40</property>
               </packing>
             </child>
             <child>
               <widget class="GtkButton" id="zoom_out">
                 <property name="width_request">100</property>
-                <property name="height_request">50</property>
+                <property name="height_request">60</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -261,7 +261,7 @@
               </widget>
               <packing>
                 <property name="x">230</property>
-                <property name="y">115</property>
+                <property name="y">110</property>
               </packing>
             </child>
           </widget>
