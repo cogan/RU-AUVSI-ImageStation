@@ -1,0 +1,32 @@
+This is the ImageStation software to be used by Rutgers for the 2010 Student UAS competition
+
+RUNNING the Program (must have python installed):
+to run the program simply type ./main.py, or python main.py
+
+ABOUT:
+
+here is a diagram of the basic structure of the program
+
+                   Plane
+                     |
+                     | 
+            SerialInterface.py
+			         |
+				     | 
+              Communicator.py  ---->  ImageStore
+				 |      |
+                |        |
+               |          |
+    ImageStation.py     CameraControl.py
+    
+ImageStation + CameraControl:
+    These files correspond to the user interface.  Their respective glade files have all the user interface info contained within them.  They send messages to the Communicator in order to communicate with the plane.  They also are observers to the Communicator, so they receive messages through the communicator calling the update() method.
+
+Communicator:
+    Calls methods in the selected interface in order to communicate with the plane.  Uses a queue to determine the next command or request to be sent
+
+ImageStore:
+    Contains all the data for saving/loading the project as well as all picture and crop information.
+
+SerialInterface:
+    Uses NmeaEncoder and NmeaDecoder as well as the pyserial interface to actually communicate with the plane
