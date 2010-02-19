@@ -49,7 +49,7 @@ class ImageStation:
         #* Set up the Widget Tree
         #*
         
-        self.widgets = gtk.glade.XML("ImageStation.glade") 
+        self.widgets = gtk.glade.XML("ImageStation.glade")
         
         #*
         #* Set up File Chooser Dialog
@@ -152,6 +152,19 @@ class ImageStation:
         self.image_tree_menu = self.widgets.get_widget("image_tree_menu")
         
         #*
+        #* Set up Picture Info Dialog
+        #*
+        
+        self.picture_info_dialog = self.widgets.get_widget("picture_info_dialog")
+        self.picture_name_label = self.widgets.get_widget("picture_name_label")
+        self.picture_shape_entry = self.widgets.get_widget("picture_shape_entry")
+        self.picture_color_entry = self.widgets.get_widget("picture_color_entry")
+        self.picture_alpha_entry = self.widgets.get_widget("picture_alpha_entry")
+        self.picture_alphacolor_entry = self.widgets.get_widget("picture_alphacolor_entry")
+        self.picture_location_entry = self.widgets.get_widget("picture_location_entry")
+        self.picture_orientation_entry = self.widgets.get_widget("picture_orientation_entry")
+        
+        #*
         #* Set up Drawing Area
         #*
         
@@ -202,7 +215,11 @@ class ImageStation:
         
         image_tree_dic = { "on_image_tree_button_press_event" : self.image_tree_button_press_event, \
                 "on_image_tree_menu_display_activate" : self.image_tree_menu_display_activate, \
-                "on_image_tree_menu_add_to_queue_activate" : self.image_tree_menu_add_to_queue_activate }
+                "on_image_tree_menu_add_to_queue_activate" : self.image_tree_menu_add_to_queue_activate, \
+                "on_image_tree_menu_info_activate" : self.image_tree_menu_info_activate }
+                
+        picture_info_dialog_dic = { "on_pid_save_activate" : self.pid_save_activate, \
+                "on_pid_cancel_activate" : self.pid_cancel_activate }
         
         image_queue_dic = { "on_image_queue_key_press_event" : self.image_queue_key_press_event, \
                 "on_image_queue_drag_end" : self.image_queue_drag_end }
@@ -353,6 +370,40 @@ class ImageStation:
         crop_num = int(self.tree_store.get_value(treeiter, 2))
         self.add_to_queue(pic_name, pic_num, crop_num)
     
+    def image_tree_menu_info_activate(self, widget, data=None):
+        """display the picture info dialog box."""
+        (model, treeiter) = self.image_tree.get_selection().get_selected()
+        raw_name = self.tree_store.get_value(treeiter, 0)
+        pic_name = self.remove_markup(raw_name)
+        pic_num = int(self.tree_store.get_value(treeiter, 1))
+        self.display_picture_info(pic_name, pic_num)
+    
+    def display_picture_info(self, pic_name, pic_num):
+        """displays the info for the appropriate picture."""
+        #populate the box
+        self.picture_name_label.set_markup("<b>" + pic_name + "</b>")
+        self.picture_shape_entry.set_text("b")
+        self.picture_color_entry.set_text("c")
+        self.picture_alpha_entry.set_text("d")
+        self.picture_alphacolor_entry.set_text("e")
+        self.picture_location_entry.set_text("f")
+        self.picture_orientation_entry.set_text("a")
+        
+        #show the box
+        self.picture_info_dialog.show()
+        
+    #*
+    #* Picture Info Dialog events
+    #*
+    
+    def pid_save_activate(self, widget, data=None):
+        #TODO: do this
+        print "save"
+        
+    def pid_cancel_activate(self, widget, data=None):
+        #TODO: do this
+        print "cancel"
+    
     #*
     #* Image Queue events
     #*
@@ -367,14 +418,14 @@ class ImageStation:
             model.remove(treeiter)
             self.communicator.image_store.get_image(pic_num, crop_num).inqueue = False
             self.queue_changed()
-    
+
     def image_queue_drag_end(self, event, data=None):
         self.queue_changed()
-    
+
     #*
     #* Drawing Area events
     #*
-        
+
     def drawing_area_expose_event(self, widget, event):
         x, y, width, height = widget.get_allocation()
         self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \

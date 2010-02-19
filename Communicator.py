@@ -30,9 +30,9 @@ class Communicator(Subject):
         self.image_store = ImageStore()
         self.image_store.set_project_path("/home/cogan/Desktop/ImageStationProject/")
         
-        #set default interface to none
-        self.interface = SerialInterface("/dev/ttyUSB0", 9600)
-        #self.interface = DebugInterface()
+        #set default interface
+        #self.interface = SerialInterface("/dev/ttyUSB0", 9600)
+        self.interface = DebugInterface()
 
     def set_interface(self, interface, **kwargs):
         """sets the interface used to communicate with the plane"""
