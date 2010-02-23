@@ -2,7 +2,6 @@ from NmeaEncoder import *
 from NmeaDecoder import *
 from Interface import *
 
-
 encoder = NmeaEncoder("IS")
 decoder = NmeaDecoder()
 

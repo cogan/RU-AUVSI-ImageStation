@@ -7,6 +7,7 @@ class Crop:
     """image"""
     
     def __init__(self, \
+            name = "", \
             available = False, \
             completed = False, \
             inqueue = False, \
@@ -16,6 +17,7 @@ class Crop:
             path = ""):
         """constructor"""
         #various program relevent attributes
+        self.name = name
         self.available = available
         self.completed = completed
         self.inqueue = inqueue

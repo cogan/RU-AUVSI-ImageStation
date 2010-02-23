@@ -353,8 +353,7 @@ class ImageStation:
     def image_tree_menu_display_activate(self, widget, data=None):
         """display picture of selected imagetree_menu item."""
         model, treeiter = self.image_tree.get_selection().get_selected()
-        #raw_name = self.tree_store.get_value(treeiter, 0)
-        #pic_name = self.remove_markup(raw_name)
+
         pic_num = int(self.tree_store.get_value(treeiter, 1))
         crop_num = int(self.tree_store.get_value(treeiter, 2))
         self.cd_pic_num = pic_num
@@ -364,30 +363,37 @@ class ImageStation:
     def image_tree_menu_add_to_queue_activate(self, widget, data=None):
         """add selected imagetree_menu item to the download queue."""
         (model, treeiter) = self.image_tree.get_selection().get_selected()
-        raw_name = self.tree_store.get_value(treeiter, 0)
-        pic_name = self.remove_markup(raw_name)
         pic_num = int(self.tree_store.get_value(treeiter, 1))
         crop_num = int(self.tree_store.get_value(treeiter, 2))
-        self.add_to_queue(pic_name, pic_num, crop_num)
+        name = self.communicator.image_store.get_crop(pic_num, crop_num).name
+        self.add_to_queue(name, pic_num, crop_num)
     
     def image_tree_menu_info_activate(self, widget, data=None):
         """display the picture info dialog box."""
         (model, treeiter) = self.image_tree.get_selection().get_selected()
-        raw_name = self.tree_store.get_value(treeiter, 0)
-        pic_name = self.remove_markup(raw_name)
         pic_num = int(self.tree_store.get_value(treeiter, 1))
-        self.display_picture_info(pic_name, pic_num)
+        crop_num = int(self.tree_store.get_value(treeiter, 2))
+        self.display_picture_info(pic_num, crop_num)
     
-    def display_picture_info(self, pic_name, pic_num):
+    def display_picture_info(self, pic_num, crop_num):
         """displays the info for the appropriate picture."""
         #populate the box
-        self.picture_name_label.set_markup("<b>" + pic_name + "</b>")
-        self.picture_shape_entry.set_text("b")
-        self.picture_color_entry.set_text("c")
-        self.picture_alpha_entry.set_text("d")
-        self.picture_alphacolor_entry.set_text("e")
-        self.picture_location_entry.set_text("f")
-        self.picture_orientation_entry.set_text("a")
+        crop = self.communicator.image_store.get_crop(pic_num, crop_num)
+        picture = self.communicator.image_store.get_picture(pic_num)
+        name = crop.name
+        shape = picture.shape
+        color = picture.color
+        alpha = picture.alpha
+        alphacolor = picture.alphacolor
+        location = picture.location
+        orientation = picture.orientation
+        self.picture_name_label.set_markup("<b>" + name + "</b>")
+        self.picture_shape_entry.set_text(shape)
+        self.picture_color_entry.set_text(color)
+        self.picture_alpha_entry.set_text(alpha)
+        self.picture_alphacolor_entry.set_text(alphacolor)
+        self.picture_location_entry.set_text(location)
+        self.picture_orientation_entry.set_text(orientation)
         
         #show the box
         self.picture_info_dialog.show()
@@ -416,7 +422,7 @@ class ImageStation:
             pic_num = int(model.get_value(treeiter, 1))
             crop_num = int(model.get_value(treeiter, 2))
             model.remove(treeiter)
-            self.communicator.image_store.get_image(pic_num, crop_num).inqueue = False
+            self.communicator.image_store.get_crop(pic_num, crop_num).inqueue = False
             self.queue_changed()
 
     def image_queue_drag_end(self, event, data=None):
@@ -538,13 +544,13 @@ class ImageStation:
         """adds an item to the queue"""
         #if the picture is not already in the queue
         #and if it is not already downloaded
-        if ((self.communicator.image_store.get_image(pic_num, crop_num).inqueue == False) & \
-                    (self.communicator.image_store.get_image(pic_num, crop_num).completed == False)):
+        if ((self.communicator.image_store.get_crop(pic_num, crop_num).inqueue == False) & \
+                    (self.communicator.image_store.get_crop(pic_num, crop_num).completed == False)):
             #insert in queue
             myiter = self.list_store.append(None)
             #set the data in column 0
             #if the picture is ready for download set color to black
-            if (self.communicator.image_store.get_image(pic_num, crop_num).available == True):
+            if (self.communicator.image_store.get_crop(pic_num, crop_num).available == True):
                 self.list_store.set_value(myiter, \
                     0, '<span foreground="#000000"><b>' + name + '</b></span>')
             #otherwise set to gray
@@ -555,10 +561,10 @@ class ImageStation:
             self.list_store.set_value(myiter, 1, pic_num)
             self.list_store.set_value(myiter, 2, crop_num)
             #let model know picture is inqueue
-            self.communicator.image_store.get_image(pic_num, crop_num).inqueue = True
+            self.communicator.image_store.get_crop(pic_num, crop_num).inqueue = True
             #call queue_changed function
             self.queue_changed()
-        elif self.communicator.image_store.get_image(pic_num, crop_num).completed == True:
+        elif self.communicator.image_store.get_crop(pic_num, crop_num).completed == True:
             print "image has already been downloaded"
         else:
             print "image is currently in the queue"
@@ -586,11 +592,11 @@ class ImageStation:
         
     def display_image(self, pic_num, crop_num):
         """displays the appropriate image in the drawing_area"""
-        if (self.communicator.image_store.get_image(pic_num, crop_num).completed == True):
+        if (self.communicator.image_store.get_crop(pic_num, crop_num).completed == True):
             self.cd_crop_num = crop_num
             self.cd_pic_num = pic_num
             try:
-                path = self.communicator.image_store.get_image(pic_num, crop_num).path
+                path = self.communicator.image_store.get_crop(pic_num, crop_num).path
                 image = gtk.Image()
                 image.set_from_file(path)
                 self.pixbuf = image.get_pixbuf()
@@ -684,7 +690,7 @@ class ImageStation:
 
     def _handle_picture_taken(self, picture_num):
         #add the picture to tree!
-        picture_name = "picture_" + str(picture_num)
+        picture_name = self.communicator.image_store.get_crop(picture_num, 1).name
         self.insert_in_tree(picture_name, picture_num, 1, False)
         self.add_to_queue(picture_name, picture_num, 1)
         
@@ -696,35 +702,25 @@ class ImageStation:
         
     def _handle_downloaded_to_flc(self, picture_count):
         print "complete download to flc, %d pictures now available" % (picture_count,)
+        
+        #render as active in the treeview
         for i in range(0, picture_count):
-            #change to active in the treeview
-            self.tree_store[i][0] = '<span foreground="#000000"><b>picture_' + str(i) + '</b></span>'
-            
-            #TODO: possibly change this to look at some numeric column instead of
-            # comparing the picture names
-            
-            #change to active in the queue, but first check if the queue is empty
-            try:
-                self.list_store[0][0]
-                is_empty = False
-            except Exception as e:
-            	print "if you see this fix this generic exception in _handle_downloaded_to_flc in ImageStation.py"
-            	print e;
-                is_empty = True
-            #if it is not adjust appropriately
-            if is_empty == False:
-                j = 0
-                while ((self.remove_markup(self.list_store[j][0]) != 'picture_' + str(i)) \
-                        & (j < len(self.list_store)-1)):
-                    j = j+1
-                if (self.remove_markup(self.list_store[j][0]) == 'picture_' + str(i)):
-                    self.list_store[j][0] = '<span foreground="#000000"><b>picture_' + str(i) + '</b></span>'
-        #call queue changed
+            self.tree_store[i][0] = '<span foreground="#000000"><b>' + \
+                self.communicator.image_store.get_crop(i, 1).name + '</b></span>'
+        
+        #render as active in the queue
+        for i in range(0, len(self.list_store)):
+            picture_num = self.list_store[i][1]
+            crop_num = self.list_store[i][2]
+            if picture_num < picture_count:
+                self.list_store[i][0] = '<span foreground="#000000"><b>' + \
+                self.communicator.image_store.get_crop(picture_num, crop_num).name + '</b></span>'
+        
         self.queue_changed()
         
     def _handle_crop_generated(self, picture_num, crop_num):
         #a crop was generated, add it to the tree
-        crop_name = "crop_" + str(crop_num)
+        crop_name = self.communicator.image_store.get_crop(picture_num, crop_num).name
         self.insert_in_tree(crop_name, picture_num, crop_num, True)
         self.add_to_queue(crop_name, picture_num, crop_num)
         
@@ -734,7 +730,7 @@ class ImageStation:
         
     def _handle_image_downloaded(self, picture_num, crop_num, percent_complete):
         #part or all of a picture has finished downloading
-        if (self.communicator.image_store.get_image(picture_num, crop_num).completed == True):
+        if (self.communicator.image_store.get_crop(picture_num, crop_num).completed == True):
             del self.list_store[0]
 
         # update the progress

@@ -43,8 +43,6 @@ class Communicator(Subject):
         elif interface == "debug":
             self.interface = DebugInterface()
 
-    #def get_image(pn, cn)
-
     #*
     #* Functions to be called by a "controller" to initiate Communicator actions
     #*
@@ -236,7 +234,7 @@ class Communicator(Subject):
             # 0 again, but it's not a big deal because a picture can never
             # become unavailable once it is available)
             for i in range(0, self.image_store.picture_count):
-                self.image_store.get_image(i, 1).available = True
+                self.image_store.get_crop(i, 1).available = True
 
             self.notify("DOWNLOADED_TO_FLC", picture_count=self.image_store.picture_count)
         except InterfaceError as e:
@@ -270,8 +268,8 @@ class Communicator(Subject):
             #add a new crop to the crop_list
             crop_num = len(self.image_store.picture_list[picture_num].crop_list)
             self.image_store.picture_list[picture_num].add_crop()
-            self.image_store.get_image(picture_num, crop_num).available = True
-            self.image_store.get_image(picture_num, crop_num).path = \
+            self.image_store.get_crop(picture_num, crop_num).available = True
+            self.image_store.get_crop(picture_num, crop_num).path = \
                 self.image_store.project_path + "pic" + str(picture_num) \
                 + "crop" + str(crop_num) + ".jpg"
             
@@ -299,10 +297,10 @@ class Communicator(Subject):
         print "sending request to download image"
         
         #check if the picture in question is available for download
-        if (self.image_store.get_image(picture_num, crop_num).available == True):
+        if (self.image_store.get_crop(picture_num, crop_num).available == True):
         
             #if the picture has size 0, initialize the picture for download
-            if (self.image_store.get_image(picture_num, crop_num).size == 0):
+            if (self.image_store.get_crop(picture_num, crop_num).size == 0):
                 #get the size and update the model
                 print "initializing picture %d, crop %d" % (picture_num, crop_num)
                 try:
@@ -320,11 +318,11 @@ class Communicator(Subject):
                     (crop_size_str,) = self.interface.request_size(picture_num, crop_num)
                     crop_size = int(crop_size_str)
 
-                    self.image_store.get_image(picture_num, crop_num).size = crop_size
+                    self.image_store.get_crop(picture_num, crop_num).size = crop_size
                     
                     #now that we have the size calculate the amount of 
                     # segments needed to dl the full pic
-                    self.image_store.get_image(picture_num, crop_num).calculate_total_segments()
+                    self.image_store.get_crop(picture_num, crop_num).calculate_total_segments()
                     
                     #notify observers
                     self.notify("SIZE_CALCULATED", \
@@ -339,7 +337,7 @@ class Communicator(Subject):
 
             #the picture has size info, download it
             else:
-                segment_num = self.image_store.get_image(picture_num, crop_num).segments_downloaded
+                segment_num = self.image_store.get_crop(picture_num, crop_num).segments_downloaded
                 print "downloading segment %d of picture %d crop %d" % (segment_num, picture_num, crop_num)
                 try:
                     (segment_data,) = self.interface.download_segment( \
@@ -348,17 +346,17 @@ class Communicator(Subject):
                         segment_num = segment_num)
 
                     #store the data with the corresponding picture
-                    self.image_store.get_image(picture_num, crop_num).save_segment(segment_data)
+                    self.image_store.get_crop(picture_num, crop_num).save_segment(segment_data)
 
                     percent_complete = \
-                        math.ceil((self.image_store.get_image(picture_num, crop_num).segments_downloaded*100) / \
-                            self.image_store.get_image(picture_num, crop_num).total_segments())
+                        math.ceil((self.image_store.get_crop(picture_num, crop_num).segments_downloaded*100) / \
+                            self.image_store.get_crop(picture_num, crop_num).total_segments())
 
                     #check for completion
-                    if self.image_store.get_image(picture_num, crop_num).segments_downloaded == \
-                        self.image_store.get_image(picture_num, crop_num).total_segments():
+                    if self.image_store.get_crop(picture_num, crop_num).segments_downloaded == \
+                        self.image_store.get_crop(picture_num, crop_num).total_segments():
                         print "picture %d crop %d completed downloading" % (picture_num,crop_num)
-                        self.image_store.get_image(picture_num, crop_num).completed = True
+                        self.image_store.get_crop(picture_num, crop_num).completed = True
                     
                     #notify observers
                     self.notify("IMAGE_DOWNLOADED", \
