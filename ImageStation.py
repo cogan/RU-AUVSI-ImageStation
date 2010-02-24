@@ -10,6 +10,7 @@ import gtk.glade
 
 #import project related dependencies
 from Communicator import *
+from PictureDialog import *
 import CameraControl
 
 class ImageStation:
@@ -28,6 +29,9 @@ class ImageStation:
         
         # Set the model
         self.communicator = communicator
+        
+        # list for tracking which pictures currently have info dialog boxes open
+        self.picture_info_list = []
         
         # Configure the GUI with Glade
         self.initialize_gui()
@@ -217,9 +221,6 @@ class ImageStation:
                 "on_image_tree_menu_display_activate" : self.image_tree_menu_display_activate, \
                 "on_image_tree_menu_add_to_queue_activate" : self.image_tree_menu_add_to_queue_activate, \
                 "on_image_tree_menu_info_activate" : self.image_tree_menu_info_activate }
-                
-        picture_info_dialog_dic = { "on_pid_save_activate" : self.pid_save_activate, \
-                "on_pid_cancel_activate" : self.pid_cancel_activate }
         
         image_queue_dic = { "on_image_queue_key_press_event" : self.image_queue_key_press_event, \
                 "on_image_queue_drag_end" : self.image_queue_drag_end }
@@ -377,26 +378,22 @@ class ImageStation:
     
     def display_picture_info(self, pic_num, crop_num):
         """displays the info for the appropriate picture."""
-        #populate the box
-        crop = self.communicator.image_store.get_crop(pic_num, crop_num)
-        picture = self.communicator.image_store.get_picture(pic_num)
-        name = crop.name
-        shape = picture.shape
-        color = picture.color
-        alpha = picture.alpha
-        alphacolor = picture.alphacolor
-        location = picture.location
-        orientation = picture.orientation
-        self.picture_name_label.set_markup("<b>" + name + "</b>")
-        self.picture_shape_entry.set_text(shape)
-        self.picture_color_entry.set_text(color)
-        self.picture_alpha_entry.set_text(alpha)
-        self.picture_alphacolor_entry.set_text(alphacolor)
-        self.picture_location_entry.set_text(location)
-        self.picture_orientation_entry.set_text(orientation)
         
-        #show the box
-        self.picture_info_dialog.show()
+        # If the dialog box isn't currently shown, get all the picture
+        # attributes and display them
+        if self.picture_info_list[pic_num] == False:
+            # get picture attributes
+            picture = self.communicator.image_store.get_picture(pic_num)
+            self.picture_info_list[pic_num] = PictureDialog()
+            self.picture_info_list[pic_num].set_picture(picture)
+        
+        # If the dialog box was already displayed, make sure we are displaying
+        # info from the correct crop
+        crop = self.communicator.image_store.get_crop(pic_num, crop_num)
+        self.picture_info_list[pic_num].set_crop(crop)
+        
+        #show the box and set flag
+        self.picture_info_list[pic_num].show()
         
     #*
     #* Picture Info Dialog events
@@ -580,15 +577,6 @@ class ImageStation:
         except IndexError as e:
             #nothing on the queue
             pass
-    
-    def remove_markup(self, string):
-        """removes markup from strings in list_store and tree_store"""
-        #this will only remove the markup the colored bold strings
-        #if other markup is applied this script will need to be changed
-        #30 - length of beginning markup
-        #11 - length of ending markup
-        #TODO: 12/03/09 this should be replaced with a regular expression.
-        return string[30:len(string)-11]
         
     def display_image(self, pic_num, crop_num):
         """displays the appropriate image in the drawing_area"""
@@ -693,6 +681,7 @@ class ImageStation:
         picture_name = self.communicator.image_store.get_crop(picture_num, 1).name
         self.insert_in_tree(picture_name, picture_num, 1, False)
         self.add_to_queue(picture_name, picture_num, 1)
+        self.picture_info_list.append(False)
         
     def _handle_search_resumed(self):
         pass

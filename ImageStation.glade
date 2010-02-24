@@ -3,8 +3,6 @@
   <!-- interface-requires gtk+ 2.16 -->
   <!-- interface-naming-policy toplevel-contextual -->
   <widget class="GtkWindow" id="ImageWindow">
-    <property name="width_request">800</property>
-    <property name="height_request">500</property>
     <property name="visible">True</property>
     <signal name="destroy" handler="on_ImageWindow_destroy"/>
     <child>
@@ -241,6 +239,7 @@
                     <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <widget class="GtkTreeView" id="image_queue">
+                        <property name="width_request">200</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <signal name="key_press_event" handler="on_image_queue_key_press_event"/>
@@ -259,14 +258,202 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkDrawingArea" id="drawing_area">
+              <widget class="GtkVBox" id="vbox3">
                 <property name="visible">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK</property>
-                <signal name="button_press_event" handler="on_drawing_area_button_press_event"/>
-                <signal name="expose_event" handler="on_drawing_area_expose_event"/>
-                <signal name="motion_notify_event" handler="on_drawing_area_motion_notify_event"/>
-                <signal name="event" handler="on_drawing_area_event"/>
-                <signal name="button_release_event" handler="on_drawing_area_button_release_event"/>
+                <property name="orientation">vertical</property>
+                <child>
+                  <widget class="GtkDrawingArea" id="drawing_area">
+                    <property name="width_request">750</property>
+                    <property name="height_request">540</property>
+                    <property name="visible">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK</property>
+                    <signal name="button_press_event" handler="on_drawing_area_button_press_event"/>
+                    <signal name="expose_event" handler="on_drawing_area_expose_event"/>
+                    <signal name="motion_notify_event" handler="on_drawing_area_motion_notify_event"/>
+                    <signal name="event" handler="on_drawing_area_event"/>
+                    <signal name="button_release_event" handler="on_drawing_area_button_release_event"/>
+                  </widget>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkFixed" id="fixed1">
+                    <property name="width_request">500</property>
+                    <property name="height_request">200</property>
+                    <property name="visible">True</property>
+                    <child>
+                      <widget class="GtkLabel" id="picture_name_label">
+                        <property name="width_request">100</property>
+                        <property name="height_request">30</property>
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">&lt;b&gt;name&lt;/b&gt;</property>
+                        <property name="use_markup">True</property>
+                      </widget>
+                      <packing>
+                        <property name="x">300</property>
+                        <property name="y">15</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="picture_alpha_label">
+                        <property name="width_request">100</property>
+                        <property name="height_request">30</property>
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">alphanumeric</property>
+                      </widget>
+                      <packing>
+                        <property name="x">5</property>
+                        <property name="y">100</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="picture_shape_label">
+                        <property name="width_request">100</property>
+                        <property name="height_request">30</property>
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">&lt;b&gt;shape:&lt;/b&gt;</property>
+                        <property name="use_markup">True</property>
+                      </widget>
+                      <packing>
+                        <property name="x">5</property>
+                        <property name="y">60</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="picture_alphacolor_label">
+                        <property name="width_request">100</property>
+                        <property name="height_request">30</property>
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">alpha color</property>
+                      </widget>
+                      <packing>
+                        <property name="x">270</property>
+                        <property name="y">100</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="picture_color_label">
+                        <property name="width_request">100</property>
+                        <property name="height_request">30</property>
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">color</property>
+                      </widget>
+                      <packing>
+                        <property name="x">270</property>
+                        <property name="y">60</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="picture_location_label">
+                        <property name="width_request">100</property>
+                        <property name="height_request">30</property>
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">location</property>
+                      </widget>
+                      <packing>
+                        <property name="x">5</property>
+                        <property name="y">140</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkEntry" id="picture_alpha_entry">
+                        <property name="width_request">100</property>
+                        <property name="height_request">30</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="has_frame">False</property>
+                        <property name="invisible_char">&#x25CF;</property>
+                        <property name="text" translatable="yes">'A'</property>
+                        <property name="shadow_type">none</property>
+                      </widget>
+                      <packing>
+                        <property name="x">120</property>
+                        <property name="y">100</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkEntry" id="picture_location_entry">
+                        <property name="width_request">100</property>
+                        <property name="height_request">30</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">&#x25CF;</property>
+                      </widget>
+                      <packing>
+                        <property name="x">120</property>
+                        <property name="y">140</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="picture_orientation_label">
+                        <property name="width_request">100</property>
+                        <property name="height_request">30</property>
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">orientation</property>
+                      </widget>
+                      <packing>
+                        <property name="x">270</property>
+                        <property name="y">140</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkEntry" id="picture_color_entry">
+                        <property name="width_request">100</property>
+                        <property name="height_request">30</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">&#x25CF;</property>
+                      </widget>
+                      <packing>
+                        <property name="x">385</property>
+                        <property name="y">60</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkEntry" id="picture_alphacolor_entry">
+                        <property name="width_request">100</property>
+                        <property name="height_request">30</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">&#x25CF;</property>
+                      </widget>
+                      <packing>
+                        <property name="x">385</property>
+                        <property name="y">100</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkEntry" id="picture_orientation_entry">
+                        <property name="width_request">100</property>
+                        <property name="height_request">30</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">&#x25CF;</property>
+                      </widget>
+                      <packing>
+                        <property name="x">385</property>
+                        <property name="y">140</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label1">
+                        <property name="width_request">100</property>
+                        <property name="height_request">30</property>
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">triangle</property>
+                        <property name="selectable">True</property>
+                      </widget>
+                      <packing>
+                        <property name="x">100</property>
+                        <property name="y">60</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </widget>
               <packing>
                 <property name="position">1</property>
@@ -347,228 +534,6 @@
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
                 <signal name="activate" handler="on_fcd_save_activate"/>
-              </widget>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </widget>
-          <packing>
-            <property name="expand">False</property>
-            <property name="pack_type">end</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </widget>
-    </child>
-  </widget>
-  <widget class="GtkDialog" id="picture_info_dialog">
-    <property name="border_width">5</property>
-    <property name="type_hint">normal</property>
-    <property name="has_separator">False</property>
-    <child internal-child="vbox">
-      <widget class="GtkVBox" id="dialog-vbox8">
-        <property name="visible">True</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child>
-          <widget class="GtkFixed" id="fixed1">
-            <property name="visible">True</property>
-            <child>
-              <widget class="GtkLabel" id="picture_name_label">
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">&lt;b&gt;name&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-              </widget>
-              <packing>
-                <property name="x">5</property>
-                <property name="y">15</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkLabel" id="picture_alpha_label">
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">alphanumeric</property>
-              </widget>
-              <packing>
-                <property name="x">5</property>
-                <property name="y">100</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkLabel" id="picture_shape_label">
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">shape</property>
-              </widget>
-              <packing>
-                <property name="x">5</property>
-                <property name="y">60</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkLabel" id="picture_alphacolor_label">
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">alpha color</property>
-              </widget>
-              <packing>
-                <property name="x">270</property>
-                <property name="y">100</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkLabel" id="picture_color_label">
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">color</property>
-              </widget>
-              <packing>
-                <property name="x">270</property>
-                <property name="y">60</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkLabel" id="picture_location_label">
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">location</property>
-              </widget>
-              <packing>
-                <property name="x">5</property>
-                <property name="y">140</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkEntry" id="picture_shape_entry">
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">&#x25CF;</property>
-              </widget>
-              <packing>
-                <property name="x">120</property>
-                <property name="y">60</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkEntry" id="picture_alpha_entry">
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">&#x25CF;</property>
-              </widget>
-              <packing>
-                <property name="x">120</property>
-                <property name="y">100</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkEntry" id="picture_location_entry">
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">&#x25CF;</property>
-              </widget>
-              <packing>
-                <property name="x">120</property>
-                <property name="y">140</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkLabel" id="picture_orientation_label">
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">orientation</property>
-              </widget>
-              <packing>
-                <property name="x">270</property>
-                <property name="y">140</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkEntry" id="picture_color_entry">
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">&#x25CF;</property>
-              </widget>
-              <packing>
-                <property name="x">385</property>
-                <property name="y">60</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkEntry" id="picture_alphacolor_entry">
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">&#x25CF;</property>
-              </widget>
-              <packing>
-                <property name="x">385</property>
-                <property name="y">100</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkEntry" id="picture_orientation_entry">
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">&#x25CF;</property>
-              </widget>
-              <packing>
-                <property name="x">385</property>
-                <property name="y">140</property>
-              </packing>
-            </child>
-          </widget>
-          <packing>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child internal-child="action_area">
-          <widget class="GtkHButtonBox" id="dialog-action_area8">
-            <property name="visible">True</property>
-            <property name="layout_style">end</property>
-            <child>
-              <widget class="GtkButton" id="pid_cancel">
-                <property name="label" translatable="yes">cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="activate" handler="on_pid_cancel_activate"/>
-              </widget>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkButton" id="pid_save">
-                <property name="label" translatable="yes">save</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="activate" handler="on_pid_save_activate"/>
               </widget>
               <packing>
                 <property name="expand">False</property>

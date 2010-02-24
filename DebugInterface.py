@@ -52,7 +52,7 @@ class DebugInterface(Interface):
         
     def download_segment(self, picture_num, crop_num, segment_num): 
         """download a segment of an image"""
-        time.sleep(.1)
+        time.sleep(.01)
         return ["",]
         
     def camera_pan_left(self, increment):
