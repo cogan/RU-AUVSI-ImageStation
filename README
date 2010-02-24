@@ -1,7 +1,12 @@
-This is the ImageStation software to be used by Rutgers for the 2010 Student UAS competition
+This is the ImageStation software to be used by Rutgers for the AUVSI 2010 Student UAS competition
 
 RUNNING the Program (must have python installed):
 to run the program simply type ./main.py, or python main.py
+
+REQUIREMENTS:
+pySerial
+GTK+
+pyGTK
 
 ABOUT:
 
@@ -11,10 +16,10 @@ here is a diagram of the basic structure of the program
                      |
                      | 
             SerialInterface.py
-			         |
-				     | 
+                     |
+                     | 
               Communicator.py  ---->  ImageStore
-				 |      |
+                 |      |
                 |        |
                |          |
     ImageStation.py     CameraControl.py
@@ -29,4 +34,4 @@ ImageStore:
     Contains all the data for saving/loading the project as well as all picture and crop information.
 
 SerialInterface:
-    Uses NmeaEncoder and NmeaDecoder as well as the pyserial interface to actually communicate with the plane
+    Uses NmeaEncoder and NmeaDecoder as well as the pySerial interface to actually communicate with the plane
