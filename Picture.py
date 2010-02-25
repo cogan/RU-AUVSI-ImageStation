@@ -9,12 +9,12 @@ class Picture(object):
         """constructor"""
         
         # mission relevant attributes
-        self._location = ""
-        self._orientation = ""
-        self._shape = ""
-        self._alpha = ""
-        self._alphacolor = ""
-        self._color = ""
+        self._latitude = "uncalculated"
+        self._longitude = "uncalculated"
+        self._shape = "unknown"
+        self._alpha = "unknown"
+        self._alphacolor = "unknown"
+        self._color = "unknown"
         
         # various crops of pictures
         # we want to start with index 1, so we put an dud in crop_list[0]
@@ -27,17 +27,17 @@ class Picture(object):
         #return the number of the crop added
         return len(self.crop_list)-1
         
-    def get_location(self):
-        return self._location
+    def get_latitude(self):
+        return self._latitude
     
-    def set_location(self, value):
-        self._location = value
+    def set_latitude(self, value):
+        self._latitude = value
         
-    def get_orientation(self):
-        return self._orientation
+    def get_longitude(self):
+        return self._longitude
     
-    def set_orientation(self, value):
-        self._orientation = value
+    def set_longitude(self, value):
+        self._longitude = value
         
     def get_shape(self):
         return self._shape
@@ -63,8 +63,8 @@ class Picture(object):
     def set_alphacolor(self, value):
         self._alphacolor = value
     
-    location = property(get_location, set_location)
-    orientation = property(get_orientation, set_orientation)
+    latitude = property(get_latitude, set_latitude)
+    longitude = property(get_longitude, set_longitude)
     shape = property(get_shape, set_shape)
     alpha = property(get_alpha, set_alpha)
     color = property(get_color, set_color)

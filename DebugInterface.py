@@ -48,7 +48,7 @@ class DebugInterface(Interface):
         
     def request_size(self, picture_num, crop_num):
         """get the size of a crop"""
-        return [10000,]
+        return [1000,]
         
     def download_segment(self, picture_num, crop_num, segment_num): 
         """download a segment of an image"""

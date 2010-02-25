@@ -1,4 +1,5 @@
 #ImageStation.py
+# change gtk.entry colors: http://bytes.com/topic/python/answers/540122-gtk-entry-colors
 
 #import required modules
 import sys
@@ -7,6 +8,7 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import gtk.glade
+import glib
 
 #import project related dependencies
 from Communicator import *
@@ -156,19 +158,6 @@ class ImageStation:
         self.image_tree_menu = self.widgets.get_widget("image_tree_menu")
         
         #*
-        #* Set up Picture Info Dialog
-        #*
-        
-        self.picture_info_dialog = self.widgets.get_widget("picture_info_dialog")
-        self.picture_name_label = self.widgets.get_widget("picture_name_label")
-        self.picture_shape_entry = self.widgets.get_widget("picture_shape_entry")
-        self.picture_color_entry = self.widgets.get_widget("picture_color_entry")
-        self.picture_alpha_entry = self.widgets.get_widget("picture_alpha_entry")
-        self.picture_alphacolor_entry = self.widgets.get_widget("picture_alphacolor_entry")
-        self.picture_location_entry = self.widgets.get_widget("picture_location_entry")
-        self.picture_orientation_entry = self.widgets.get_widget("picture_orientation_entry")
-        
-        #*
         #* Set up Drawing Area
         #*
         
@@ -181,8 +170,7 @@ class ImageStation:
         # create background for drawing area
         image = gtk.Image()
         filename = "%s/images/blank.jpg" % (os.path.dirname(__file__),)
-        image.set_from_file(filename)
-        self.pixbuf = image.get_pixbuf()
+        self.pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(filename, 800, 600)
         
         # for keeping track of crop areas
         self.box_drawn = False
@@ -191,6 +179,27 @@ class ImageStation:
         self.ya = 0
         self.xb = 0
         self.yb = 0
+        
+        #*
+        #* Set up Picture Info Box
+        #*
+        
+        self.picture_info_box = self.widgets.get_widget("picture_info_box")
+        self.picture_name = self.widgets.get_widget("picture_name_label")
+        self.picture_shape = self.widgets.get_widget("picture_shape_entry")
+        self.picture_color = self.widgets.get_widget("picture_color_entry")
+        self.picture_alpha = self.widgets.get_widget("picture_alpha_entry")
+        self.picture_alphacolor = self.widgets.get_widget("picture_alphacolor_entry")
+        self.picture_longitude = self.widgets.get_widget("picture_long_entry")
+        self.picture_latitude = self.widgets.get_widget("picture_lat_entry")
+        
+        
+        self.picture_shape.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+        self.picture_color.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+        self.picture_alpha.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+        self.picture_alphacolor.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+        self.picture_longitude.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+        self.picture_latitude.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
         
         #*
         #* Connect events
@@ -230,6 +239,10 @@ class ImageStation:
                 "on_drawing_area_button_release_event" : self.drawing_area_button_release_event, \
                 "on_drawing_area_motion_notify_event" : self.drawing_area_motion_notify_event }
         
+        picture_info_dic = { "on_picture_shape_entry_button_press_event" : self.shape_entry_button_press_event, \
+                "on_picture_shape_entry_focus_out_event" : self.shape_entry_focus_out_event, \
+                "on_picture_shape_entry_key_press_event" : self.shape_entry_key_press_event }
+        
         general_dic = { "on_ImageWindow_destroy" : self.ImageWindow_destroy }
         
         self.widgets.signal_autoconnect(file_dic)
@@ -239,8 +252,9 @@ class ImageStation:
         self.widgets.signal_autoconnect(image_tree_dic)
         self.widgets.signal_autoconnect(image_queue_dic)
         self.widgets.signal_autoconnect(drawing_dic)
+        self.widgets.signal_autoconnect(picture_info_dic)
         self.widgets.signal_autoconnect(general_dic)
-
+    
     #*
     #* File Events
     #*
@@ -469,7 +483,38 @@ class ImageStation:
             #draw the box
             self.draw_box(widget, self.x_begin, self.y_begin, \
                                     self.x_end, self.y_end)
-                                    
+    
+    #*
+    #* Picture Info Box Events
+    #*
+
+    #TODO: fix this so that the code isn't directly in the event???
+
+    def shape_entry_button_press_event(self, widget, event, data=None):
+        """picture info entry box double clicked"""
+        
+        # check for double click
+        # if so make the widget editable and change its color
+        if event.type == gtk.gdk._2BUTTON_PRESS:
+            widget.set_editable(True)
+            widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#FFFFFF"))
+    
+    def shape_entry_focus_out_event(self, widget, data=None):
+        """focus lost on shape entry"""
+        widget.set_editable(False)
+        widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+        self.communicator.image_store.get_picture(self.cd_pic_num).shape = \
+            widget.get_text()
+
+
+    def shape_entry_key_press_event(self, widget, event, data=None):
+        """key press"""
+        if event.keyval == 65293:
+            widget.set_editable(False)
+            widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+            self.communicator.image_store.get_picture(self.cd_pic_num).shape = \
+                widget.get_text()
+
     #*
     #* General events
     #*
@@ -585,31 +630,44 @@ class ImageStation:
             self.cd_pic_num = pic_num
             try:
                 path = self.communicator.image_store.get_crop(pic_num, crop_num).path
-                image = gtk.Image()
-                image.set_from_file(path)
-                self.pixbuf = image.get_pixbuf()
+                self.pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, 800, 600)
                 w = self.pixbuf.get_width()
                 h = self.pixbuf.get_height()
-                #draw the image and resize
+                #draw the image
                 self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
                                                     0, 0, 0, 0, w, h)
-                self.drawing_area.window.resize(w, h)
-            except ValueError as e:
+            except glib.GError as e:
                 print "picture " + str(pic_num) + " crop " + str(crop_num) + \
                     " is corrupt!"
         else:
             #draw "incomplete" image
             path = "%s/images/incomplete.jpg" % (os.path.dirname(__file__),)
-            image = gtk.Image()
-            image.set_from_file(path)
-            self.pixbuf = image.get_pixbuf()
+            self.pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, 800, 600)
             w = self.pixbuf.get_width()
             h = self.pixbuf.get_height()
-            #draw the image and resize
+            #draw the image
             self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
                                                 0, 0, 0, 0, w, h)
-            self.drawing_area.window.resize(w, h)
-            
+        
+        # show the picture info and update it
+        self.picture_info_box.show()
+        self.update_picture_info(pic_num, crop_num)
+
+    def update_picture_info(self, pic_num, crop_num):
+        """update the fields containing a pictures info"""
+        pic = self.communicator.image_store.get_picture(pic_num)
+        
+        # get the name from the crop
+        self.picture_name.set_markup("<b>" + pic.crop_list[crop_num].name + "</b>")
+        
+        # get the attributes from the picture
+        self.picture_shape.set_text(pic.shape)
+        self.picture_color.set_text(pic.color)
+        self.picture_alpha.set_text(pic.alpha)
+        self.picture_alphacolor.set_text(pic.alphacolor)
+        self.picture_longitude.set_text(pic.longitude)
+        self.picture_latitude.set_text(pic.latitude)
+
     def draw_box(self, widget, x_begin, y_begin, x_end, y_end):
         self.box_width = self.x_end - self.x_begin
         self.box_height = self.y_end - self.y_begin
