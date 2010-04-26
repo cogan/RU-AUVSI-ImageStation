@@ -35,11 +35,17 @@ class Crop:
     def total_segments(self):
         return math.ceil(float(self.size)/float(self.segment_size))
         
-    def save_segment(self, segment_data):
+    def save_segment(self, segment_data, segment_num):
         #save the data
         fout = open(self.path, 'a')
+        fout.seek(segment_num * self.segment_size)
         fout.write(segment_data)
         fout.close
         
         #update info
         self.segments_downloaded = self.segments_downloaded + 1;
+        
+    def get_percent_complete(self):
+        percent_complete = \
+            math.floor( (self.segments_downloaded*100) / (self.total_segments()) )
+        return percent_complete

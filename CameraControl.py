@@ -10,6 +10,7 @@
 #
 # __medium__
 # redownload image feature
+# when a picture is corrupt show a corrupt image
 #****
 
 #import required modules

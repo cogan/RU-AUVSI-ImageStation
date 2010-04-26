@@ -1,6 +1,7 @@
 #ImageStore.py
 
 from Picture import *
+import pickle
 
 class ImageStore:
     """Store locations for Images"""

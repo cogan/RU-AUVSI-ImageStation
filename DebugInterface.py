@@ -44,11 +44,11 @@ class DebugInterface(Interface):
     def request_info(self, picture_num):
         """get all positional info about a picture
         i.e camera angles, plane angles, gps coordinates"""
-        pass
-        
+        return ["54.33", "65.44", "33.33", "66.6", "14.2", "1.0", "2.0",]
+               
     def request_size(self, picture_num, crop_num):
         """get the size of a crop"""
-        return [1000,]
+        return ["1000",]
         
     def download_segment(self, picture_num, crop_num, segment_num): 
         """download a segment of an image"""

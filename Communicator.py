@@ -31,8 +31,8 @@ class Communicator(Subject):
         self.image_store.set_project_path(os.path.expanduser("~/Desktop/ImageStationProject/"))
         
         #set default interface
-        self.interface = SerialInterface("/dev/ttyUSB0", 9600)
-        #self.interface = DebugInterface()
+        #self.interface = SerialInterface("/dev/ttyUSB0", 9600)
+        self.interface = DebugInterface()
 
     def set_interface(self, interface, **kwargs):
         """sets the interface used to communicate with the plane"""
@@ -42,6 +42,26 @@ class Communicator(Subject):
             self.interface = NoneInterface()
         elif interface == "debug":
             self.interface = DebugInterface()
+
+    #*
+    #* New/Save/Load functions
+    #*
+
+    def save_project(self, path=None):
+        if not path:
+            path = self.image_store.project_path
+        file_handler = open(path + 'imagestore.obj', 'w')
+        pickle.dump(self.image_store, file_handler)
+        
+    def load_project(self, path=None):
+        if not path:
+            return False
+        if not (path[-13:] == "save_file.isp"):
+            print "invalid save file"
+            return False
+        file_handler = open(path[:-13] + 'imagestore.obj', 'r')
+        self.image_store = pickle.load(file_handler)
+        return True
 
     #*
     #* Functions to be called by a "controller" to initiate Communicator actions
@@ -308,15 +328,27 @@ class Communicator(Subject):
                     # all the info relevant to the picture (i.e. plane angles,
                     # camera angles, and gps info at the time the pic was taken
                     if crop_num == 1:
-                         (gpsx_str, gpsy_str, pan_str, tilt_str, \
+                        (gpsx_str, gpsy_str, pan_str, tilt_str, \
                             yaw_str, pitch_str, roll_str) = \
                             self.interface.request_info(picture_num)
-                        # give off a notification
-                        #TODO: fix this
-                        #self.notify("SIZE_CALCULATED", \
-                       # 		picture_num=picture_num, \
-                       # 		crop_num=crop_num, \
-                       # 		size=crop_size)
+
+                        gps_x = float(gpsx_str)
+                        gps_y = float(gpsy_str)
+                        pan = float(pan_str)
+                        tilt = float(tilt_str)
+                        yaw = float(yaw_str)
+                        pitch = float(pitch_str)
+                        roll = float(roll_str)
+                       
+                        self.notify("INFO_RECEIVED", \
+		                        picture_num = picture_num, \
+		                        gps_x = gps_x, \
+		                        gps_y = gps_y, \
+		                        pan = pan, \
+		                        tilt = tilt, \
+		                        yaw = yaw, \
+		                        pitch = pitch, \
+		                        roll = roll)
                         
                     print "requesting size of picture %d, crop %d" % (picture_num, crop_num)
                     
@@ -352,11 +384,9 @@ class Communicator(Subject):
                         segment_num = segment_num)
 
                     #store the data with the corresponding picture
-                    self.image_store.get_crop(picture_num, crop_num).save_segment(segment_data)
+                    self.image_store.get_crop(picture_num, crop_num).save_segment(segment_data, segment_num)
 
-                    percent_complete = \
-                        math.ceil((self.image_store.get_crop(picture_num, crop_num).segments_downloaded*100) / \
-                            self.image_store.get_crop(picture_num, crop_num).total_segments())
+                    percent_complete = self.image_store.get_crop(picture_num, crop_num).get_percent_complete()
 
                     #check for completion
                     if self.image_store.get_crop(picture_num, crop_num).segments_downloaded == \

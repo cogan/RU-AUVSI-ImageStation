@@ -44,6 +44,7 @@ class ImageStation:
             "LOCKED_TARGET" : self._handle_locked_target, \
             "DOWNLOADED_TO_FLC" : self._handle_downloaded_to_flc, \
             "CROP_GENERATED" : self._handle_crop_generated, \
+            "INFO_RECEIVED" : self._handle_info_received, \
             "SIZE_CALCULATED" : self._handle_size_calculated, \
             "IMAGE_DOWNLOADED" : self._handle_image_downloaded, \
             "PING" : self._handle_ping, \
@@ -61,8 +62,9 @@ class ImageStation:
         #* Set up File Chooser Dialog
         #*
         
-        self.file_chooser = self.widgets.get_widget("file_chooser_dialog")
-        
+        self.save_chooser = self.widgets.get_widget("save_dialog")
+        self.open_chooser = self.widgets.get_widget("open_dialog")
+
         #*
         #* Set up Connection Menu (can't be done in Glade)
         #* ***update: can be done in glade, just isn't right now***
@@ -156,6 +158,12 @@ class ImageStation:
         #*
         
         self.play_pause = self.widgets.get_widget("play_pause")
+        play_image = gtk.Image()
+        
+        play_image.set_from_file("images/play.png")
+        play_image.show()
+        self.play_pause.set_image(play_image)
+        
         self.paused = False
         
         #*
@@ -200,7 +208,6 @@ class ImageStation:
         self.picture_longitude = self.widgets.get_widget("picture_long_entry")
         self.picture_latitude = self.widgets.get_widget("picture_lat_entry")
         
-        
         self.picture_shape.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
         self.picture_color.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
         self.picture_alpha.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
@@ -230,8 +237,10 @@ class ImageStation:
                 "on_tool_dl2flc_clicked" : self.tool_dl2flc_clicked, \
                 "on_tool_gen_crop_clicked" : self.tool_gen_crop_clicked }
                 
-        chooser_dic = { "on_fcd_save_activate" : self.fcd_save_activate, \
-                "on_fcd_cancel_activate" : self.fcd_cancel_activate }
+        chooser_dic = { "on_sd_save_clicked" : self.sd_save_clicked, \
+                "on_sd_cancel_clicked" : self.sd_cancel_clicked, \
+                "on_od_open_clicked" : self.od_open_clicked, \
+                "on_od_cancel_clicked" : self.od_cancel_clicked }
         
         image_tree_dic = { "on_image_tree_button_press_event" : self.image_tree_button_press_event, \
                 "on_image_tree_menu_display_activate" : self.image_tree_menu_display_activate, \
@@ -241,7 +250,7 @@ class ImageStation:
         image_queue_dic = { "on_image_queue_key_press_event" : self.image_queue_key_press_event, \
                 "on_image_queue_drag_end" : self.image_queue_drag_end }
         
-        button_dic = { "on_play_pause_clicked" : self.play_pause_clicked }
+        button_dic = { "on_play_pause_toggled" : self.play_pause_toggled }
         
         drawing_dic = { "on_drawing_area_expose_event" : self.drawing_area_expose_event, \
                 "on_drawing_area_button_press_event" : self.drawing_area_button_press_event, \
@@ -250,7 +259,16 @@ class ImageStation:
         
         picture_info_dic = { "on_picture_shape_entry_button_press_event" : self.shape_entry_button_press_event, \
                 "on_picture_shape_entry_focus_out_event" : self.shape_entry_focus_out_event, \
-                "on_picture_shape_entry_key_press_event" : self.shape_entry_key_press_event }
+                "on_picture_shape_entry_key_press_event" : self.shape_entry_key_press_event, \
+                "on_picture_color_entry_button_press_event" : self.color_entry_button_press_event, \
+                "on_picture_color_entry_focus_out_event" : self.color_entry_focus_out_event, \
+                "on_picture_color_entry_key_press_event" : self.color_entry_key_press_event, \
+                "on_picture_alpha_entry_button_press_event" : self.alpha_entry_button_press_event, \
+                "on_picture_alpha_entry_focus_out_event" : self.alpha_entry_focus_out_event, \
+                "on_picture_alpha_entry_key_press_event" : self.alpha_entry_key_press_event, \
+                "on_picture_alphacolor_entry_button_press_event" : self.alphacolor_entry_button_press_event, \
+                "on_picture_alphacolor_entry_focus_out_event" : self.alphacolor_entry_focus_out_event, \
+                "on_picture_alphacolor_entry_key_press_event" : self.alphacolor_entry_key_press_event }
         
         general_dic = { "on_ImageWindow_destroy" : self.ImageWindow_destroy }
         
@@ -275,15 +293,15 @@ class ImageStation:
     
     def file_menu_open_activate(self, widget, data=None):
         """open clicked on file menu."""
-        pass
+        self.open_chooser.show()
         
     def file_menu_save_activate(self, widget, data=None):
         """save clicked on file menu."""
-        pass
+        self.communicator.save_project()
         
     def file_menu_saveas_activate(self, widget, data=None):
         """saveas clicked on file menu."""
-        pass
+        self.save_chooser.show()
     
     def file_menu_quit_activate(self, widget, data=None):
         """quit clicked on file menu."""
@@ -329,11 +347,11 @@ class ImageStation:
         
     def tool_open_clicked(self, widget, data=None):
         """open clicked on the toolbar menu."""
-        pass
+        self.open_chooser.show()
         
     def tool_save_clicked(self, widget, data=None):
         """save clicked on the toolbar menu."""
-        pass
+        self.communicator.save_project()
         
     def tool_dl2flc_clicked(self, widget, data=None):
         """dl2flc clicked on the toolbar menu."""
@@ -342,23 +360,37 @@ class ImageStation:
     def tool_gen_crop_clicked(self, widget, data=None):
         """generate crop clicked on the toolbar menu."""
         self._generate_crop()
-        
+
     #*
     #* File Chooser Dialog events
     #*
-        
-    def fcd_save_activate(self, widget, data=None):
+
+    def sd_save_clicked(self, widget, data=None):
         """save clicked in file choose dialog."""
-        print "save clicked"
+        filename = self.save_chooser.get_filename()
+        self.communicator.save_project(filename)
+        self.save_chooser.destroy()
     
-    def fcd_cancel_activate(self, widget, data=None):
+    def sd_cancel_clicked(self, widget, data=None):
         """cancel clicked in file choose dialog."""
         print "cancel clicked"
-        widget.hide()
+        self.save_chooser.destroy()
+    
+    def od_open_clicked(self, widget, data=None):
+        """save clicked in file choose dialog."""
+        filename = self.open_chooser.get_filename()
+        if (self.communicator.load_project(filename)):
+            self.open_chooser.destroy()
+        self.project_loaded()
+        
+    def od_cancel_clicked(self, widget, data=None):
+        """cancel clicked in file choose dialog."""
+        print "cancel clicked"
+        self.open_chooser.destroy()
     
     #*
     #* Image Tree events
-    #*   
+    #*
 
     def image_tree_button_press_event(self, treeview, event, data=None):
         """item selected in image_tree."""
@@ -453,7 +485,7 @@ class ImageStation:
     #* Button Events
     #*
 
-    def play_pause_clicked(self, widget, data=None):
+    def play_pause_toggled(self, widget, data=None):
         if self.paused == True:
             self.paused = False
             self.queue_changed()
@@ -509,8 +541,6 @@ class ImageStation:
     #* Picture Info Box Events
     #*
 
-    #TODO: fix this so that the code isn't directly in the event???
-
     def shape_entry_button_press_event(self, widget, event, data=None):
         """picture info entry box double clicked"""
         
@@ -527,13 +557,84 @@ class ImageStation:
         self.communicator.image_store.get_picture(self.cd_pic_num).shape = \
             widget.get_text()
 
-
     def shape_entry_key_press_event(self, widget, event, data=None):
         """key press"""
         if event.keyval == 65293:
             widget.set_editable(False)
             widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
             self.communicator.image_store.get_picture(self.cd_pic_num).shape = \
+                widget.get_text()
+                
+    def color_entry_button_press_event(self, widget, event, data=None):
+        """picture info entry box double clicked"""
+        
+        # check for double click
+        # if so make the widget editable and change its color
+        if event.type == gtk.gdk._2BUTTON_PRESS:
+            widget.set_editable(True)
+            widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#FFFFFF"))
+    
+    def color_entry_focus_out_event(self, widget, data=None):
+        """focus lost on color entry"""
+        widget.set_editable(False)
+        widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+        self.communicator.image_store.get_picture(self.cd_pic_num).color = \
+            widget.get_text()
+
+    def color_entry_key_press_event(self, widget, event, data=None):
+        """key press"""
+        if event.keyval == 65293:
+            widget.set_editable(False)
+            widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+            self.communicator.image_store.get_picture(self.cd_pic_num).color = \
+                widget.get_text()
+    
+    def alpha_entry_button_press_event(self, widget, event, data=None):
+        """picture info entry box double clicked"""
+        
+        # check for double click
+        # if so make the widget editable and change its color
+        if event.type == gtk.gdk._2BUTTON_PRESS:
+            widget.set_editable(True)
+            widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#FFFFFF"))
+    
+    def alpha_entry_focus_out_event(self, widget, data=None):
+        """focus lost on alpha entry"""
+        widget.set_editable(False)
+        widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+        self.communicator.image_store.get_picture(self.cd_pic_num).alpha = \
+            widget.get_text()
+
+    def alpha_entry_key_press_event(self, widget, event, data=None):
+        """key press"""
+        if event.keyval == 65293:
+            widget.set_editable(False)
+            widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+            self.communicator.image_store.get_picture(self.cd_pic_num).alpha = \
+                widget.get_text()
+                
+    def alphacolor_entry_button_press_event(self, widget, event, data=None):
+        """picture info entry box double clicked"""
+        
+        # check for double click
+        # if so make the widget editable and change its color
+        if event.type == gtk.gdk._2BUTTON_PRESS:
+            widget.set_editable(True)
+            widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#FFFFFF"))
+    
+    def alphacolor_entry_focus_out_event(self, widget, data=None):
+        """focus lost on alphacolor entry"""
+        widget.set_editable(False)
+        widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+        self.communicator.image_store.get_picture(self.cd_pic_num).alphacolor = \
+            widget.get_text()
+
+    def alphacolor_entry_key_press_event(self, widget, event, data=None):
+        """key press"""
+        if event.keyval == 65293:
+            widget.set_editable(False)
+            widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+            self.communicator.image_store.get_picture(self.cd_pic_num).alphacolor = \
                 widget.get_text()
 
     #*
@@ -548,7 +649,45 @@ class ImageStation:
     #* Functions related to file manipulation
     #*
     
-    #put save, open, saveas and all that stuff here
+    def project_loaded(self):
+    
+        # determine the current state of each picture and handle accordingly
+        for pic_num in range(0, self.communicator.image_store.picture_count):
+            
+            pic = self.communicator.image_store.get_picture(pic_num)
+            
+            for crop_num in range(1, pic.num_crops()):
+                # get crop
+                crop = pic.get_crop(crop_num)
+                
+                # insert into tree
+                if crop_num == 1:
+                    self.insert_in_tree(crop.name, pic_num, crop_num, False)
+                    if crop.available == True:
+                        self.tree_store[pic_num][0] = \
+                            '<span foreground="#000000"><b>' + crop.name + '</b></span>'
+                else:
+                    self.insert_in_tree(crop.name, pic_num, crop_num, True)
+                
+                # insert into queue?
+                if crop.inqueue == True:
+                    crop.inqueue = False
+                    self.add_to_queue(crop.name, pic_num, crop_num)
+                
+                # update the progress
+                if crop.size > 0:
+                    if crop_num == 1:
+                        #it's the parent/thumbnail, just do it
+                        self.tree_store[pic_num][3] = str(crop.get_percent_complete()) + "%"
+                    else:
+                        #it's a child, cycle through the array to find it
+                        parent = self.tree_store[pic_num].iter
+                        n=0
+                        childiter = self.tree_store.iter_nth_child(parent, n)
+                        while (self.tree_store.get_value(childiter, 2) != crop_num):
+                            n += 1
+                            childiter = self.tree_store.iter_nth_child(parent, n)
+                        self.tree_store.set_value(childiter, 3, str(crop.get_percent_complete()) + "%")
     
     def _quit(self):
         """exit the program"""
@@ -795,6 +934,9 @@ class ImageStation:
         self.insert_in_tree(crop_name, picture_num, crop_num, True)
         self.add_to_queue(crop_name, picture_num, crop_num)
         
+    def _handle_info_received(self, picture_num, gps_x, gps_y, pan, tilt, yaw, pitch, roll):
+        print "info received, gps_x: %f, gps_y: %f" % (gps_x, gps_y)
+    
     def _handle_size_calculated(self, picture_num, crop_num, size):
     	print "picture %d, crop %d has size %d" % (picture_num, crop_num, size)
     	self.queue_changed()

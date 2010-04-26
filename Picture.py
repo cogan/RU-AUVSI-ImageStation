@@ -27,6 +27,12 @@ class Picture(object):
         #return the number of the crop added
         return len(self.crop_list)-1
         
+    def get_crop(self, crop_num):
+        return self.crop_list[crop_num]
+        
+    def num_crops(self):
+        return len(self.crop_list)
+    
     def get_latitude(self):
         return self._latitude
     
