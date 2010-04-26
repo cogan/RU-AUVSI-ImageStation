@@ -2,9 +2,14 @@
 
 #****
 #TODO:
-# get pictures for buttons and up/down arrow
-# get new pictures for 'dl to flc' and 'generate crop'
+# __critical__
 # get new/save/load working
+# finish storing picture attributes
+# get gps coords
+# get orientation
+#
+# __medium__
+# redownload image feature
 #****
 
 #import required modules

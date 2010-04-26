@@ -152,6 +152,13 @@ class ImageStation:
         self.list_view.append_column(column2)
         
         #*
+        #* Set up play/pause button
+        #*
+        
+        self.play_pause = self.widgets.get_widget("play_pause")
+        self.paused = False
+        
+        #*
         #* Set up ImageTree_Menu
         #*
         
@@ -234,6 +241,8 @@ class ImageStation:
         image_queue_dic = { "on_image_queue_key_press_event" : self.image_queue_key_press_event, \
                 "on_image_queue_drag_end" : self.image_queue_drag_end }
         
+        button_dic = { "on_play_pause_clicked" : self.play_pause_clicked }
+        
         drawing_dic = { "on_drawing_area_expose_event" : self.drawing_area_expose_event, \
                 "on_drawing_area_button_press_event" : self.drawing_area_button_press_event, \
                 "on_drawing_area_button_release_event" : self.drawing_area_button_release_event, \
@@ -251,6 +260,7 @@ class ImageStation:
         self.widgets.signal_autoconnect(chooser_dic)
         self.widgets.signal_autoconnect(image_tree_dic)
         self.widgets.signal_autoconnect(image_queue_dic)
+        self.widgets.signal_autoconnect(button_dic)
         self.widgets.signal_autoconnect(drawing_dic)
         self.widgets.signal_autoconnect(picture_info_dic)
         self.widgets.signal_autoconnect(general_dic)
@@ -440,6 +450,17 @@ class ImageStation:
         self.queue_changed()
 
     #*
+    #* Button Events
+    #*
+
+    def play_pause_clicked(self, widget, data=None):
+        if self.paused == True:
+            self.paused = False
+            self.queue_changed()
+        else:
+            self.paused = True
+
+    #*
     #* Drawing Area events
     #*
 
@@ -618,7 +639,9 @@ class ImageStation:
             #if there are items in queue send info to model
             pic_num = self.list_store[0][1]
             crop_num = self.list_store[0][2]
-            self.communicator.download_image(picture_num=pic_num, crop_num=crop_num)
+            if not self.paused == True:
+                self.communicator.download_image(picture_num=pic_num, crop_num=crop_num)
+
         except IndexError as e:
             #nothing on the queue
             pass
@@ -630,12 +653,13 @@ class ImageStation:
             self.cd_pic_num = pic_num
             try:
                 path = self.communicator.image_store.get_crop(pic_num, crop_num).path
-                self.pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(path, 800, 600)
+                self.pixbuf = gtk.gdk.pixbuf_new_from_file(path)
                 w = self.pixbuf.get_width()
                 h = self.pixbuf.get_height()
                 #draw the image
                 self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
                                                     0, 0, 0, 0, w, h)
+                self.drawing_area.window.resize(w, h)
             except glib.GError as e:
                 print "picture " + str(pic_num) + " crop " + str(crop_num) + \
                     " is corrupt!"
@@ -679,7 +703,7 @@ class ImageStation:
             self.xa = self.x_end
             self.ya = self.y_end
             self.xb = self.xa + abs(self.box_width)
-            self.yb = self.ya + abs(self.box_width)
+            self.yb = self.ya + abs(self.box_height)
             widget.window.draw_rectangle(self.gc, False, \
                         self.xa, self.ya, \
                         abs(self.box_width), abs(self.box_height))
@@ -689,7 +713,7 @@ class ImageStation:
             self.xa = self.x_begin + self.box_width
             self.ya = self.y_begin
             self.xb = self.xa + abs(self.box_width)
-            self.yb = self.ya + abs(self.box_width)    
+            self.yb = self.ya + abs(self.box_height)    
             widget.window.draw_rectangle(self.gc, False, \
                         self.xa, self.ya, \
                         abs(self.box_width), abs(self.box_height))
@@ -699,7 +723,7 @@ class ImageStation:
             self.xa = self.x_begin
             self.ya = self.y_begin + self.box_height
             self.xb = self.xa + abs(self.box_width)
-            self.yb = self.ya + abs(self.box_width)    
+            self.yb = self.ya + abs(self.box_height)    
             widget.window.draw_rectangle(self.gc, False, \
                         self.xa, self.ya, \
                         abs(self.box_width), abs(self.box_height))
@@ -709,7 +733,7 @@ class ImageStation:
             self.xa = self.x_begin
             self.ya = self.y_begin
             self.xb = self.xa + abs(self.box_width)
-            self.yb = self.ya + abs(self.box_width)  
+            self.yb = self.ya + abs(self.box_height)  
             widget.window.draw_rectangle(self.gc, False, \
                         self.xa, self.ya, \
                         abs(self.box_width), abs(self.box_height))

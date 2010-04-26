@@ -138,6 +138,7 @@
             <child>
               <widget class="GtkToolButton" id="tool_new">
                 <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">New</property>
                 <property name="stock_id">gtk-new</property>
                 <signal name="clicked" handler="on_tool_new_clicked"/>
               </widget>
@@ -149,6 +150,7 @@
             <child>
               <widget class="GtkToolButton" id="tool_open">
                 <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">Open</property>
                 <property name="stock_id">gtk-open</property>
                 <signal name="clicked" handler="on_tool_open_clicked"/>
               </widget>
@@ -160,6 +162,7 @@
             <child>
               <widget class="GtkToolButton" id="tool_save">
                 <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">Save</property>
                 <property name="stock_id">gtk-save</property>
                 <signal name="clicked" handler="on_tool_save_clicked"/>
               </widget>
@@ -179,6 +182,7 @@
             <child>
               <widget class="GtkToolButton" id="tool_dl2flc">
                 <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">Download to FLC</property>
                 <property name="stock_id">gtk-goto-bottom</property>
                 <signal name="clicked" handler="on_tool_dl2flc_clicked"/>
               </widget>
@@ -190,6 +194,7 @@
             <child>
               <widget class="GtkToolButton" id="tool_gen_crop">
                 <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">Generate Crop</property>
                 <property name="stock_id">gtk-fullscreen</property>
                 <signal name="clicked" handler="on_tool_gen_crop_clicked"/>
               </widget>
@@ -215,8 +220,10 @@
                 <property name="orientation">vertical</property>
                 <child>
                   <widget class="GtkScrolledWindow" id="scrolledwindow1">
+                    <property name="height_request">426</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="border_width">5</property>
                     <property name="hscrollbar_policy">automatic</property>
                     <property name="vscrollbar_policy">automatic</property>
                     <child>
@@ -228,13 +235,17 @@
                     </child>
                   </widget>
                   <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
                   <widget class="GtkScrolledWindow" id="scrolledwindow2">
+                    <property name="height_request">200</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="border_width">5</property>
                     <property name="hscrollbar_policy">automatic</property>
                     <property name="vscrollbar_policy">automatic</property>
                     <child>
@@ -248,7 +259,67 @@
                     </child>
                   </widget>
                   <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
                     <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkHBox" id="hbox4">
+                    <property name="visible">True</property>
+                    <child>
+                      <widget class="GtkLabel" id="label1">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">
+</property>
+                      </widget>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkButton" id="play_pause">
+                        <property name="width_request">70</property>
+                        <property name="height_request">50</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <signal name="clicked" handler="on_play_pause_clicked"/>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label7">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">
+</property>
+                      </widget>
+                      <packing>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkLabel" id="label8">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">
+</property>
+                  </widget>
+                  <packing>
+                    <property name="position">3</property>
                   </packing>
                 </child>
               </widget>

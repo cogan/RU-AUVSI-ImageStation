@@ -31,7 +31,8 @@ class SerialInterface(Interface):
         # "take_picture" : "CPT"
         # "resume_search" : ""
         # "lock_target" : "",
-        # "download_to_flc" : "FLC"
+        # "acknowledge download_to_flc" : "FLC"
+        # "download to FLC complete" : "FLD"
         # "generate_crop" : "CRP"
         # "request_info" : "INF"
         # "request_size" : "PSZ"
@@ -86,7 +87,8 @@ class SerialInterface(Interface):
         if self.enabled == True:
             try:
                 msg_to_send = self.encoder.encode("FLC")
-                return self.tx_rx_decode(msg_to_send)
+                self.tx_rx_decode(msg_to_send)
+                return self.rx_decode()
             except InterfaceError as e:
                 raise InterfaceError(e.value)
         else:
@@ -327,6 +329,34 @@ class SerialInterface(Interface):
                     print "returned args array: %s" % (repr(self.decoder.decode_bin(response2)),)
                     ### /DEBUGGING ###
                     return self.decoder.decode_bin(response2)
+                except DecodeError as e:
+                    attempts += 1
+                    error_msg = e.value
+                    #flush the serial line
+            else: #timeout
+                attempts += 1
+                error_msg = "waiting for response timed out"
+                #flush the serial line
+                
+        # attempts > 3, failure
+        raise InterfaceError(error_msg)
+        
+    def rx_decode(self):
+        """recieve a response and decode it."""
+        print "in rx_decode"
+        attempts = 0
+        MAX_ATTEMPTS = 999
+        while (attempts < MAX_ATTEMPTS):
+            response = self.ser.readline()
+            if response:
+                ### DEBUGGING ###
+                print "received msg: %s" % (response,)
+                ### /DEBUGGING ###
+                try:
+                    ### DEBUGGING ###
+                    print "returned args array: %s" % (self.decoder.decode(response),)
+                    ### /DEBUGGING ###
+                    return self.decoder.decode(response)
                 except DecodeError as e:
                     attempts += 1
                     error_msg = e.value

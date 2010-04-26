@@ -28,11 +28,11 @@ class Communicator(Subject):
         
         #storage of pictures
         self.image_store = ImageStore()
-        self.image_store.set_project_path("/home/cogan/Desktop/ImageStationProject/")
+        self.image_store.set_project_path(os.path.expanduser("~/Desktop/ImageStationProject/"))
         
         #set default interface
-        #self.interface = SerialInterface("/dev/ttyUSB0", 9600)
-        self.interface = DebugInterface()
+        self.interface = SerialInterface("/dev/ttyUSB0", 9600)
+        #self.interface = DebugInterface()
 
     def set_interface(self, interface, **kwargs):
         """sets the interface used to communicate with the plane"""
@@ -308,9 +308,15 @@ class Communicator(Subject):
                     # all the info relevant to the picture (i.e. plane angles,
                     # camera angles, and gps info at the time the pic was taken
                     if crop_num == 1:
-                        #TODO something = self.interface.request_info(picture_num)
+                         (gpsx_str, gpsy_str, pan_str, tilt_str, \
+                            yaw_str, pitch_str, roll_str) = \
+                            self.interface.request_info(picture_num)
                         # give off a notification
-                        pass
+                        #TODO: fix this
+                        #self.notify("SIZE_CALCULATED", \
+                       # 		picture_num=picture_num, \
+                       # 		crop_num=crop_num, \
+                       # 		size=crop_size)
                         
                     print "requesting size of picture %d, crop %d" % (picture_num, crop_num)
                     
