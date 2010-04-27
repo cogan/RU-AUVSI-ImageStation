@@ -42,6 +42,14 @@ class Interface:
     def download_image(self, picture_num, crop_num, segment_num):
         """download a segment of an image."""
         abstract
+    
+    def camera_zoom_in(self, increment):
+        """have the camera zoom in."""
+        abstract
+
+    def camera_zoom_out(self, increment):
+        """have the camera zoom out."""
+        abstract
         
     def camera_pan_left(self, increment):
         """have the camera pan left."""

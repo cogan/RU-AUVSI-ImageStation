@@ -54,7 +54,15 @@ class DebugInterface(Interface):
         """download a segment of an image"""
         time.sleep(.01)
         return ["",]
-        
+    
+    def camera_zoom_in(self, increment):
+        """have the camera zoom in."""
+        return True
+
+    def camera_zoom_out(self, increment):
+        """have the camera zoom out."""
+        return True
+    
     def camera_pan_left(self, increment):
         """have the camera pan left."""
         return True

@@ -27,7 +27,7 @@ class ImageStation:
         # cd = currently displayed
         self.cd_crop_num = -1
         self.cd_pic_num = -1
-        self.saved = False
+        self.saved = True
         
         # Set the model
         self.communicator = communicator
@@ -59,10 +59,17 @@ class ImageStation:
         self.widgets = gtk.glade.XML("ImageStation.glade")
         
         #*
-        #* Set up File Chooser Dialog
+        #* Get top level window
         #*
         
-        self.save_chooser = self.widgets.get_widget("save_dialog")
+        self.window = self.widgets.get_widget("ImageWindow")
+        self.window.set_title("Image Station")
+        
+        #*
+        #* Set up Dialogs
+        #*
+        
+        self.new_chooser = self.widgets.get_widget("new_dialog")
         self.open_chooser = self.widgets.get_widget("open_dialog")
 
         #*
@@ -222,7 +229,6 @@ class ImageStation:
         file_dic = { "on_file_menu_new_activate" : self.file_menu_new_activate, \
                 "on_file_menu_open_activate" : self.file_menu_open_activate, \
                 "on_file_menu_save_activate" : self.file_menu_save_activate, \
-                "on_file_menu_saveas_activate" : self.file_menu_saveas_activate, \
                 "on_file_menu_quit_activate" : self.file_menu_quit_activate }
                 
         connection_menu_none.connect("activate", self.connection_menu_none_activate)
@@ -237,8 +243,8 @@ class ImageStation:
                 "on_tool_dl2flc_clicked" : self.tool_dl2flc_clicked, \
                 "on_tool_gen_crop_clicked" : self.tool_gen_crop_clicked }
                 
-        chooser_dic = { "on_sd_save_clicked" : self.sd_save_clicked, \
-                "on_sd_cancel_clicked" : self.sd_cancel_clicked, \
+        chooser_dic = { "on_nd_ok_clicked" : self.nd_ok_clicked, \
+                "on_nd_cancel_clicked" : self.nd_cancel_clicked, \
                 "on_od_open_clicked" : self.od_open_clicked, \
                 "on_od_cancel_clicked" : self.od_cancel_clicked }
         
@@ -270,7 +276,8 @@ class ImageStation:
                 "on_picture_alphacolor_entry_focus_out_event" : self.alphacolor_entry_focus_out_event, \
                 "on_picture_alphacolor_entry_key_press_event" : self.alphacolor_entry_key_press_event }
         
-        general_dic = { "on_ImageWindow_destroy" : self.ImageWindow_destroy }
+        general_dic = { "on_ImageWindow_delete_event" : self.image_window_delete_event, \
+                        "on_ImageWindow_destroy" : self.image_window_destroy }
         
         self.widgets.signal_autoconnect(file_dic)
         self.widgets.signal_autoconnect(view_dic)
@@ -289,7 +296,7 @@ class ImageStation:
     
     def file_menu_new_activate(self, widget, data=None):
         """new clicked on file menu."""
-        pass
+        self.new_chooser.show()
     
     def file_menu_open_activate(self, widget, data=None):
         """open clicked on file menu."""
@@ -298,15 +305,12 @@ class ImageStation:
     def file_menu_save_activate(self, widget, data=None):
         """save clicked on file menu."""
         self.communicator.save_project()
-        
-    def file_menu_saveas_activate(self, widget, data=None):
-        """saveas clicked on file menu."""
-        self.save_chooser.show()
+        self.saved = True
     
     def file_menu_quit_activate(self, widget, data=None):
         """quit clicked on file menu."""
         self._quit()
-     
+    
     #*
     #* Connection Events
     #*
@@ -343,7 +347,7 @@ class ImageStation:
     
     def tool_new_clicked(self, widget, data=None):
         """new clicked on toolbar menu."""
-        pass
+        self.new_chooser.show()
         
     def tool_open_clicked(self, widget, data=None):
         """open clicked on the toolbar menu."""
@@ -352,6 +356,7 @@ class ImageStation:
     def tool_save_clicked(self, widget, data=None):
         """save clicked on the toolbar menu."""
         self.communicator.save_project()
+        self.saved = True
         
     def tool_dl2flc_clicked(self, widget, data=None):
         """dl2flc clicked on the toolbar menu."""
@@ -364,29 +369,36 @@ class ImageStation:
     #*
     #* File Chooser Dialog events
     #*
-
-    def sd_save_clicked(self, widget, data=None):
-        """save clicked in file choose dialog."""
-        filename = self.save_chooser.get_filename()
-        self.communicator.save_project(filename)
-        self.save_chooser.destroy()
     
-    def sd_cancel_clicked(self, widget, data=None):
+    def nd_ok_clicked(self, widget, data=None):
+        """save clicked in file choose dialog."""
+        filename = self.new_chooser.get_filename()
+        self.communicator.new_project(filename)
+        self.new_chooser.hide()
+        self.project_loaded()
+    
+    def nd_cancel_clicked(self, widget, data=None):
         """cancel clicked in file choose dialog."""
-        print "cancel clicked"
-        self.save_chooser.destroy()
+        self.new_chooser.hide()
     
     def od_open_clicked(self, widget, data=None):
         """save clicked in file choose dialog."""
         filename = self.open_chooser.get_filename()
         if (self.communicator.load_project(filename)):
-            self.open_chooser.destroy()
+            self.open_chooser.hide()
         self.project_loaded()
         
     def od_cancel_clicked(self, widget, data=None):
         """cancel clicked in file choose dialog."""
-        print "cancel clicked"
-        self.open_chooser.destroy()
+        self.open_chooser.hide()
+        
+    def sd_yes_clicked(self, widget, data=None):
+        """cancel clicked on "are you sure you want to save?" dialog"""
+        return True
+        
+    def sd_cancel_clicked(self, widget, data=None):
+        """cancel clicked in file choose dialog."""
+        self.open_chooser.hide()
     
     #*
     #* Image Tree events
@@ -640,8 +652,24 @@ class ImageStation:
     #*
     #* General events
     #*
-        
-    def ImageWindow_destroy(self, widget, data=None):
+    
+    def image_window_delete_event(self, widget, data=None):
+        if (self.saved == False):
+            dialog = gtk.MessageDialog(self.window, gtk.DIALOG_MODAL, \
+            gtk.MESSAGE_INFO, gtk.BUTTONS_YES_NO, \
+            "The current project has not been saved!")
+            dialog.format_secondary_text("Are you sure you want to quit without saving?")
+            
+            dialog.set_title(":(")
+
+            response = dialog.run()
+            dialog.destroy()
+            if response == gtk.RESPONSE_YES:
+                return False
+            else:
+                return True
+                
+    def image_window_destroy(self, widget, data=None):
         """window was destroyed, exit the program."""
         self._quit()
 
@@ -650,7 +678,19 @@ class ImageStation:
     #*
     
     def project_loaded(self):
-    
+        # clear the current treeview and listview
+        while 1:
+            iters = self.tree_store.get_iter_first()
+            if not iters:
+                break
+            self.tree_store.remove(iters)
+        
+        while 1:
+            iters = self.list_store.get_iter_first()
+            if not iters:
+                break
+            self.list_store.remove(iters)
+        
         # determine the current state of each picture and handle accordingly
         for pic_num in range(0, self.communicator.image_store.picture_count):
             
@@ -688,6 +728,12 @@ class ImageStation:
                             n += 1
                             childiter = self.tree_store.iter_nth_child(parent, n)
                         self.tree_store.set_value(childiter, 3, str(crop.get_percent_complete()) + "%")
+    
+        # set the title of the window to be the project path
+        self.window.set_title("Image Station - " + \
+            self.communicator.image_store.project_path)
+    
+        self.saved = True
     
     def _quit(self):
         """exit the program"""
@@ -894,6 +940,7 @@ class ImageStation:
         try:
             function_to_call = self.update_dic[update]
             function_to_call(**kwargs)
+            self.saved = False
         except KeyError as e:
             pass
 

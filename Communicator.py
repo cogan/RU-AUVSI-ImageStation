@@ -28,7 +28,6 @@ class Communicator(Subject):
         
         #storage of pictures
         self.image_store = ImageStore()
-        self.image_store.set_project_path(os.path.expanduser("~/Desktop/ImageStationProject/"))
         
         #set default interface
         #self.interface = SerialInterface("/dev/ttyUSB0", 9600)
@@ -46,16 +45,27 @@ class Communicator(Subject):
     #*
     #* New/Save/Load functions
     #*
-
+    
+    def new_project(self, path):
+        # create the project in the filesystem
+        os.mkdir(path)
+        if not (path[-1] == '/'):
+            path = path + '/'
+        open(path + 'imagestore.obj', 'w')
+        open(path + 'save_file.isp', 'w')
+        
+        # initialize the imagestore
+        self.image_store = ImageStore()
+        self.save_project(path)
+        self.image_store.set_project_path(path)
+        
     def save_project(self, path=None):
         if not path:
             path = self.image_store.project_path
         file_handler = open(path + 'imagestore.obj', 'w')
         pickle.dump(self.image_store, file_handler)
         
-    def load_project(self, path=None):
-        if not path:
-            return False
+    def load_project(self, path):
         if not (path[-13:] == "save_file.isp"):
             print "invalid save file"
             return False
@@ -457,7 +467,7 @@ class Communicator(Subject):
         
         #for notational convenience
         increment = kwargs['increment']
-        print "Communicator sending request to zoom in"
+        print "Communicator sending request to zoom out"
         
         try:
             self.interface.camera_zoom_out(increment)

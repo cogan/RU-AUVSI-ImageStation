@@ -3,7 +3,6 @@
 #****
 #TODO:
 # __critical__
-# get new/save/load working
 # finish storing picture attributes
 # get gps coords
 # get orientation
@@ -70,6 +69,7 @@ class CameraControl:
         #*
         
         self.window = self.widgets.get_widget("camera_window")
+        self.window.set_title("Camera Control")
         
         #*
         #* Set up video check menu item

@@ -40,7 +40,15 @@ class NoneInterface(Interface):
     def download_segment(self, picture_num, crop_num, segment_num): 
         """download a segment of an image"""
         raise InterfaceError("no interface selected")
-        
+    
+    def camera_zoom_in(self, increment):
+        """have the camera zoom in."""
+        raise InterfaceError("no interface selected")
+
+    def camera_zoom_out(self, increment):
+        """have the camera zoom out."""
+        raise InterfaceError("no interface selected")
+    
     def camera_pan_left(self, increment):
         """have the camera pan left."""
         raise InterfaceError("no interface selected")
