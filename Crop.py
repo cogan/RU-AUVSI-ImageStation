@@ -36,11 +36,17 @@ class Crop:
         return math.ceil(float(self.size)/float(self.segment_size))
         
     def save_segment(self, segment_data, segment_num):
-        #save the data
+        
+        #make sure the file exists
         fout = open(self.path, 'a')
+        fout.close()
+        
+        #save the data (you can't use seek with 'a')
+        fout = open(self.path, 'r+')
         fout.seek(segment_num * self.segment_size)
         fout.write(segment_data)
-        fout.close
+        fout.truncate(fout.tell())
+        fout.close()
         
         #update info
         self.segments_downloaded = self.segments_downloaded + 1;

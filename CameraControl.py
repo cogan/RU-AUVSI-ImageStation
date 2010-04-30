@@ -3,9 +3,7 @@
 #****
 #TODO:
 # __critical__
-# finish storing picture attributes
-# get gps coords
-# get orientation
+# calculate gps and orientation
 #
 # __medium__
 # redownload image feature

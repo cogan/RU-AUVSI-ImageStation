@@ -16,6 +16,14 @@ class Picture(object):
         self._alphacolor = "unknown"
         self._color = "unknown"
         
+        # "intermediate" attributes
+#        self._gpsx = 0.0
+#        self._gpsy = 0.0
+#        self._altitude = 0.0
+#        self._pan = 0.0
+        
+        
+        
         # various crops of pictures
         # we want to start with index 1, so we put an dud in crop_list[0]
         self.crop_list = [0]
