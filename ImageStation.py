@@ -212,6 +212,7 @@ class ImageStation:
         self.picture_color = self.widgets.get_widget("picture_color_entry")
         self.picture_alpha = self.widgets.get_widget("picture_alpha_entry")
         self.picture_alphacolor = self.widgets.get_widget("picture_alphacolor_entry")
+        self.picture_orientation = self.widgets.get_widget("picture_orientation_entry")
         self.picture_longitude = self.widgets.get_widget("picture_long_entry")
         self.picture_latitude = self.widgets.get_widget("picture_lat_entry")
         
@@ -219,6 +220,7 @@ class ImageStation:
         self.picture_color.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
         self.picture_alpha.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
         self.picture_alphacolor.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+        self.picture_orientation.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
         self.picture_longitude.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
         self.picture_latitude.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
         
