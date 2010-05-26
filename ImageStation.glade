@@ -433,9 +433,11 @@
                                     </child>
                                     <child>
                                       <widget class="GtkEntry" id="picture_shape_entry">
+                                        <property name="width_request">80</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="events">GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK</property>
+                                        <property name="editable">False</property>
                                         <property name="has_frame">False</property>
                                         <property name="invisible_char">&#x25CF;</property>
                                         <signal name="button_press_event" handler="on_picture_shape_entry_button_press_event"/>
@@ -444,6 +446,7 @@
                                       </widget>
                                       <packing>
                                         <property name="expand">False</property>
+                                        <property name="fill">False</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
@@ -470,8 +473,10 @@
                                     </child>
                                     <child>
                                       <widget class="GtkEntry" id="picture_color_entry">
+                                        <property name="width_request">80</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <property name="editable">False</property>
                                         <property name="has_frame">False</property>
                                         <property name="invisible_char">&#x25CF;</property>
                                         <signal name="button_press_event" handler="on_picture_color_entry_button_press_event"/>
@@ -506,8 +511,10 @@
                                     </child>
                                     <child>
                                       <widget class="GtkEntry" id="picture_alpha_entry">
+                                        <property name="width_request">80</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <property name="editable">False</property>
                                         <property name="has_frame">False</property>
                                         <property name="invisible_char">&#x25CF;</property>
                                         <signal name="button_press_event" handler="on_picture_alpha_entry_button_press_event"/>
@@ -542,8 +549,10 @@
                                     </child>
                                     <child>
                                       <widget class="GtkEntry" id="picture_alphacolor_entry">
+                                        <property name="width_request">80</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <property name="editable">False</property>
                                         <property name="has_frame">False</property>
                                         <property name="invisible_char">&#x25CF;</property>
                                         <signal name="button_press_event" handler="on_picture_alphacolor_entry_button_press_event"/>
@@ -578,13 +587,16 @@
                                     </child>
                                     <child>
                                       <widget class="GtkEntry" id="picture_orientation_entry">
+                                        <property name="width_request">80</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <property name="editable">False</property>
                                         <property name="has_frame">False</property>
                                         <property name="invisible_char">&#x25CF;</property>
                                       </widget>
                                       <packing>
                                         <property name="expand">False</property>
+                                        <property name="fill">False</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
@@ -612,24 +624,25 @@
                                     <child>
                                       <widget class="GtkLabel" id="latitude">
                                         <property name="visible">True</property>
+                                        <property name="xalign">0</property>
                                         <property name="label" translatable="yes">&lt;b&gt;latitude:&lt;/b&gt;</property>
                                         <property name="use_markup">True</property>
                                       </widget>
                                       <packing>
-                                        <property name="fill">False</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
                                     <child>
                                       <widget class="GtkEntry" id="picture_lat_entry">
-                                        <property name="width_request">100</property>
+                                        <property name="width_request">80</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <property name="editable">False</property>
                                         <property name="has_frame">False</property>
                                         <property name="invisible_char">&#x25CF;</property>
                                       </widget>
                                       <packing>
-                                        <property name="fill">False</property>
+                                        <property name="expand">False</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
@@ -646,24 +659,25 @@
                                     <child>
                                       <widget class="GtkLabel" id="label11">
                                         <property name="visible">True</property>
+                                        <property name="xalign">0</property>
                                         <property name="label" translatable="yes">&lt;b&gt;longitude:&lt;/b&gt;</property>
                                         <property name="use_markup">True</property>
                                       </widget>
                                       <packing>
-                                        <property name="fill">False</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
                                     <child>
                                       <widget class="GtkEntry" id="picture_long_entry">
-                                        <property name="width_request">100</property>
+                                        <property name="width_request">80</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <property name="editable">False</property>
                                         <property name="has_frame">False</property>
                                         <property name="invisible_char">&#x25CF;</property>
                                       </widget>
                                       <packing>
-                                        <property name="fill">False</property>
+                                        <property name="expand">False</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
@@ -691,24 +705,22 @@
                                     <child>
                                       <widget class="GtkLabel" id="label12">
                                         <property name="visible">True</property>
-                                        <property name="label" translatable="yes">&lt;b&gt;longitude:&lt;/b&gt;</property>
+                                        <property name="xalign">0</property>
+                                        <property name="label" translatable="yes">&lt;b&gt;include in file?&lt;/b&gt;</property>
                                         <property name="use_markup">True</property>
                                       </widget>
                                       <packing>
-                                        <property name="fill">False</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
                                     <child>
-                                      <widget class="GtkEntry" id="picture_long_entry1">
-                                        <property name="width_request">100</property>
+                                      <widget class="GtkCheckButton" id="include_target">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="has_frame">False</property>
-                                        <property name="invisible_char">&#x25CF;</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="draw_indicator">True</property>
                                       </widget>
                                       <packing>
-                                        <property name="fill">False</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
@@ -720,6 +732,15 @@
                                   </packing>
                                 </child>
                                 <child>
+                                  <widget class="GtkLabel" id="target_number">
+                                    <property name="visible">True</property>
+                                    <property name="xalign">0</property>
+                                  </widget>
+                                  <packing>
+                                    <property name="position">11</property>
+                                  </packing>
+                                </child>
+                                <child>
                                   <widget class="GtkLabel" id="spacer6">
                                     <property name="height_request">30</property>
                                     <property name="visible">True</property>
@@ -727,7 +748,7 @@
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">False</property>
-                                    <property name="position">11</property>
+                                    <property name="position">12</property>
                                   </packing>
                                 </child>
                               </widget>
