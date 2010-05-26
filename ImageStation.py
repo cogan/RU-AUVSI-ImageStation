@@ -38,6 +38,10 @@ class ImageStation:
         # Configure the GUI with Glade
         self.initialize_gui()
         
+        #debugging load
+        self.communicator.load_project('/home/cogan/Desktop/ImageStationProject/save_file.isp')
+        self.project_loaded()
+        
         # Configure update handler
         self.update_dic = {"PICTURE_TAKEN" : self._handle_picture_taken, \
             "SEARCH_RESUMED" : self._handle_search_resumed, \
@@ -206,7 +210,6 @@ class ImageStation:
         #* Set up Picture Info Box
         #*
         
-        self.picture_info_box = self.widgets.get_widget("picture_info_box")
         self.picture_name = self.widgets.get_widget("picture_name_label")
         self.picture_shape = self.widgets.get_widget("picture_shape_entry")
         self.picture_color = self.widgets.get_widget("picture_color_entry")
@@ -224,6 +227,8 @@ class ImageStation:
         self.picture_longitude.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
         self.picture_latitude.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
         
+        self.fixed1 = self.widgets.get_widget("fixed1")
+        
         #*
         #* Connect events
         #*
@@ -238,6 +243,8 @@ class ImageStation:
         connection_menu_debug.connect("activate", self.connection_menu_debug_activate)
             
         view_dic = { "on_view_menu_cc_activate" : self.view_menu_cc_activate }
+            
+        help_dic = { "on_help_menu_about_activate" : self.help_menu_about_activate }
             
         tool_dic = { "on_tool_new_clicked" : self.tool_new_clicked, \
                 "on_tool_open_clicked" : self.tool_open_clicked, \
@@ -283,6 +290,7 @@ class ImageStation:
         
         self.widgets.signal_autoconnect(file_dic)
         self.widgets.signal_autoconnect(view_dic)
+        self.widgets.signal_autoconnect(help_dic)
         self.widgets.signal_autoconnect(tool_dic)
         self.widgets.signal_autoconnect(chooser_dic)
         self.widgets.signal_autoconnect(image_tree_dic)
@@ -342,6 +350,22 @@ class ImageStation:
             self.camera_control.window.hide()
         else:
             self.camera_control.window.show()
+            
+    #*
+    #* Help Events
+    #*
+            
+    def help_menu_about_activate(self, widget, data=None):
+        """about clicked on help menu."""
+        print "cmon"
+        button1 = gtk.Button("Press Me!")
+        self.fixed1.put(button1, 0, 0)
+        button1.window.raise_()
+        button1.show()
+        button2 = gtk.Button("Prease Press Me!")
+        self.fixed1.put(button2, 380, 380)
+        button2.show()
+        button2.window.raise_()
 
     #*
     #* Toolbar events
@@ -861,7 +885,6 @@ class ImageStation:
                                                 0, 0, 0, 0, w, h)
         
         # show the picture info and update it
-        self.picture_info_box.show()
         self.update_picture_info(pic_num, crop_num)
 
     def update_picture_info(self, pic_num, crop_num):
@@ -869,7 +892,7 @@ class ImageStation:
         pic = self.communicator.image_store.get_picture(pic_num)
         
         # get the name from the crop
-        self.picture_name.set_markup("<b>" + pic.crop_list[crop_num].name + "</b>")
+        #self.picture_name.set_markup("<b>" + pic.crop_list[crop_num].name + "</b>")
         
         # get the attributes from the picture
         self.picture_shape.set_text(pic.shape)
