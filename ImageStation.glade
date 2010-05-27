@@ -188,6 +188,14 @@
               </packing>
             </child>
             <child>
+              <widget class="GtkSeparatorToolItem" id="separatortoolitem1">
+                <property name="visible">True</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
               <widget class="GtkToolButton" id="tool_gen_crop">
                 <property name="visible">True</property>
                 <property name="tooltip" translatable="yes">Generate Crop</property>
@@ -202,10 +210,31 @@
             <child>
               <widget class="GtkToolButton" id="tool_identify_target">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">toolbutton1</property>
+                <property name="tooltip" translatable="yes">Identify Target</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-dialog-error</property>
                 <signal name="clicked" handler="on_tool_identify_target_clicked"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkSeparatorToolItem" id="separatortoolitem2">
+                <property name="visible">True</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="tool_save_target_info">
+                <property name="visible">True</property>
+                <property name="tooltip" translatable="yes">Save Target Info to File</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-dnd-multiple</property>
+                <signal name="clicked" handler="on_tool_save_target_info_clicked"/>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -349,7 +378,7 @@
                         <property name="hscrollbar_policy">automatic</property>
                         <property name="vscrollbar_policy">automatic</property>
                         <child>
-                          <widget class="GtkViewport" id="viewport1">
+                          <widget class="GtkViewport" id="image_viewport">
                             <property name="visible">True</property>
                             <property name="resize_mode">queue</property>
                             <property name="hadjustment">0 0 1 0.10000000000000001 0.90000000000000002 1</property>
@@ -652,7 +681,7 @@
                                     </child>
                                     <child>
                                       <widget class="GtkEntry" id="picture_lat_entry">
-                                        <property name="width_request">80</property>
+                                        <property name="width_request">90</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="editable">False</property>
@@ -687,7 +716,7 @@
                                     </child>
                                     <child>
                                       <widget class="GtkEntry" id="picture_long_entry">
-                                        <property name="width_request">80</property>
+                                        <property name="width_request">90</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="editable">False</property>
@@ -739,6 +768,7 @@
                                         <property name="receives_default">False</property>
                                         <property name="xalign">0</property>
                                         <property name="draw_indicator">True</property>
+                                        <signal name="toggled" handler="on_include_target_toggled"/>
                                       </widget>
                                       <packing>
                                         <property name="expand">False</property>
@@ -870,14 +900,6 @@
         <property name="label" translatable="yes">add to queue</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_image_tree_menu_add_to_queue_activate"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkMenuItem" id="image_tree_menu_info">
-        <property name="visible">True</property>
-        <property name="label" translatable="yes">info</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="on_image_tree_menu_info_activate"/>
       </widget>
     </child>
   </widget>

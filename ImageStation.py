@@ -32,14 +32,15 @@ class ImageStation:
         # Set the model
         self.communicator = communicator
         
-        # list for tracking which pictures currently have info dialog boxes open
-        self.picture_info_list = []
+        # for tracking the number of identified targets
+        self.num_targets = 0
+        self.user_toggled = True
         
         # Configure the GUI with Glade
         self.initialize_gui()
         
         #debugging load
-        self.communicator.load_project('/home/cogan/Desktop/ImageStationProject/save_file.isp')
+        self.communicator.load_project('/home/cogan/Desktop/newISP/save_file.isp')
         self.project_loaded()
         
         # Configure update handler
@@ -209,6 +210,10 @@ class ImageStation:
         self.xb = 0
         self.yb = 0
         
+        # disable image window to start
+        self.image_viewport = self.widgets.get_widget("image_viewport")
+        self.image_viewport.set_sensitive(False)
+        
         #*
         #* Set up Target
         #*
@@ -232,6 +237,9 @@ class ImageStation:
         self.picture_longitude.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
         self.picture_latitude.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
         
+        self.include_target = self.widgets.get_widget("include_target")
+        self.target_number = self.widgets.get_widget("target_number")
+        
         #*
         #* Connect events
         #*
@@ -254,7 +262,8 @@ class ImageStation:
                 "on_tool_save_clicked" : self.tool_save_clicked, \
                 "on_tool_dl2flc_clicked" : self.tool_dl2flc_clicked, \
                 "on_tool_gen_crop_clicked" : self.tool_gen_crop_clicked, \
-                "on_tool_identify_target_clicked" : self.tool_identify_target_clicked }
+                "on_tool_identify_target_clicked" : self.tool_identify_target_clicked, \
+                "on_tool_save_target_info_clicked" : self.tool_save_target_info_clicked }
                 
         chooser_dic = { "on_nd_ok_clicked" : self.nd_ok_clicked, \
                 "on_nd_cancel_clicked" : self.nd_cancel_clicked, \
@@ -263,8 +272,7 @@ class ImageStation:
         
         image_tree_dic = { "on_image_tree_button_press_event" : self.image_tree_button_press_event, \
                 "on_image_tree_menu_display_activate" : self.image_tree_menu_display_activate, \
-                "on_image_tree_menu_add_to_queue_activate" : self.image_tree_menu_add_to_queue_activate, \
-                "on_image_tree_menu_info_activate" : self.image_tree_menu_info_activate }
+                "on_image_tree_menu_add_to_queue_activate" : self.image_tree_menu_add_to_queue_activate }
         
         image_queue_dic = { "on_image_queue_key_press_event" : self.image_queue_key_press_event, \
                 "on_image_queue_drag_end" : self.image_queue_drag_end }
@@ -290,7 +298,8 @@ class ImageStation:
                 "on_picture_alphacolor_entry_key_press_event" : self.alphacolor_entry_key_press_event, \
                 "on_picture_orientation_entry_button_press_event" : self.orientation_entry_button_press_event, \
                 "on_picture_orientation_entry_focus_out_event" : self.orientation_entry_focus_out_event, \
-                "on_picture_orientation_entry_key_press_event" : self.orientation_entry_key_press_event }
+                "on_picture_orientation_entry_key_press_event" : self.orientation_entry_key_press_event, \
+                "on_include_target_toggled" : self.include_target_toggled }
         
         general_dic = { "on_ImageWindow_delete_event" : self.image_window_delete_event, \
                         "on_ImageWindow_destroy" : self.image_window_destroy }
@@ -402,6 +411,10 @@ class ImageStation:
     def tool_identify_target_clicked(self, widget, data=None):
         """identify target clicked on the toolbar menu."""
         self._identify_target()
+        
+    def tool_save_target_info_clicked(self, widget, data=None):
+        """save target info clicked on the toolbar menu."""
+        self._save_target_info()
 
     #*
     #* File Chooser Dialog events
@@ -459,7 +472,7 @@ class ImageStation:
     def image_tree_menu_display_activate(self, widget, data=None):
         """display picture of selected imagetree_menu item."""
         model, treeiter = self.image_tree.get_selection().get_selected()
-
+        self.image_viewport.set_sensitive(True)
         pic_num = int(self.tree_store.get_value(treeiter, 1))
         crop_num = int(self.tree_store.get_value(treeiter, 2))
         self.cd_pic_num = pic_num
@@ -473,44 +486,6 @@ class ImageStation:
         crop_num = int(self.tree_store.get_value(treeiter, 2))
         name = self.communicator.image_store.get_crop(pic_num, crop_num).name
         self.add_to_queue(name, pic_num, crop_num)
-    
-    def image_tree_menu_info_activate(self, widget, data=None):
-        """display the picture info dialog box."""
-        (model, treeiter) = self.image_tree.get_selection().get_selected()
-        pic_num = int(self.tree_store.get_value(treeiter, 1))
-        crop_num = int(self.tree_store.get_value(treeiter, 2))
-        self.display_picture_info(pic_num, crop_num)
-    
-    def display_picture_info(self, pic_num, crop_num):
-        """displays the info for the appropriate picture."""
-        
-        # If the dialog box isn't currently shown, get all the picture
-        # attributes and display them
-        if self.picture_info_list[pic_num] == False:
-            # get picture attributes
-            picture = self.communicator.image_store.get_picture(pic_num)
-            self.picture_info_list[pic_num] = PictureDialog()
-            self.picture_info_list[pic_num].set_picture(picture)
-        
-        # If the dialog box was already displayed, make sure we are displaying
-        # info from the correct crop
-        crop = self.communicator.image_store.get_crop(pic_num, crop_num)
-        self.picture_info_list[pic_num].set_crop(crop)
-        
-        #show the box and set flag
-        self.picture_info_list[pic_num].show()
-        
-    #*
-    #* Picture Info Dialog events
-    #*
-    
-    def pid_save_activate(self, widget, data=None):
-        #TODO: do this
-        print "save"
-        
-    def pid_cancel_activate(self, widget, data=None):
-        #TODO: do this
-        print "cancel"
     
     #*
     #* Image Queue events
@@ -546,9 +521,12 @@ class ImageStation:
     #*
 
     def drawing_area_expose_event(self, widget, event):
-        x, y, width, height = widget.get_allocation()
-        self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
-                                            0, 0, 0, 0, -1, -1)
+        #x, y, width, height = widget.get_allocation()
+        if self.image_viewport.get_property('sensitive') == False:
+            self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
+                                                            0, 0, 0, 0, -1, -1)
+        else:
+            self.redraw_current_image()
                   
     def drawing_area_button_press_event(self, widget, event):
         """button pressed in drawing area"""
@@ -557,24 +535,45 @@ class ImageStation:
                 self.button_pressed = True
                 
                 if self.box_drawn == True:
-                    #clear the screen
-                    self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
-                                                            0, 0, 0, 0, -1, -1)
-                #current coordinates
+                    # clear the screen
+                    self.redraw_current_image()
+                    
+                # current coordinates
                 self.x_begin = int(event.x)
                 self.y_begin = int(event.y)
         
         if self.drawing_area_mode == "IDENTIFY_TARGET":
             if event.button == 1 and self.pixbuf != None:
-                #get pixel coordinates
+                # get pixel coordinates
                 print "x: %d, y: %d" % (int(event.x), int(event.y),)
                 x = int(event.x)
                 y = int(event.y)
                 
-                #TODO: draw on image with cairo
-                self.drawing_area.window.draw_arc(self.gc, False, x, y, 70, 70, 0, 360*64)
-
-
+                # redraw to remove any existing targets
+                self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
+                                                            0, 0, 0, 0, -1, -1)
+                
+                # draw target on image
+                # TODO: make it cooler
+                self.drawing_area.window.draw_arc(self.gc, False, x-10, y-10, 20, 20, 0, 360*64)
+                self.drawing_area.window.draw_arc(self.gc, False, x-20, y-20, 40, 40, 0, 360*64)
+                
+                # create target
+                crop = self.communicator.image_store.get_crop(self.cd_pic_num, \
+                                                    self.cd_crop_num)
+                crop.set_target(x, y)
+                self.update_target_info(self.cd_pic_num, self.cd_crop_num)
+            
+                # go back to generate crop mode
+                self.drawing_area_mode = "GENERATE_CROP_TRANSITION"
+                cross_cursor = gtk.gdk.Cursor(gtk.gdk.CROSS)
+                self.drawing_area.window.set_cursor(cross_cursor)
+            
+            # on right click go back to generate crop mode
+            elif event.button == 3:
+                self.drawing_area_mode = "GENERATE_CROP"
+                cross_cursor = gtk.gdk.Cursor(gtk.gdk.CROSS)
+                self.drawing_area.window.set_cursor(cross_cursor)
                 
 
     def drawing_area_motion_notify_event(self, widget, event):
@@ -601,6 +600,10 @@ class ImageStation:
                 #draw the box
                 self.draw_box(widget, self.x_begin, self.y_begin, \
                                         self.x_end, self.y_end)
+        
+        if self.drawing_area_mode == "GENERATE_CROP_TRANSITION":
+            self.drawing_area_mode = "GENERATE_CROP"
+    
     
     #*
     #* Picture Info Box Events
@@ -619,16 +622,23 @@ class ImageStation:
         """focus lost on shape entry"""
         widget.set_editable(False)
         widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
-        self.communicator.image_store.get_picture(self.cd_pic_num).shape = \
-            widget.get_text()
+        crop = self.communicator.image_store.get_crop(self.cd_pic_num, \
+                                                    self.cd_crop_num)
+        crop.target.shape = widget.get_text()
 
     def shape_entry_key_press_event(self, widget, event, data=None):
         """key press"""
         if event.keyval == 65293:
-            widget.set_editable(False)
-            widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
-            self.communicator.image_store.get_picture(self.cd_pic_num).shape = \
-                widget.get_text()
+            if widget.get_editable() == False:
+                widget.set_editable(True)
+                widget.select_region(0, len(widget.get_text()))
+                widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#FFFFFF"))
+            elif widget.get_editable() == True:
+                widget.set_editable(False)
+                widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+                crop = self.communicator.image_store.get_crop(self.cd_pic_num, \
+                                                        self.cd_crop_num)
+                crop.target.shape = widget.get_text()
                 
     def color_entry_button_press_event(self, widget, event, data=None):
         """picture info entry box double clicked"""
@@ -643,16 +653,23 @@ class ImageStation:
         """focus lost on color entry"""
         widget.set_editable(False)
         widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
-        self.communicator.image_store.get_picture(self.cd_pic_num).color = \
-            widget.get_text()
+        crop = self.communicator.image_store.get_crop(self.cd_pic_num, \
+                                                    self.cd_crop_num)
+        crop.target.color = widget.get_text()
 
     def color_entry_key_press_event(self, widget, event, data=None):
         """key press"""
         if event.keyval == 65293:
-            widget.set_editable(False)
-            widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
-            self.communicator.image_store.get_picture(self.cd_pic_num).color = \
-                widget.get_text()
+            if widget.get_editable() == False:
+                widget.set_editable(True)
+                widget.select_region(0, len(widget.get_text()))
+                widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#FFFFFF"))
+            elif widget.get_editable() == True:
+                widget.set_editable(False)
+                widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+                crop = self.communicator.image_store.get_crop(self.cd_pic_num, \
+                                                        self.cd_crop_num)
+                crop.target.color = widget.get_text()
     
     def alpha_entry_button_press_event(self, widget, event, data=None):
         """picture info entry box double clicked"""
@@ -667,16 +684,23 @@ class ImageStation:
         """focus lost on alpha entry"""
         widget.set_editable(False)
         widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
-        self.communicator.image_store.get_picture(self.cd_pic_num).alpha = \
-            widget.get_text()
+        crop = self.communicator.image_store.get_crop(self.cd_pic_num, \
+                                                    self.cd_crop_num)
+        crop.target.alpha = widget.get_text()
 
     def alpha_entry_key_press_event(self, widget, event, data=None):
         """key press"""
         if event.keyval == 65293:
-            widget.set_editable(False)
-            widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
-            self.communicator.image_store.get_picture(self.cd_pic_num).alpha = \
-                widget.get_text()
+            if widget.get_editable() == False:
+                widget.set_editable(True)
+                widget.select_region(0, len(widget.get_text()))
+                widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#FFFFFF"))
+            elif widget.get_editable() == True:
+                widget.set_editable(False)
+                widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+                crop = self.communicator.image_store.get_crop(self.cd_pic_num, \
+                                                        self.cd_crop_num)
+                crop.target.alpha = widget.get_text()
                 
     def alphacolor_entry_button_press_event(self, widget, event, data=None):
         """picture info entry box double clicked"""
@@ -691,16 +715,23 @@ class ImageStation:
         """focus lost on alphacolor entry"""
         widget.set_editable(False)
         widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
-        self.communicator.image_store.get_picture(self.cd_pic_num).alphacolor = \
-            widget.get_text()
+        crop = self.communicator.image_store.get_crop(self.cd_pic_num, \
+                                                    self.cd_crop_num)
+        crop.target.alphacolor = widget.get_text()
 
     def alphacolor_entry_key_press_event(self, widget, event, data=None):
         """key press"""
         if event.keyval == 65293:
-            widget.set_editable(False)
-            widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
-            self.communicator.image_store.get_picture(self.cd_pic_num).alphacolor = \
-                widget.get_text()
+            if widget.get_editable() == False:
+                widget.set_editable(True)
+                widget.select_region(0, len(widget.get_text()))
+                widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#FFFFFF"))
+            elif widget.get_editable() == True:
+                widget.set_editable(False)
+                widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+                crop = self.communicator.image_store.get_crop(self.cd_pic_num, \
+                                                        self.cd_crop_num)
+                crop.target.alphacolor = widget.get_text()
 
     def orientation_entry_button_press_event(self, widget, event, data=None):
         """picture info entry box double clicked"""
@@ -715,16 +746,44 @@ class ImageStation:
         """focus lost on orientation entry"""
         widget.set_editable(False)
         widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
-        self.communicator.image_store.get_picture(self.cd_pic_num).orientation = \
-            widget.get_text()
+        crop = self.communicator.image_store.get_crop(self.cd_pic_num, \
+                                                    self.cd_crop_num)
+        crop.target.orientation = widget.get_text()
 
     def orientation_entry_key_press_event(self, widget, event, data=None):
         """key press"""
         if event.keyval == 65293:
-            widget.set_editable(False)
-            widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
-            self.communicator.image_store.get_picture(self.cd_pic_num).orientation = \
-                widget.get_text()
+            if widget.get_editable() == False:
+                widget.set_editable(True)
+                widget.select_region(0, len(widget.get_text()))
+                widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#FFFFFF"))
+            elif widget.get_editable() == True:
+                widget.set_editable(False)
+                widget.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse("#E6D6D6"))
+                crop = self.communicator.image_store.get_crop(self.cd_pic_num, \
+                                                        self.cd_crop_num)
+                crop.target.orientation = widget.get_text()
+                
+    def include_target_toggled(self, widget, data=None):
+        """include target button toggled"""
+        print "number of targets before click is %d" % (self.num_targets,)
+        crop = self.communicator.image_store.get_crop(self.cd_pic_num, 
+                                                        self.cd_crop_num)
+        # if toggled on we need to display the target num and update Target
+        if self.include_target.get_active() == True:
+            if self.user_toggled == True:
+                self.num_targets += 1
+                self.target_number.set_text("target 0" + str(self.num_targets))
+                crop.target.included = True
+                crop.target.number = self.num_targets
+        else:
+            if self.user_toggled == True:
+                self.num_targets -= 1
+                self.target_number.set_text("")
+                crop.target.included = False
+                crop.target.number = 0
+       
+        print "number of targets after click is %d" % (self.num_targets,)
 
     #*
     #* General events
@@ -849,8 +908,12 @@ class ImageStation:
         
         #clear the screen
         if self.box_drawn == True:
-            self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
-                                                    0, 0, 0, 0, -1, -1)
+            self.redraw_current_image()
+    
+    def _save_target_info(self):
+        """save all the target info to a file"""
+        #TODO: this
+        print "did NOT save info to file cause this shit isn't done"
     
     #*
     #* Functions related to images
@@ -933,10 +996,15 @@ class ImageStation:
                 self.pixbuf = gtk.gdk.pixbuf_new_from_file(path)
                 w = self.pixbuf.get_width()
                 h = self.pixbuf.get_height()
-                #draw the image
+                
+                # draw the image
                 self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
                                                     0, 0, 0, 0, w, h)
                 self.drawing_area.window.resize(w, h)
+                
+                # render the target and compass
+                self.draw_target(pic_num, crop_num)
+                
             except glib.GError as e:
                 print "picture " + str(pic_num) + " crop " + str(crop_num) + \
                     " is corrupt!"
@@ -951,27 +1019,65 @@ class ImageStation:
                                                 0, 0, 0, 0, w, h)
         
         # show the picture info and update it
-        self.update_picture_info(pic_num, crop_num)
+        self.update_target_info(pic_num, crop_num)
 
-    def update_picture_info(self, pic_num, crop_num):
+    def redraw_current_image(self):
+        self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
+                                                    0, 0, 0, 0, -1, -1)
+        self.draw_target(self.cd_pic_num, self.cd_crop_num)
+
+    def draw_target(self, pic_num, crop_num):
+            crop = self.communicator.image_store.get_crop(pic_num, crop_num)
+            if crop.target != None:
+                x = crop.target.x_coord
+                y = crop.target.y_coord
+                self.drawing_area.window.draw_arc(self.gc, False, x-10, y-10, 20, 20, 0, 360*64)
+                self.drawing_area.window.draw_arc(self.gc, False, x-20, y-20, 40, 40, 0, 360*64)
+
+    def update_target_info(self, pic_num, crop_num):
         """update the fields containing a pictures info"""
-        pic = self.communicator.image_store.get_picture(pic_num)
+        crop = self.communicator.image_store.get_crop(pic_num, crop_num)
         
         # get the attributes from the picture
-        self.picture_shape.set_text(pic.shape)
-        self.picture_color.set_text(pic.color)
-        self.picture_alpha.set_text(pic.alpha)
-        self.picture_alphacolor.set_text(pic.alphacolor)
-        self.picture_orientation.set_text(pic.orientation)
-        self.picture_longitude.set_text(pic.longitude)
-        self.picture_latitude.set_text(pic.latitude)
+        if crop.target != None:
+            self.target_viewport.set_sensitive(True)
+            self.picture_shape.set_text(crop.target.shape)
+            self.picture_color.set_text(crop.target.color)
+            self.picture_alpha.set_text(crop.target.alpha)
+            self.picture_alphacolor.set_text(crop.target.alphacolor)
+            self.picture_orientation.set_text(crop.target.orientation)
+            self.picture_longitude.set_text(crop.target.longitude)
+            self.picture_latitude.set_text(crop.target.latitude)
+            if crop.target.included == True:
+                self.user_toggled = False
+                self.include_target.set_active(True)
+                self.user_toggled = True
+                self.target_number.set_text("target 0" + str(crop.target.number))
+            else:
+                self.user_toggled = False
+                self.include_target.set_active(False)
+                self.user_toggled = True
+                self.target_number.set_text("")
+        else:
+            self.target_viewport.set_sensitive(False)
+            self.picture_shape.set_text("")
+            self.picture_color.set_text("")
+            self.picture_alpha.set_text("")
+            self.picture_alphacolor.set_text("")
+            self.picture_orientation.set_text("")
+            self.picture_longitude.set_text("")
+            self.picture_latitude.set_text("")
+            self.user_toggled = False
+            self.include_target.set_active(False)
+            self.user_toggled = True
+            self.target_number.set_text("")
 
     def draw_box(self, widget, x_begin, y_begin, x_end, y_end):
         self.box_width = self.x_end - self.x_begin
         self.box_height = self.y_end - self.y_begin
         #erase previous box
-        widget.window.draw_pixbuf(self.gc, self.pixbuf, \
-                                                        0, 0, 0, 0, -1, -1)
+        #TODO: this is extremely slow... need to use cairo
+        self.redraw_current_image()
         #box drawn from bottom right to top left
         if ((self.box_width < 0) & (self.box_height < 0)):
             self.xa = self.x_end
@@ -1038,7 +1144,6 @@ class ImageStation:
         picture_name = self.communicator.image_store.get_crop(picture_num, 1).name
         self.insert_in_tree(picture_name, picture_num, 1, False)
         self.add_to_queue(picture_name, picture_num, 1)
-        self.picture_info_list.append(False)
         
     def _handle_search_resumed(self):
         pass

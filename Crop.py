@@ -2,7 +2,7 @@
 
 import os
 import math
-
+from Target import *
 
 # TODO: i think the crop needs to be passed its parent (the picture)
 class Crop:
@@ -77,12 +77,11 @@ class Crop:
         return (real_x, real_y)
     
     def set_target(self, crop_x, crop_y):
-        pass
-        #self.target = Target()
+        self.target = Target()
         
         # need these for rendering the target
-        #self.target.x_coord = crop_x
-        #self.target.y_coord = crop_y
+        self.target.x_coord = crop_x
+        self.target.y_coord = crop_y
         
         # need this stuff for calculating latitude and longitude
         # *** needs pitch, yaw, roll, pan, tilt from picture
@@ -94,4 +93,5 @@ class Crop:
         #                                        crop_x + self.x_offset, 
         #                                        crop_y + self.y_offset)
         
-        #self.target.calculate_gps(???)
+        #TODO: change this to take the required args
+        self.target.calculate_gps()
