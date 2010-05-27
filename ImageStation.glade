@@ -199,6 +199,19 @@
                 <property name="homogeneous">True</property>
               </packing>
             </child>
+            <child>
+              <widget class="GtkToolButton" id="tool_identify_target">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">toolbutton1</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-dialog-error</property>
+                <signal name="clicked" handler="on_tool_identify_target_clicked"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
           </widget>
           <packing>
             <property name="expand">False</property>
@@ -390,15 +403,17 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
+                        <property name="x_options"></property>
                         <property name="y_options"></property>
                       </packing>
                     </child>
                     <child>
                       <widget class="GtkVBox" id="vbox3">
+                        <property name="width_request">220</property>
                         <property name="visible">True</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <widget class="GtkViewport" id="viewport2">
+                          <widget class="GtkViewport" id="target_viewport">
                             <property name="visible">True</property>
                             <property name="resize_mode">queue</property>
                             <child>
@@ -593,6 +608,9 @@
                                         <property name="editable">False</property>
                                         <property name="has_frame">False</property>
                                         <property name="invisible_char">&#x25CF;</property>
+                                        <signal name="button_press_event" handler="on_picture_orientation_entry_button_press_event"/>
+                                        <signal name="key_press_event" handler="on_picture_orientation_entry_key_press_event"/>
+                                        <signal name="focus_out_event" handler="on_picture_orientation_entry_focus_out_event"/>
                                       </widget>
                                       <packing>
                                         <property name="expand">False</property>
@@ -715,12 +733,15 @@
                                     </child>
                                     <child>
                                       <widget class="GtkCheckButton" id="include_target">
+                                        <property name="width_request">80</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">False</property>
+                                        <property name="xalign">0</property>
                                         <property name="draw_indicator">True</property>
                                       </widget>
                                       <packing>
+                                        <property name="expand">False</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
@@ -775,6 +796,7 @@
                         <property name="right_attach">2</property>
                         <property name="top_attach">1</property>
                         <property name="bottom_attach">2</property>
+                        <property name="x_options"></property>
                         <property name="x_padding">15</property>
                       </packing>
                     </child>

@@ -1,15 +1,10 @@
-#Picture.py
-
-from Crop import *
-
 class Picture(object):
-    """contains picture attributes and crop list"""
+    """contains target attributes"""
     
     def __init__(self):
         """constructor"""
         
         # mission relevant attributes
-        # TODO: move these to target class
         self._latitude = "uncalculated"
         self._longitude = "uncalculated"
         self._shape = "unknown"
@@ -17,30 +12,14 @@ class Picture(object):
         self._alphacolor = "unknown"
         self._color = "unknown"
         self._orientation = "unknown"
-        
-        # "intermediate" attributes
-#        self._gpsx = 0.0
-#        self._gpsy = 0.0
-#        self._altitude = 0.0
-#        self._pan = 0.0
-        
-        
-        # various crops of pictures
-        # we want to start with index 1, so we put an dud in crop_list[0]
-        self.crop_list = [0]
-        
-    def add_crop(self):
-        crop_num = len(self.crop_list)
-        self.crop_list.append(Crop(name="crop_" + str(crop_num)))
-        
-        #return the number of the crop added
-        return len(self.crop_list)-1
-        
-    def get_crop(self, crop_num):
-        return self.crop_list[crop_num]
-        
-    def num_crops(self):
-        return len(self.crop_list)
+    
+    def calculate_gps(self):
+        self.set_latitude = "1234.12.12"
+        self.set_longitude = "9876.98.98"
+    
+    #*
+    #* Get and set functions for basic properties
+    #*
     
     def get_latitude(self):
         return self._latitude
