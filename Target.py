@@ -1,10 +1,15 @@
 #Target.py
 
+import os.path
+
 class Target(object):
     """contains target attributes"""
     
-    def __init__(self):
+    def __init__(self, crop):
         """constructor"""
+        
+        # the crop that this target belongs to
+        self.crop = crop
         
         # mission relevant attributes
         self._latitude = "uncalculated"
@@ -21,11 +26,68 @@ class Target(object):
         
         # whether the target should be included
         self._included = False
-        self._number = 0
+        self._number = -1
     
     def calculate_gps(self):
         self.latitude = "1234.12.12"
         self.longitude = "9876.98.98"
+    
+    def format_info(self):
+        """return target info in string format specified by 2010 UAVSI
+        competition rules
+        
+        ex. 01 N30 35 34.123 W075 48 47.123 rectangle red A orange Img01.jpeg
+        ex. 02 S34 00 12.345 E002 01 12.345 square orange 4 yellow pic02.jpeg"""
+        target_str = ""
+        
+        # Field 1:  Target Number, two digits, starting at 01 
+        # and increment by one for each additional target.
+        if self.number < 10:
+            target_str += "0" + str(self.number)
+        else:
+            target_str += str(self.number)
+        target_str += " "
+        
+        # Field 2:  Latitude in the following format, first character N or S, 
+        # two digit degrees (use leading zeros if necessary), followed by space 
+        # two digit minutes, followed by space, two digit seconds followed by 
+        # decimal point and up to 3 digits (thousandths of a second)
+        target_str += self.latitude
+        target_str += " "
+        
+        # Field 3:  Longitude in the following format, first character E or W,
+        # three digit degrees (use leading zeros if necessary), followed by 
+        # space, two digit minutes, followed by space, two digit seconds 
+        # followed by decimal point and up to 3 digits (thousandths of a secon)
+        target_str += self.longitude
+        target_str += " "
+        
+        # Field 4:  Target orientation, up to two characters:  
+        # N, NE, E, SE, S, SW, W, NW
+        target_str += self.orientation
+        target_str += " "
+                
+        # Field 5:  Target shape, list geometric shape as appropriate:
+        target_str += self.shape
+        target_str += " "
+        
+        # Field 6:  Target color, as appropriate.
+        target_str += self.color
+        target_str += " "
+        
+        # Field 7:  Alphanumeric, as appropriate
+        target_str += self.alpha
+        target_str += " "
+        
+        # Field 8:  Alphanumeric color, as appropriate
+        target_str += self.alphacolor
+        target_str += " "
+        
+        # Field 9:  File name of image (include extension)
+        target_str += os.path.basename(self.crop.path)
+        
+        # return the completed string
+        return target_str
     
     #*
     #* Get and set functions for basic properties

@@ -33,8 +33,10 @@ class ImageStation:
         self.communicator = communicator
         
         # for tracking the number of identified targets
-        self.num_targets = 0
+        self.cd_target_num = -1
+        self.target_list = [0]
         self.user_toggled = True
+        self.target_file_name = "RU.txt"
         
         # Configure the GUI with Glade
         self.initialize_gui()
@@ -549,19 +551,31 @@ class ImageStation:
                 x = int(event.x)
                 y = int(event.y)
                 
+                crop = self.communicator.image_store.get_crop(self.cd_pic_num, \
+                                                    self.cd_crop_num)
+
                 # redraw to remove any existing targets
-                self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
+                if self.cd_target_num != -1:
+                    self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
                                                             0, 0, 0, 0, -1, -1)
+                    for i in range(self.cd_target_num, len(self.target_list)-1):
+                        self.target_list[i] = self.target_list[i+1]
+                        self.target_list[i].number = i
                 
+                    self.target_list.pop()
+                    self.target_number.set_text("")
+                    crop.target.included = False
+                    crop.target.number = -1
+                    self.cd_target_num = -1
+                    
                 # draw target on image
                 # TODO: make it cooler
                 self.drawing_area.window.draw_arc(self.gc, False, x-10, y-10, 20, 20, 0, 360*64)
                 self.drawing_area.window.draw_arc(self.gc, False, x-20, y-20, 40, 40, 0, 360*64)
                 
                 # create target
-                crop = self.communicator.image_store.get_crop(self.cd_pic_num, \
-                                                    self.cd_crop_num)
                 crop.set_target(x, y)
+                
                 self.update_target_info(self.cd_pic_num, self.cd_crop_num)
             
                 # go back to generate crop mode
@@ -766,24 +780,32 @@ class ImageStation:
                 
     def include_target_toggled(self, widget, data=None):
         """include target button toggled"""
-        print "number of targets before click is %d" % (self.num_targets,)
+        
         crop = self.communicator.image_store.get_crop(self.cd_pic_num, 
                                                         self.cd_crop_num)
-        # if toggled on we need to display the target num and update Target
+        # if toggled on we need to display the target number
+        # also update the target list and update Target info
         if self.include_target.get_active() == True:
             if self.user_toggled == True:
-                self.num_targets += 1
-                self.target_number.set_text("target 0" + str(self.num_targets))
+                self.target_list.append(crop.target)
+                self.target_number.set_text("target 0" + str(len(self.target_list)-1))
                 crop.target.included = True
-                crop.target.number = self.num_targets
+                crop.target.number = len(self.target_list)-1
+                self.cd_target_num = len(self.target_list)-1
         else:
             if self.user_toggled == True:
-                self.num_targets -= 1
+                # delete the current target from the target list
+                # shift all other targets downward
+                
+                for i in range(self.cd_target_num, len(self.target_list)-1):
+                    self.target_list[i] = self.target_list[i+1]
+                    self.target_list[i].number = i
+                
+                self.target_list.pop()
                 self.target_number.set_text("")
                 crop.target.included = False
-                crop.target.number = 0
-       
-        print "number of targets after click is %d" % (self.num_targets,)
+                crop.target.number = -1
+                self.cd_target_num = -1
 
     #*
     #* General events
@@ -864,7 +886,13 @@ class ImageStation:
                             n += 1
                             childiter = self.tree_store.iter_nth_child(parent, n)
                         self.tree_store.set_value(childiter, 3, str(crop.get_percent_complete()) + "%")
-    
+                        
+                # update the target list
+                if crop.target.included == True:
+                    while len(self.target_list)-1 < crop.target.number:
+                        self.target_list.append(0)
+                    self.target_list[crop.target.number] = crop.target
+
         # set the title of the window to be the project path
         self.window.set_title("Image Station - " + \
             self.communicator.image_store.project_path)
@@ -912,8 +940,18 @@ class ImageStation:
     
     def _save_target_info(self):
         """save all the target info to a file"""
-        #TODO: this
-        print "did NOT save info to file cause this shit isn't done"
+        
+        #make sure the file exists
+        path = self.communicator.image_store.project_path + \
+            self.target_file_name
+        fout = open(path, 'w')
+
+        print str(1)
+        print str(len(self.target_list)-1)
+        for i in range(1, len(self.target_list)):
+            fout.write(self.target_list[i].format_info())
+            fout.write("\n\n")
+        fout.close()
     
     #*
     #* Functions related to images
@@ -1048,16 +1086,21 @@ class ImageStation:
             self.picture_orientation.set_text(crop.target.orientation)
             self.picture_longitude.set_text(crop.target.longitude)
             self.picture_latitude.set_text(crop.target.latitude)
+            
+            print "target number is %d" % (crop.target.number,)
+            
             if crop.target.included == True:
                 self.user_toggled = False
                 self.include_target.set_active(True)
                 self.user_toggled = True
                 self.target_number.set_text("target 0" + str(crop.target.number))
+                self.cd_target_num = crop.target.number
             else:
                 self.user_toggled = False
                 self.include_target.set_active(False)
                 self.user_toggled = True
                 self.target_number.set_text("")
+                self.cd_target_num = -1
         else:
             self.target_viewport.set_sensitive(False)
             self.picture_shape.set_text("")
@@ -1071,7 +1114,8 @@ class ImageStation:
             self.include_target.set_active(False)
             self.user_toggled = True
             self.target_number.set_text("")
-
+            self.cd_target_num = -1
+            
     def draw_box(self, widget, x_begin, y_begin, x_end, y_end):
         self.box_width = self.x_end - self.x_begin
         self.box_height = self.y_end - self.y_begin

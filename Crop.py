@@ -77,7 +77,7 @@ class Crop:
         return (real_x, real_y)
     
     def set_target(self, crop_x, crop_y):
-        self.target = Target()
+        self.target = Target(self)
         
         # need these for rendering the target
         self.target.x_coord = crop_x
