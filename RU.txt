@@ -1,0 +1,4 @@
+01 1234.12.12 9876.98.98 SW s c a ac pic1crop1.jpg
+
+02 1234.12.12 9876.98.98 NW a b c d pic0crop1.jpg
+

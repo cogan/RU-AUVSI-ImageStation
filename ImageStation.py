@@ -888,7 +888,7 @@ class ImageStation:
                         self.tree_store.set_value(childiter, 3, str(crop.get_percent_complete()) + "%")
                         
                 # update the target list
-                if crop.target.included == True:
+                if crop.target != None and crop.target.included == True:
                     while len(self.target_list)-1 < crop.target.number:
                         self.target_list.append(0)
                     self.target_list[crop.target.number] = crop.target
@@ -1034,6 +1034,8 @@ class ImageStation:
                 self.pixbuf = gtk.gdk.pixbuf_new_from_file(path)
                 w = self.pixbuf.get_width()
                 h = self.pixbuf.get_height()
+                
+                print "w = %d, h = %d" % (w, h,)
                 
                 # draw the image
                 self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
