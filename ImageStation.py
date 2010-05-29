@@ -12,7 +12,6 @@ import glib
 
 #import project related dependencies
 from Communicator import *
-from PictureDialog import *
 import CameraControl
 
 class ImageStation:
@@ -110,14 +109,16 @@ class ImageStation:
         #column 1: picture number
         #column 2: crop number
         #column 3: % complete
-        self.tree_store = gtk.TreeStore(str, int, int, str)
+        #column 4: target
+        #column 5: hidden color column
+        self.tree_store = gtk.TreeStore(str, int, int, str, gtk.gdk.Pixbuf, str)
         
         #treeview associated with model
         self.image_tree.set_model(self.tree_store)
         
         #create column 0
         cell0 = gtk.CellRendererText()
-        column0 = gtk.TreeViewColumn('Image List', cell0, markup=0)
+        column0 = gtk.TreeViewColumn('Image List', cell0, markup=0, background=5)
         column0.set_resizable(True)
         self.image_tree.append_column(column0)
         
@@ -135,6 +136,11 @@ class ImageStation:
         cell3 = gtk.CellRendererText()
         column3 = gtk.TreeViewColumn("Status", cell3, text=3)
         self.image_tree.append_column(column3)
+        
+        #create column 4
+        cell4 = gtk.CellRendererPixbuf()
+        column4 = gtk.TreeViewColumn("Target", cell4, pixbuf=4)
+        self.image_tree.append_column(column4)
         
         #*
         #* Set up ListView
@@ -473,10 +479,28 @@ class ImageStation:
 
     def image_tree_menu_display_activate(self, widget, data=None):
         """display picture of selected imagetree_menu item."""
-        model, treeiter = self.image_tree.get_selection().get_selected()
         self.image_viewport.set_sensitive(True)
+        # get pic and crop num
+        model, treeiter = self.image_tree.get_selection().get_selected()
         pic_num = int(self.tree_store.get_value(treeiter, 1))
         crop_num = int(self.tree_store.get_value(treeiter, 2))
+        
+        # change the previously selected image color back to regular
+        if self.cd_crop_num != -1 and self.cd_crop_num == 1:
+            #it's the parent/thumbnail, just do it
+            self.tree_store[self.cd_pic_num][5] = "white"
+        elif self.cd_crop_num != -1:
+            #it's a child, cycle through the array to find it
+            parent = self.tree_store[self.cd_pic_num].iter
+            n=0
+            childiter = self.tree_store.iter_nth_child(parent, n)
+            while (self.tree_store.get_value(childiter, 2) != self.cd_crop_num):
+                n += 1
+                childiter = self.tree_store.iter_nth_child(parent, n)
+            self.tree_store.set_value(childiter, 5, "white")
+
+        # update the currently selected pic and crop and display the image
+        self.tree_store.set_value(treeiter, 5, "green")
         self.cd_pic_num = pic_num
         self.cd_crop_num = crop_num
         self.display_image(pic_num, crop_num)
@@ -555,9 +579,13 @@ class ImageStation:
                                                     self.cd_crop_num)
 
                 # redraw to remove any existing targets
+                self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
+                                        0, 0, 0, 0, -1, -1)
+                
+                # if we are identifying a new target when the old target was
+                # included, we need to account for the deletion of the old
+                # target when we identify the new one
                 if self.cd_target_num != -1:
-                    self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
-                                                            0, 0, 0, 0, -1, -1)
                     for i in range(self.cd_target_num, len(self.target_list)-1):
                         self.target_list[i] = self.target_list[i+1]
                         self.target_list[i].number = i
@@ -572,6 +600,22 @@ class ImageStation:
                 # TODO: make it cooler
                 self.drawing_area.window.draw_arc(self.gc, False, x-10, y-10, 20, 20, 0, 360*64)
                 self.drawing_area.window.draw_arc(self.gc, False, x-20, y-20, 40, 40, 0, 360*64)
+                
+                # set the target column to show the "unincluded target image"
+                if self.cd_crop_num == 1:
+                    #it's the parent/thumbnail, just do it
+                    self.tree_store[self.cd_pic_num][4] = \
+                        gtk.gdk.pixbuf_new_from_file("./images/unid_tar_icon.png")
+                else:
+                    #it's a child, cycle through the array to find it
+                    parent = self.tree_store[self.cd_pic_num].iter
+                    n=0
+                    childiter = self.tree_store.iter_nth_child(parent, n)
+                    while (self.tree_store.get_value(childiter, 2) != self.cd_crop_num):
+                        n += 1
+                        childiter = self.tree_store.iter_nth_child(parent, n)
+                    self.tree_store.set_value(childiter, 4, \
+                        gtk.gdk.pixbuf_new_from_file("./images/unid_tar_icon.png"))
                 
                 # create target
                 crop.set_target(x, y)
@@ -783,8 +827,10 @@ class ImageStation:
         
         crop = self.communicator.image_store.get_crop(self.cd_pic_num, 
                                                         self.cd_crop_num)
+
         # if toggled on we need to display the target number
         # also update the target list and update Target info
+        # lastly update the icon in the treeview
         if self.include_target.get_active() == True:
             if self.user_toggled == True:
                 self.target_list.append(crop.target)
@@ -792,6 +838,22 @@ class ImageStation:
                 crop.target.included = True
                 crop.target.number = len(self.target_list)-1
                 self.cd_target_num = len(self.target_list)-1
+                
+            if self.cd_crop_num == 1:
+                #it's the parent/thumbnail, just do it
+                self.tree_store[self.cd_pic_num][4] = \
+                        gtk.gdk.pixbuf_new_from_file("./images/id_tar_icon.png")
+            else:
+                #it's a child, cycle through the array to find it
+                parent = self.tree_store[self.cd_pic_num].iter
+                n=0
+                childiter = self.tree_store.iter_nth_child(parent, n)
+                while (self.tree_store.get_value(childiter, 2) != self.cd_crop_num):
+                    n += 1
+                    childiter = self.tree_store.iter_nth_child(parent, n)
+                self.tree_store.set_value(childiter, 4, \
+                        gtk.gdk.pixbuf_new_from_file("./images/id_tar_icon.png"))
+                
         else:
             if self.user_toggled == True:
                 # delete the current target from the target list
@@ -806,6 +868,22 @@ class ImageStation:
                 crop.target.included = False
                 crop.target.number = -1
                 self.cd_target_num = -1
+                
+                # update image in the treeview
+                if self.cd_crop_num == 1:
+                    #it's the parent/thumbnail, just do it
+                    self.tree_store[self.cd_pic_num][4] = \
+                            gtk.gdk.pixbuf_new_from_file("./images/unid_tar_icon.png")
+                else:
+                    #it's a child, cycle through the array to find it
+                    parent = self.tree_store[self.cd_pic_num].iter
+                    n=0
+                    childiter = self.tree_store.iter_nth_child(parent, n)
+                    while (self.tree_store.get_value(childiter, 2) != self.cd_crop_num):
+                        n += 1
+                        childiter = self.tree_store.iter_nth_child(parent, n)
+                    self.tree_store.set_value(childiter, 4, \
+                        gtk.gdk.pixbuf_new_from_file("./images/unid_tar_icon.png"))
 
     #*
     #* General events
@@ -872,11 +950,18 @@ class ImageStation:
                     crop.inqueue = False
                     self.add_to_queue(crop.name, pic_num, crop_num)
                 
-                # update the progress
+                # update the progress and target image
                 if crop.size > 0:
                     if crop_num == 1:
                         #it's the parent/thumbnail, just do it
                         self.tree_store[pic_num][3] = str(crop.get_percent_complete()) + "%"
+                        if crop.target != None:
+                            if crop.target.included == True:
+                                self.tree_store[self.cd_pic_num][4] = \
+                                    gtk.gdk.pixbuf_new_from_file("./images/id_tar_icon.png")
+                            else:
+                                self.tree_store[self.cd_pic_num][4] = \
+                                    gtk.gdk.pixbuf_new_from_file("./images/unid_tar_icon.png")
                     else:
                         #it's a child, cycle through the array to find it
                         parent = self.tree_store[pic_num].iter
@@ -886,6 +971,13 @@ class ImageStation:
                             n += 1
                             childiter = self.tree_store.iter_nth_child(parent, n)
                         self.tree_store.set_value(childiter, 3, str(crop.get_percent_complete()) + "%")
+                        if crop.target != None:
+                            if crop.target.included == True:
+                                self.tree_store.set_value(childiter, 4, \
+                                    gtk.gdk.pixbuf_new_from_file("./images/id_tar_icon.png"))
+                            else:
+                                self.tree_store.set_value(childiter, 4, \
+                                    gtk.gdk.pixbuf_new_from_file("./images/unid_tar_icon.png"))
                         
                 # update the target list
                 if crop.target != None and crop.target.included == True:
@@ -926,6 +1018,9 @@ class ImageStation:
     
     def _identify_target(self):
         """identify a target on the image"""
+        
+        # ^
+        # |
         
         # change the cursor for the drawing area
         x_cursor = gtk.gdk.Cursor(gtk.gdk.X_CURSOR)
@@ -1040,7 +1135,8 @@ class ImageStation:
                 # draw the image
                 self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
                                                     0, 0, 0, 0, w, h)
-                self.drawing_area.window.resize(w, h)
+                #self.drawing_area.window.resize(w, h)
+                self.drawing_area.set_size_request(w,h)
                 
                 # render the target and compass
                 self.draw_target(pic_num, crop_num)
@@ -1075,7 +1171,7 @@ class ImageStation:
                 self.drawing_area.window.draw_arc(self.gc, False, x-20, y-20, 40, 40, 0, 360*64)
 
     def update_target_info(self, pic_num, crop_num):
-        """update the fields containing a pictures info"""
+        """update the fields containing a crop's target info"""
         crop = self.communicator.image_store.get_crop(pic_num, crop_num)
         
         # get the attributes from the picture
