@@ -297,7 +297,7 @@ class Communicator(Subject):
 
             #add a new crop to the crop_list
             crop_num = len(self.image_store.picture_list[picture_num].crop_list)
-            self.image_store.picture_list[picture_num].add_crop()
+            self.image_store.picture_list[picture_num].add_crop(xa, ya)
             self.image_store.get_crop(picture_num, crop_num).available = True
             self.image_store.get_crop(picture_num, crop_num).path = \
                 self.image_store.project_path + "pic" + str(picture_num) \
@@ -339,7 +339,8 @@ class Communicator(Subject):
                     # camera angles, and gps info at the time the pic was taken
                     if crop_num == 1:
                         (gpsx_str, gpsy_str, pan_str, tilt_str, \
-                            yaw_str, pitch_str, roll_str) = \
+                            yaw_str, pitch_str, roll_str, \
+                            plane_orientation_str, altitude_str) = \
                             self.interface.request_info(picture_num)
 
                         gps_x = float(gpsx_str)
@@ -349,6 +350,19 @@ class Communicator(Subject):
                         yaw = float(yaw_str)
                         pitch = float(pitch_str)
                         roll = float(roll_str)
+                        orientation = float(orientation_str)
+                        altitude = float(altitude_str)
+                       
+                        picture = self.image_store.get_picture(picture_num)
+                        picture.gps_x = gps_x
+                        picture.gps_y = gps_y
+                        picture.pan = pan
+                        picture.tilt = tilt
+                        picture.yaw = yaw
+                        picture.pitch = pitch
+                        picture.roll = roll
+                        picture.plane_orientation = plane_orientation
+                        picture.altitude = altitude
                        
                         self.notify("INFO_RECEIVED", \
 		                        picture_num = picture_num, \

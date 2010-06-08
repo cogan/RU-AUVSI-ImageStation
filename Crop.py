@@ -4,11 +4,13 @@ import os
 import math
 from Target import *
 
-# TODO: i think the crop needs to be passed its parent (the picture)
 class Crop:
     """image"""
     
     def __init__(self, \
+            picture, \
+            x_offset = 0, \
+            y_offset = 0, \
             name = "", \
             available = False, \
             completed = False, \
@@ -18,6 +20,9 @@ class Crop:
             size = 0, \
             path = ""):
         """constructor"""
+        
+        # the picture this crop belongs to
+        self.picture = picture
         
         # various program relevent attributes
         self.name = name
@@ -30,12 +35,8 @@ class Crop:
         self.path = path
         
         # resolution attributes
-        self.x_offset = 0
-        self.y_offset = 0
-        self.x_full_resolution = 2400
-        self.y_full_resolution = 1800
-        self.x_thumbnail_resolution = 800
-        self.y_thumbnail_resolution = 600
+        self.x_offset = x_offset
+        self.y_offset = y_offset
         
         self.target = None
         
@@ -72,8 +73,8 @@ class Crop:
     def calculate_real_coordinates(crop_x, crop_y):
         """ takes the actual coordinates on the crop and returns the
             correspondin coordinates on the full size image"""
-        real_x = int(crop_x * (x_full_resolution / x_thumbnail_resolution))
-        real_y = int(crop_y * (y_full_resolution / y_thumbnail_resolution))
+        real_x = int((self.x_offset + crop_x) * (self.picture.x_resolution / self.picture.x_thumbnail_resolution))
+        real_y = int((self.y_offset + crop_y) * (self.picture.y_resolution / self.picture.y_thumbnail_resolution))
         return (real_x, real_y)
     
     def set_target(self, crop_x, crop_y):
@@ -84,14 +85,37 @@ class Crop:
         self.target.y_coord = crop_y
         
         # need this stuff for calculating latitude and longitude
-        # *** needs pitch, yaw, roll, pan, tilt from picture
-        # *** needs intrinsic camera matrix (should be in picture)
-        # for these use something like self.parent.yaw, self.parent.pitch etc.
-        # *** needs to determine real coordinates from crop coordinates
-        # for this define a seperate function.
-        # e.g. (real_x, real_y) = self.calculate_real_coordinates(
+        # * needs pitch, yaw, roll, pan, tilt from picture, etc.
+        gps_x = self.picture.gps_x
+        gps_y = self.picture.gps_y
+        pan = self.picture.pan
+        tilt = self.picture.tilt
+        yaw = self.picture.yaw
+        pitch = self.picture.pitch
+        roll = self.picture.roll
+        plane_orientation = self.picture.plane_orientation
+        altitude = self.picture.altitude
+        
+        # * needs intrinsic camera matrix (should be in picture)
+        # -> in picture constructor put a bloggie = Camera() part
+        # -> right now all pictures should use the default image size of
+        #    fully zoomed out, and the corresponding intrinsic params.
+        #    If this were to change the image station would have to get
+        #    the zoom level and use it to calculate new intrinsic params
+        M_int = self.picture.bloggie.get_intrinsic_matrix()
+        
+        # * needs to determine real coordinates from crop coordinates
+        # -> for this define a seperate function.
+        # -> e.g. (real_x, real_y) = self.calculate_real_coordinates(
         #                                        crop_x + self.x_offset, 
         #                                        crop_y + self.y_offset)
+        #
+        # *** to get x_offset and y_offset
+        # --> look at '_execute_generate_crop' and make it so xa and ya are stored
+        (real_x, real_y) = self.calculate_real_coordinates(crop_x, crop_y)
         
+        # FINALLY: pass all this info to the calculate_gps function, which
+        # will do matrix mults and math described in the blue notebook
+        #
         #TODO: change this to take the required args
         self.target.calculate_gps()

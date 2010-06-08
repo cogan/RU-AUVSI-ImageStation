@@ -1,6 +1,8 @@
 #Target.py
 
 import os.path
+from numpy import matrix
+import math
 
 class Target(object):
     """contains target attributes"""
@@ -29,9 +31,60 @@ class Target(object):
         self._number = -1
     
     def calculate_gps(self):
-        self.latitude = "1234.12.12"
-        self.longitude = "9876.98.98"
-    
+        #self.latitude = "1234.12.12"
+        #self.longitude = "9876.98.98"
+        
+        # things
+        ## m_int
+        ## x_im, y_im
+        ## altitude
+        ## tilt
+        
+        #
+        # get the angles of the target in the camera view
+        #  ________________
+        # |         x      |
+        # |       ---->    |
+        # |     y |        |
+        # |       \/       |
+        # |________________|
+        #
+        #
+        M_int_inv = M_int.I
+        p_im = matrix([ [x_im] ,\
+                        [y_im] ,\
+                        [1   ] ])
+        
+        p = M_int_inv * p_im
+        
+        angle_y = math.atan( p[1,0] / p[2,0] )
+        angle_x = math.atan( p[0,0] / p[2,0] )
+        
+        #
+        # solve for Z using trig
+        #
+        # Z =   alt * cos(angle_y)
+        #     -----------------------
+        #     cos(tilt + (-angle_y) )
+        #
+        Z = ( altitude * math.cos(angle_y) ) / math.cos(tilt - angle_y)
+        
+        #
+        # multiply p by Z to get P
+        #
+        
+        P = p * Z
+        
+        #
+        # determine transformation matrix M_ext
+        #
+        #  M_ext = wMc= [   R   T ]
+        #  camera wrt W [ 0 0 0 1 ]
+        #
+        # T = gps coords of camera (plane)
+        # 
+        
+        
     def format_info(self):
         """return target info in string format specified by 2010 UAVSI
         competition rules
@@ -146,12 +199,6 @@ class Target(object):
     
     def set_y_coord(self, value):
         self._y_coord = value
-    
-    def get_wordup(self):
-        return self._wordup
-    
-    def set_wordup(self, value):
-        self._wordup = value
     
     def get_included(self):
         return self._included
