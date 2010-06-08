@@ -31,8 +31,6 @@ class Target(object):
         self._number = -1
     
     def calculate_gps(self):
-        #self.latitude = "1234.12.12"
-        #self.longitude = "9876.98.98"
         
         # things
         ## m_int
@@ -49,13 +47,12 @@ class Target(object):
         # |       \/       |
         # |________________|
         #
-        #
         M_int_inv = M_int.I
         p_im = matrix([ [x_im] ,\
                         [y_im] ,\
                         [1   ] ])
         
-        p = M_int_inv * p_im
+        p_c = M_int_inv * p_im
         
         angle_y = math.atan( p[1,0] / p[2,0] )
         angle_x = math.atan( p[0,0] / p[2,0] )
@@ -70,10 +67,10 @@ class Target(object):
         Z = ( altitude * math.cos(angle_y) ) / math.cos(tilt - angle_y)
         
         #
-        # multiply p by Z to get P
+        # multiply p_c by Z to get P_c
         #
         
-        P = p * Z
+        P_c = p_c * Z
         
         #
         # determine transformation matrix M_ext
@@ -82,8 +79,80 @@ class Target(object):
         #  camera wrt W [ 0 0 0 1 ]
         #
         # T = gps coords of camera (plane)
-        # 
+        # R = rotation matrix
         
+        #
+        # Obtain R
+        #
+        
+        # Start with coordinate system oriented with GPS
+        # x is North (longitude), y is East (latitude), z is downward (hell)
+        
+        # 1) rotate about Z axis by the heading to orient the system
+        # theta_heading = ?
+        R_orient = matrix([[ math.cos(theta_heading), -math.sin(theta_heading), 0 ],\
+                           [ math.sin(theta_heading),  math.cos(theta_heading), 0 ],\
+                           [ 0,                        0,                       1 ]])
+        
+        # 2) rotate the system for yaw, pitch, and roll
+        # theta_yaw = ?
+        R_yaw = matrix([[ math.cos(theta_yaw), -math.sin(theta_yaw), 0 ],\
+                        [ math.sin(theta_yaw),  math.cos(theta_yaw), 0 ],\
+                        [ 0,                    0,                   1 ]])
+        
+        # theta_pitch = ?
+        R_pitch = matrix([[  math.cos(theta_pitch), 0, math.sin(theta_pitch)],\
+                          [  0,                     1, 0                    ],\
+                          [ -math.sin(theta_pitch), 0, math.cos(theta_pitch)]])
+        
+        # theta_roll = ?
+        R_roll = matrix([[ 1, 0,                     0                    ],\
+                         [ 0, math.cos(theta_roll), -math.sin(theta_roll) ],\
+                         [ 0, math.sin(theta_roll),  math.cos(theta_roll) ]])
+        
+        # 3) rotate the system about Z to align with the camera frame
+        # x goes left to right across the image, y goes down the image, z into
+        # theta_image = ?
+        R_image = matrix([[ math.cos(theta_image), -math.sin(theta_image), 0 ],\
+                          [ math.sin(theta_image),  math.cos(theta_image), 0 ],\
+                          [ 0,                      0,                     1 ]])
+        
+        # 4) rotate about Z to account for pan
+        # theta_pan = ?
+        R_pan = matrix([[ math.cos(theta_pan), -math.sin(theta_pan), 0 ],\
+                        [ math.sin(theta_pan),  math.cos(theta_pan), 0 ],\
+                        [ 0,                    0,                   1 ]])
+        
+        # 5) rotate about X to account for tilt
+        # theta_tilt = ?
+        R_tilt = matrix([[ 1, 0,                  0                 ],\
+                      [ 0, math.cos(theta_tilt), -math.sin(theta_tilt) ],\
+                      [ 0, math.sin(theta_tilt),  math.cos(theta_tilt) ]])
+        
+        R = R_tilt * R_pan * R_image * R_roll * R_pitch * R_yaw * R_orient
+
+        #
+        # Obtain T
+        #
+
+        T = matrix([[  gps_x    ],\
+                    [  gps_y    ],\
+                    [ -altitude ]])
+
+        M_ext = matrix([[ R[0,0], R[0,1], R[0,2], T[0,0] ],\
+                        [ R[1,0], R[1,1], R[2,1], T[1,0] ],\
+                        [ R[2,0], R[2,1], R[2,2], T[2,0] ],\
+                        [ 0,      0,      0,      1      ]])
+        
+        P_gps = M_ext * P_c
+        
+        #
+        # Convert P_gps into latitude and longitude in proper format
+        #
+        
+        # TODO: conversions go here
+        #self.latitude = "1234.12.12"
+        #self.longitude = "9876.98.98"
         
     def format_info(self):
         """return target info in string format specified by 2010 UAVSI
