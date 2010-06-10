@@ -30,7 +30,7 @@ class NoneInterface(Interface):
         
     def request_info(self, picture_num):
         """get all positional info about a picture
-        i.e camera angles, plane angles, gps coordinates"""
+        returns gps_x, gps_y, pan, tilt, yaw, pitch, roll, orientation, altitude"""
         raise InterfaceError("no interface selected")
         
     def request_size(self, picture_num, crop_num):

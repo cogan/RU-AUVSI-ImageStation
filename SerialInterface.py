@@ -110,7 +110,7 @@ class SerialInterface(Interface):
         
     def request_info(self, picture_num):
         """get all positional info about a picture
-        returns gps_x, gps_y, pan, tilt, yaw, pitch, roll, orientation"""
+        returns gps_x, gps_y, pan, tilt, yaw, pitch, roll, orientation, altitude"""
         if self.enabled == True:
             try:
                 msg_to_send = self.encoder.encode("INF", picture_num)

@@ -30,13 +30,8 @@ class Target(object):
         self._included = False
         self._number = -1
     
-    def calculate_gps(self):
-        
-        # things
-        ## m_int
-        ## x_im, y_im
-        ## altitude
-        ## tilt
+    def calculate_gps(self, M_int, x_im, y_im, gps_x, gps_y, pan, tilt, \
+                        yaw, pitch, roll, plane_orientation, altitude):
         
         #
         # get the angles of the target in the camera view
@@ -54,8 +49,8 @@ class Target(object):
         
         p_c = M_int_inv * p_im
         
-        angle_y = math.atan( p[1,0] / p[2,0] )
-        angle_x = math.atan( p[0,0] / p[2,0] )
+        angle_y = math.atan( p_c[1,0] / p_c[2,0] )
+        angle_x = math.atan( p_c[0,0] / p_c[2,0] )
         
         #
         # solve for Z using trig
@@ -68,9 +63,14 @@ class Target(object):
         
         #
         # multiply p_c by Z to get P_c
+        # PS if at this point you think my notation is confusing... too bad.
         #
         
         P_c = p_c * Z
+        P_c = matrix([[ P_c[0,0] ],\
+                      [ P_c[1,0] ],\
+                      [ P_c[2,0] ],\
+                      [ 1        ]])
         
         #
         # determine transformation matrix M_ext
@@ -89,42 +89,43 @@ class Target(object):
         # x is North (longitude), y is East (latitude), z is downward (hell)
         
         # 1) rotate about Z axis by the heading to orient the system
-        # theta_heading = ?
+        theta_heading = plane_orientation
         R_orient = matrix([[ math.cos(theta_heading), -math.sin(theta_heading), 0 ],\
                            [ math.sin(theta_heading),  math.cos(theta_heading), 0 ],\
                            [ 0,                        0,                       1 ]])
         
         # 2) rotate the system for yaw, pitch, and roll
-        # theta_yaw = ?
+        theta_yaw = yaw
         R_yaw = matrix([[ math.cos(theta_yaw), -math.sin(theta_yaw), 0 ],\
                         [ math.sin(theta_yaw),  math.cos(theta_yaw), 0 ],\
                         [ 0,                    0,                   1 ]])
         
-        # theta_pitch = ?
+        theta_pitch = pitch
         R_pitch = matrix([[  math.cos(theta_pitch), 0, math.sin(theta_pitch)],\
                           [  0,                     1, 0                    ],\
                           [ -math.sin(theta_pitch), 0, math.cos(theta_pitch)]])
         
-        # theta_roll = ?
+        theta_roll = roll
         R_roll = matrix([[ 1, 0,                     0                    ],\
                          [ 0, math.cos(theta_roll), -math.sin(theta_roll) ],\
                          [ 0, math.sin(theta_roll),  math.cos(theta_roll) ]])
         
         # 3) rotate the system about Z to align with the camera frame
         # x goes left to right across the image, y goes down the image, z into
-        # theta_image = ?
+        # fuck i wrote this down somewhere, i believe its a 90 degree rotation
+        theta_image = 0
         R_image = matrix([[ math.cos(theta_image), -math.sin(theta_image), 0 ],\
                           [ math.sin(theta_image),  math.cos(theta_image), 0 ],\
                           [ 0,                      0,                     1 ]])
         
         # 4) rotate about Z to account for pan
-        # theta_pan = ?
+        theta_pan = pan
         R_pan = matrix([[ math.cos(theta_pan), -math.sin(theta_pan), 0 ],\
                         [ math.sin(theta_pan),  math.cos(theta_pan), 0 ],\
                         [ 0,                    0,                   1 ]])
         
         # 5) rotate about X to account for tilt
-        # theta_tilt = ?
+        theta_tilt = tilt
         R_tilt = matrix([[ 1, 0,                  0                 ],\
                       [ 0, math.cos(theta_tilt), -math.sin(theta_tilt) ],\
                       [ 0, math.sin(theta_tilt),  math.cos(theta_tilt) ]])

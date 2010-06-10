@@ -43,8 +43,8 @@ class DebugInterface(Interface):
         
     def request_info(self, picture_num):
         """get all positional info about a picture
-        returns gps_x, gps_y, pan, tilt, yaw, pitch, roll, orientation"""
-        return ["54.33", "65.44", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0"]
+        returns gps_x, gps_y, pan, tilt, yaw, pitch, roll, orientation, altitude"""
+        return ["54.33", "65.44", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "100.0"]
                
     def request_size(self, picture_num, crop_num):
         """get the size of a crop"""

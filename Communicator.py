@@ -350,7 +350,7 @@ class Communicator(Subject):
                         yaw = float(yaw_str)
                         pitch = float(pitch_str)
                         roll = float(roll_str)
-                        orientation = float(orientation_str)
+                        plane_orientation = float(plane_orientation_str)
                         altitude = float(altitude_str)
                        
                         picture = self.image_store.get_picture(picture_num)

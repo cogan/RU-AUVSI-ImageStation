@@ -70,7 +70,7 @@ class Crop:
             math.floor( (self.segments_downloaded*100) / (self.total_segments()) )
         return percent_complete
         
-    def calculate_real_coordinates(crop_x, crop_y):
+    def calculate_real_coordinates(self, crop_x, crop_y):
         """ takes the actual coordinates on the crop and returns the
             correspondin coordinates on the full size image"""
         real_x = int((self.x_offset + crop_x) * (self.picture.x_resolution / self.picture.x_thumbnail_resolution))
@@ -113,9 +113,11 @@ class Crop:
         # *** to get x_offset and y_offset
         # --> look at '_execute_generate_crop' and make it so xa and ya are stored
         (real_x, real_y) = self.calculate_real_coordinates(crop_x, crop_y)
-        
+        print "crop_coords are x: %d, y%d" % (crop_x, crop_y)
+        print "real coords are x: %d, y%d" % (real_x, real_y,)
         # FINALLY: pass all this info to the calculate_gps function, which
         # will do matrix mults and math described in the blue notebook
         #
         #TODO: change this to take the required args
-        self.target.calculate_gps()
+        self.target.calculate_gps(M_int, real_x, real_y, gps_x, gps_y, \
+                pan, tilt, yaw, pitch, roll, plane_orientation, altitude)

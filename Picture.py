@@ -1,6 +1,7 @@
 #Picture.py
 
 from Crop import *
+from Camera import *
 
 class Picture(object):
     """contains picture attributes and crop list"""
@@ -32,11 +33,11 @@ class Picture(object):
         
         # representation of camera used to take picture
         self.bloggie = Camera()
-        self.bloggie.set_intrinsic_params(fc1 = 3224.35414, \
-                                            fc2 = 3202.87322, \
-                                            cc1 = 1396.72711, \
-                                            cc2 = 975.48995, \
-                                            alpha_c = 0.0)
+        self.bloggie.set_params(fc1 = 3224.35414, \
+                                fc2 = 3202.87322, \
+                                cc1 = 1396.72711, \
+                                cc2 = 975.48995, \
+                                alpha_c = 0.0)
         
         # various crops of pictures
         # we want to start with index 1, so we put an dud in crop_list[0]
@@ -48,7 +49,7 @@ class Picture(object):
         self.x_resolution = 2400
         self.y_resolution = 1800
         
-    def add_crop(self, x_offset, y_offset):
+    def add_crop(self, x_offset=0, y_offset=0):
         crop_num = len(self.crop_list)
         self.crop_list.append(Crop(self, x_offset=x_offset, y_offset=y_offset, name="crop_" + str(crop_num)))
         

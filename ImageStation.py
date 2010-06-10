@@ -571,7 +571,6 @@ class ImageStation:
         if self.drawing_area_mode == "IDENTIFY_TARGET":
             if event.button == 1 and self.pixbuf != None:
                 # get pixel coordinates
-                print "x: %d, y: %d" % (int(event.x), int(event.y),)
                 x = int(event.x)
                 y = int(event.y)
                 
@@ -1062,6 +1061,7 @@ class ImageStation:
         elif (is_crop == True):
             #determine iter that points to row containing pic_num
             # in column 1
+            parent = None
             for i in range(0, len(self.tree_store)):
                 if (pic_num == self.tree_store[i][1]):
                     #found the parent, insert the child
@@ -1069,11 +1069,14 @@ class ImageStation:
                     myiter = self.tree_store.append(parent, None)
                     self.tree_store.set_value(myiter, 0, '<span foreground="#000000"><b>' + pic_name + '</b></span>')
                     break
+            # expand the row to show the crop
+            self.image_tree.expand_row(self.tree_store.get_path(parent), True)
 
         # fill in the remaining columns
         self.tree_store.set_value(myiter, 1, pic_num)
         self.tree_store.set_value(myiter, 2, crop_num)
         self.tree_store.set_value(myiter, 3, "0%")
+        
         return myiter
     
     def add_to_queue(self, name, pic_num, crop_num):
@@ -1130,8 +1133,6 @@ class ImageStation:
                 w = self.pixbuf.get_width()
                 h = self.pixbuf.get_height()
                 
-                print "w = %d, h = %d" % (w, h,)
-                
                 # draw the image
                 self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
                                                     0, 0, 0, 0, w, h)
@@ -1184,8 +1185,6 @@ class ImageStation:
             self.picture_orientation.set_text(crop.target.orientation)
             self.picture_longitude.set_text(crop.target.longitude)
             self.picture_latitude.set_text(crop.target.latitude)
-            
-            print "target number is %d" % (crop.target.number,)
             
             if crop.target.included == True:
                 self.user_toggled = False

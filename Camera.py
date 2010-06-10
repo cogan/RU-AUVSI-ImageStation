@@ -21,7 +21,7 @@ class Camera(object):
         self.cc2 = cc2
         self.alpha_c = alpha_c
     
-    def get_intrinsic_matrix(self)
-        return matrix([[ self.fc1, self.alphaC*self.fc1, self.cc1 ],\
+    def get_intrinsic_matrix(self):
+        return matrix([[ self.fc1, self.alpha_c*self.fc1, self.cc1 ],\
                       [ 0,         self.fc2,             self.cc2 ],\
                       [ 0,         0,                    1        ]])
