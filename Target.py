@@ -151,8 +151,8 @@ class Target(object):
         #
         
         # TODO: conversions go here
-        #self.latitude = "1234.12.12"
-        #self.longitude = "9876.98.98"
+        self.latitude = "1234.12.12"
+        self.longitude = "9876.98.98"
         
     def format_info(self):
         """return target info in string format specified by 2010 UAVSI
@@ -168,42 +168,42 @@ class Target(object):
             target_str += "0" + str(self.number)
         else:
             target_str += str(self.number)
-        target_str += " "
+        target_str += "\t"
         
         # Field 2:  Latitude in the following format, first character N or S, 
         # two digit degrees (use leading zeros if necessary), followed by space 
         # two digit minutes, followed by space, two digit seconds followed by 
         # decimal point and up to 3 digits (thousandths of a second)
         target_str += self.latitude
-        target_str += " "
+        target_str += "\t"
         
         # Field 3:  Longitude in the following format, first character E or W,
         # three digit degrees (use leading zeros if necessary), followed by 
         # space, two digit minutes, followed by space, two digit seconds 
         # followed by decimal point and up to 3 digits (thousandths of a secon)
         target_str += self.longitude
-        target_str += " "
+        target_str += "\t"
         
         # Field 4:  Target orientation, up to two characters:  
         # N, NE, E, SE, S, SW, W, NW
         target_str += self.orientation
-        target_str += " "
+        target_str += "\t"
                 
         # Field 5:  Target shape, list geometric shape as appropriate:
         target_str += self.shape
-        target_str += " "
+        target_str += "\t"
         
         # Field 6:  Target color, as appropriate.
         target_str += self.color
-        target_str += " "
+        target_str += "\t"
         
         # Field 7:  Alphanumeric, as appropriate
         target_str += self.alpha
-        target_str += " "
+        target_str += "\t"
         
         # Field 8:  Alphanumeric color, as appropriate
         target_str += self.alphacolor
-        target_str += " "
+        target_str += "\t"
         
         # Field 9:  File name of image (include extension)
         target_str += os.path.basename(self.crop.path)
