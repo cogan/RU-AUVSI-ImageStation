@@ -58,6 +58,7 @@ class Crop:
         self.completed = True
         self.segments_downloaded = 1
         self.segments_total = 1
+        self.size = self.segment_size
         
     def calculate_total_segments(self):
         self.segments_total = math.ceil(float(self.size)/float(self.segment_size))  
