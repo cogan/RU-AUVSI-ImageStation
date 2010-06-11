@@ -5,17 +5,41 @@ from Interface import *
 class NoneInterface(Interface):
     """interface class to use when there is no connection selected."""
     
+    #*
+    #* Define Abstract functions (all should just raise exception)
+    #*
+    
+    def toggle_power(self):
+        """toggle power on and off for the camera"""
+        raise InterfaceError("no interface selected")
+    
+    def set_mode(self, mode):
+        """set the mode for the camera (0 for storage, 1 for camera mode)"""
+        raise InterfaceError("no interface selected")
+        
     def take_picture(self, picture_num):
         """snap a picture."""
         raise InterfaceError("no interface selected")
         
-    def resume_search(self):
-        """have the camera resume it's search pattern."""
+    def toggle_record(self):
+        """toggle recording on and off for the camera"""
         raise InterfaceError("no interface selected")
+    
+    def pan(self, value):
+        """set the pan servo to position (-180 to 180)"""
+        raise InterfaceError("no interface selected")
+            
+    def tilt(self, value):
+        """set the pan servo to position (-45 to 45)"""
+        raise InterfaceError("no interface selected")
+    
+    #def resume_search(self):
+    #    """have the camera resume it's search pattern."""
+    #    raise InterfaceError("no interface selected")
         
-    def lock_target(self, xa, ya):
-        """lock onto a target given pixels xa and ya."""
-        raise InterfaceError("no interface selected")
+    #def lock_target(self, xa, ya):
+    #    """lock onto a target given pixels xa and ya."""
+    #    raise InterfaceError("no interface selected")
         
     def download_to_flc(self):
         """download pictures form the camera memory onto the
@@ -41,33 +65,13 @@ class NoneInterface(Interface):
         """download a segment of an image"""
         raise InterfaceError("no interface selected")
     
-    def camera_zoom_in(self, increment):
-        """have the camera zoom in."""
-        raise InterfaceError("no interface selected")
+    #def camera_zoom_in(self, increment):
+    #    """have the camera zoom in."""
+    #    raise InterfaceError("no interface selected")
 
-    def camera_zoom_out(self, increment):
-        """have the camera zoom out."""
-        raise InterfaceError("no interface selected")
-    
-    def camera_pan_left(self, increment):
-        """have the camera pan left."""
-        raise InterfaceError("no interface selected")
-        
-    def camera_pan_right(self, increment):
-        """have the camera pan right."""
-        raise InterfaceError("no interface selected")
-        
-    def camera_tilt_up(self, increment):
-        """have the camera tilt upwards."""
-        raise InterfaceError("no interface selected")
-        
-    def camera_tilt_down(self, increment):
-        """have the camera tilt down."""
-        raise InterfaceError("no interface selected")
-    
-    def camera_reset(self):
-        """have the camera set itself to it's home coordinates"""
-        raise InterfaceError("no interface selected")
+    #def camera_zoom_out(self, increment):
+    #    """have the camera zoom out."""
+    #    raise InterfaceError("no interface selected")
                 
     def ping(self):
         """ping the plane"""

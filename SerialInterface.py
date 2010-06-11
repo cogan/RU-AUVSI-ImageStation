@@ -28,7 +28,12 @@ class SerialInterface(Interface):
         
         # FOR REFERENCE: Dictionary of sentence identifiers
         # 
+        # "toggle_power" : "CPW"
+        # "set_mode" : CMO"
         # "take_picture" : "CPT"
+        # "toggle_record: "CRC"
+        # "pan" : "CPA"
+        # "tilt" : "CTI"
         # "resume_search" : ""
         # "lock_target" : "",
         # "acknowledge download_to_flc" : "FLC"
@@ -37,22 +42,72 @@ class SerialInterface(Interface):
         # "request_info" : "INF"
         # "request_size" : "PSZ"
         # "download_segment" : "DPC"
-        # "camera_pan_left" : "CLT"
-        # "camera_pan_right" : "CRT"
-        # "camera_tilt_up" : "CUP"
-        # "camera_tilt_down" : "CDN"
-        # "camera_reset" : "CRE"
         # "ping" : "PNG"
     
     #*
     #* Define Abstract functions
     #*
+
+    def toggle_power(self):
+        """toggle power on and off for the camera"""
+        if self.enabled == True:
+            try:
+                msg_to_send = self.encoder.encode("CPW")
+                return self.tx_rx_decode(msg_to_send)
+            except InterfaceError as e:
+                raise InterfaceError(e.value)
+        else:
+            raise InterfaceError("no serial connection")
+    
+    def set_mode(self, mode):
+        """set the mode for the camera (0 for storage, 1 for camera mode)"""
+        if self.enabled == True:
+            try:
+                msg_to_send = self.encoder.encode("CMO", mode)
+                return self.tx_rx_decode(msg_to_send)
+            except InterfaceError as e:
+                raise InterfaceError(e.value)
+        else:
+            raise InterfaceError("no serial connection")
     
     def take_picture(self, picture_num):
         """snap a picture."""
         if self.enabled == True:
             try:
                 msg_to_send = self.encoder.encode("CPT", picture_num)
+                return self.tx_rx_decode(msg_to_send)
+            except InterfaceError as e:
+                raise InterfaceError(e.value)
+        else:
+            raise InterfaceError("no serial connection")
+    
+    def toggle_record(self):
+        """toggle recording on and off for the camera"""
+        if self.enabled == True:
+            try:
+                msg_to_send = self.encoder.encode("CRC")
+                return self.tx_rx_decode(msg_to_send)
+            except InterfaceError as e:
+                raise InterfaceError(e.value)
+        else:
+            raise InterfaceError("no serial connection")
+    
+    def pan(self, value):
+        """set the pan servo to position (-180 to 180)"""
+        if self.enabled == True:
+            try:
+                msg_to_send = self.encoder.encode("CPA", value)
+                return self.tx_rx_decode(msg_to_send)
+            except InterfaceError as e:
+                raise InterfaceError(e.value)
+        else:
+            raise InterfaceError("no serial connection")
+
+    def tilt(self, value):
+        """set the pan servo to position (-45 to 45)"""
+        if self.enabled == True:
+            try:
+                msg_to_send = self.encoder.encode("CTI", value)
                 return self.tx_rx_decode(msg_to_send)
             except InterfaceError as e:
                 raise InterfaceError(e.value)
@@ -248,7 +303,7 @@ class SerialInterface(Interface):
             self.ser.rtscts = 1
             self.ser.timeout = 1
             self.enabled = True
-            print "serial connection successful"
+            print "serial connection successful at %d baud" % (baud)
         except serial.serialutil.SerialException as e:
             self.enabled = False
             print "serial connection failed"

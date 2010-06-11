@@ -5,7 +5,7 @@
 # fix interface to camera on plane
 #
 # __medium__
-# fix add manually
+# fix add manually and redownload (especially target list bugs)
 #****
 
 #Camera.py

@@ -77,6 +77,21 @@ class Communicator(Subject):
     #* Functions to be called by a "controller" to initiate Communicator actions
     #*
 
+    def toggle_power(self, **kwargs):
+        """ command the Communicator to toggle power on the camera
+    
+        args:
+        (none)"""    
+        self.current_command = ("_execute_toggle_power", kwargs)
+    
+    def set_mode(self, **kwargs):
+        """ set the mode of the camera, 0 for mass storage device
+        or 1 for usb
+        
+        args:
+        mode"""
+        self.current_command = ("_execute_set_mode", kwargs)
+
     def take_picture(self, **kwargs):
         """command the Communicator to make the plane take a picture.
         
@@ -84,20 +99,41 @@ class Communicator(Subject):
         (none)"""
         self.current_command = ("_execute_take_picture", kwargs)
         
-    def resume_search(self, **kwargs):
-        """command the Communicator to make the plane to resume 
-        its search path.
+    def toggle_record(self, **kwargs):
+        """ turn camera recording on or off
         
         args:
         (none)"""
-        self.current_command = ("_execute_resume_search", kwargs)    
+        self.current_command = ("_execute_toggle_record", kwargs)
+    
+    def pan(self, **kwargs):
+        """ pan to set point
         
-    def lock_target(self, **kwargs):
-        """command the Communicator to make the plane seek a target.
+        args:
+        value"""
+        self.current_command = ("_execute_pan", kwargs)
+    
+    def tilt(self, **kwargs):
+        """ tilt to set point
         
-        args: 
-        xa, ya"""
-        self.current_command = ("_execute_lock_target", kwargs)
+        args:
+        value"""
+        self.current_command = ("_execute_tilt", kwargs)
+        
+    #def resume_search(self, **kwargs):
+    #    """command the Communicator to make the plane to resume 
+    #    its search path.
+    #    
+    #    args:
+    #    (none)"""
+    #    self.current_command = ("_execute_resume_search", kwargs)    
+        
+    #def lock_target(self, **kwargs):
+    #    """command the Communicator to make the plane seek a target.
+    #    
+    #    args: 
+    #    xa, ya"""
+    #    self.current_command = ("_execute_lock_target", kwargs)
         
     def download_to_flc(self, **kwargs):
         """command the Communicator to make the plane transfer pictures 
@@ -123,61 +159,68 @@ class Communicator(Subject):
         args:
         picture_num, crop_num"""
         self.current_request = ("_execute_download_image", kwargs)
-
-    def camera_reset(self, **kwargs):
-        """command the Communicator to make the plane reset the camera.
+    
+    #def camera_zoom_in(self, **kwargs):
+    #    """command the Communicator to zoom camera in by increment.
+    #    
+    #    args:
+    #    increment"""
+    #    self.current_command = ("_execute_camera_zoom_in", kwargs)    
         
-        args:
-        (none)"""
-        self.current_command = ("_execute_camera_reset", kwargs)
-        
-    def camera_zoom_in(self, **kwargs):
-        """command the Communicator to zoom camera in by increment.
-        
-        args:
-        increment"""
-        self.current_command = ("_execute_camera_zoom_in", kwargs)    
-        
-    def camera_zoom_out(self, **kwargs):
-        """command the Communicator to zoom camera in by increment.
-        
-        args:
-        increment"""
-        self.current_command = ("_execute_camera_zoom_out", kwargs)  
-        
-    def camera_pan_left(self, **kwargs):
-        """command the Communicator to pan camera left by increment.
-        
-        args:
-        increment"""
-        self.current_command = ("_execute_camera_pan_left", kwargs)
-        
-    def camera_pan_right(self, **kwargs):
-        """command the Communicator to pan camera right by increment.
-        
-        args:
-        increment"""
-        self.current_command = ("_execute_camera_pan_right", kwargs)
-        
-    def camera_tilt_up(self, **kwargs):
-        """command the Communicator to tilt camera up by increment.
-        
-        args:
-        increment"""
-        self.current_command = ("_execute_camera_tilt_up", kwargs)
-        
-    def camera_tilt_down(self, **kwargs):
-        """command the Communicator to tilt camera down by increment.
-        
-        args:
-        increment"""
-        self.current_command = ("_execute_camera_tilt_down", kwargs)
-
+    #def camera_zoom_out(self, **kwargs):
+    #    """command the Communicator to zoom camera in by increment.
+    #    
+    #    args:
+    #    increment"""
+    #    self.current_command = ("_execute_camera_zoom_out", kwargs)  
+    
     #*
     #* Private functions called by the Communicator to initiate commands
     #* through the selected 'interface' and relay data back to observers
     #*
     
+    def _execute_toggle_power(self, **kwargs):
+        """ command the Communicator to toggle power on the camera
+    
+        args:
+        (none)"""
+        
+        #reset command flag / command acknowledged
+        self.current_command = ("none", {})
+        
+        print "Communicator sending request to toggle camera power"
+        try:
+            self.interface.toggle_power()
+            self.notify("POWER_TOGGLED")
+            
+        except InterfaceError as e:
+            self.notify("INTERFACE_ERROR", \
+                msg=e.value, \
+                function=sys._getframe().f_code.co_name)
+             
+    def _execute_set_mode(self, **kwargs):
+        """ set the mode of the camera, 0 for mass storage device
+        or 1 for usb
+        
+        args:
+        mode"""
+        
+        #reset command flag / command acknowledged
+        self.current_command = ("none", {})
+        
+        #for notational convenience
+        mode = kwargs['mode']
+        
+        print "Communicator sending request to change the camera mode"
+        try:
+            self.interface.set_mode(mode)
+            self.notify("MODE_SET", mode=mode)
+            
+        except InterfaceError as e:
+            self.notify("INTERFACE_ERROR", \
+                msg=e.value, \
+                function=sys._getframe().f_code.co_name)
+
     def _execute_take_picture(self, **kwargs):
         """command the plane to take a picture
         
@@ -201,48 +244,111 @@ class Communicator(Subject):
             self.notify("INTERFACE_ERROR", \
                 msg=e.value, \
                 function=sys._getframe().f_code.co_name)
-    
-    def _execute_resume_search(self, **kwargs):
-        """command the plane to go into search mode
+        
+    def _execute_toggle_record(self, **kwargs):
+        """ turn camera recording on or off
         
         args:
         (none)"""
-        
+
         #reset command flag / command acknowledged
         self.current_command = ("none", {})
         
-        print "Communicator sending request to resume search"
+        print "Communicator sending request to turn record mode on/off"
         try:
-            self.interface.resume_search()
-
-            self.notify("SEARCH_RESUMED")
+            self.interface.toggle_record()
+            self.notify("RECORD_TOGGLED")
+            
         except InterfaceError as e:
             self.notify("INTERFACE_ERROR", \
                 msg=e.value, \
                 function=sys._getframe().f_code.co_name)
-        
-    def _execute_lock_target(self, **kwargs):
-        """command the plane to lock onto a target based on pixel values.
+    
+    def _execute_pan(self, **kwargs):
+        """ pan to set point
         
         args:
-        xa, ya"""
+        value"""
+
+        #reset command flag / command acknowledged
+        self.current_command = ("none", {})
+        
+        #for notational convenience
+        value = kwargs['value']
+        
+        print "Communicator sending request to pan to %d degrees" % (value,)
+        try:
+            self.interface.pan(value)
+            self.notify("CAMERA_PAN", value=value)
+            
+        except InterfaceError as e:
+            self.notify("INTERFACE_ERROR", \
+                msg=e.value, \
+                function=sys._getframe().f_code.co_name)
+    
+    def _execute_tilt(self, **kwargs):
+        """ tilt to set point
+        
+        args:
+        value"""
         
         #reset command flag / command acknowledged
         self.current_command = ("none", {})
         
         #for notational convenience
-        xa = kwargs['xa']
-        ya = kwargs['ya']
-        print "Communicator sending request to lock target"
-
-        try:
-            self.interface.lock_target(xa, ya)
+        value = kwargs['value']
         
-            self.notify("LOCKED_TARGET")
+        print "Communicator sending request to tilt to %d degrees" % (value,)
+        try:
+            self.interface.tilt(value)
+            self.notify("CAMERA_TILT", value=value)
+            
         except InterfaceError as e:
             self.notify("INTERFACE_ERROR", \
                 msg=e.value, \
                 function=sys._getframe().f_code.co_name)
+    
+    #def _execute_resume_search(self, **kwargs):
+    #    """command the plane to go into search mode
+    #    
+    #    args:
+    #    (none)"""
+    #    
+    #    #reset command flag / command acknowledged
+    #    self.current_command = ("none", {})
+    #    
+    #    print "Communicator sending request to resume search"
+    #    try:
+    #        self.interface.resume_search()
+    #
+    #        self.notify("SEARCH_RESUMED")
+    #    except InterfaceError as e:
+    #        self.notify("INTERFACE_ERROR", \
+    #            msg=e.value, \
+    #            function=sys._getframe().f_code.co_name)
+        
+    #def _execute_lock_target(self, **kwargs):
+    #    """command the plane to lock onto a target based on pixel values.
+    #    
+    #    args:
+    #    xa, ya"""
+    #    
+    #    #reset command flag / command acknowledged
+    #    self.current_command = ("none", {})
+    #    
+    #    #for notational convenience
+    #    xa = kwargs['xa']
+    #    ya = kwargs['ya']
+    #    print "Communicator sending request to lock target"
+    #
+    #    try:
+    #        self.interface.lock_target(xa, ya)
+    #    
+    #        self.notify("LOCKED_TARGET")
+    #    except InterfaceError as e:
+    #        self.notify("INTERFACE_ERROR", \
+    #            msg=e.value, \
+    #            function=sys._getframe().f_code.co_name)
     
     def _execute_download_to_flc(self, **kwargs):
         """command the plane to download images from the camera memory
@@ -428,157 +534,49 @@ class Communicator(Subject):
                         msg=e.value, \
                         function=sys._getframe().f_code.co_name)
 
-    def _execute_camera_reset(self, **kwargs):
-        """command the plane to make the plane reset the camera.
-        
-        args:
-        (none)"""
-        
-        #reset command flag / command acknowledged
-        self.current_command = ("none", {})
-        
-        print "Communicator sending request to reset camera"
-        
-        try:
-            self.interface.camera_reset()
-            self.notify("CAMERA_RESET")
-            
-        except InterfaceError as e:
-            self.notify("INTERFACE_ERROR", \
-                msg=e.value, \
-                function=sys._getframe().f_code.co_name)
-
-    def _execute_camera_zoom_in(self, **kwargs):
-        """command the plane to zoom camera in.
-        
-        args:
-        increment"""
-        
-        #reset command flag / command acknowledged
-        self.current_command = ("none", {})
-        
-        #for notational convenience
-        increment = kwargs['increment']
-        print "Communicator sending request to zoom in"
-        
-        try:
-            self.interface.camera_zoom_in(increment)
-            self.notify("CAMERA_ZOOM_IN")
-            
-        except InterfaceError as e:
-            self.notify("INTERFACE_ERROR", \
-                msg=e.value, \
-                function=sys._getframe().f_code.co_name)
+    #def _execute_camera_zoom_in(self, **kwargs):
+    #    """command the plane to zoom camera in.
+    #    
+    #    args:
+    #    increment"""
+    #    
+    #    #reset command flag / command acknowledged
+    #    self.current_command = ("none", {})
+    #    
+    #    #for notational convenience
+    #    increment = kwargs['increment']
+    #    print "Communicator sending request to zoom in"
+    #    
+    #    try:
+    #        self.interface.camera_zoom_in(increment)
+    #        self.notify("CAMERA_ZOOM_IN")
+    #        
+    #    except InterfaceError as e:
+    #        self.notify("INTERFACE_ERROR", \
+    #            msg=e.value, \
+    #            function=sys._getframe().f_code.co_name)
     
-    def _execute_camera_zoom_out(self, **kwargs):
-        """command the plane to zoom camera out.
-        
-        args:
-        increment"""
-        
-        #reset command flag / command acknowledged
-        self.current_command = ("none", {})
-        
-        #for notational convenience
-        increment = kwargs['increment']
-        print "Communicator sending request to zoom out"
-        
-        try:
-            self.interface.camera_zoom_out(increment)
-            self.notify("CAMERA_ZOOM_OUT")
-            
-        except InterfaceError as e:
-            self.notify("INTERFACE_ERROR", \
-                msg=e.value, \
-                function=sys._getframe().f_code.co_name)
-    
-    def _execute_camera_pan_left(self, **kwargs):
-        """command the plane to pan camera left by increment.
-        
-        args:
-        increment"""
-        
-        #reset command flag / command acknowledged
-        self.current_command = ("none", {})
-        
-        #for notational convenience
-        increment = kwargs['increment']
-        print "Communicator sending request to pan camera left"
-        
-        try:
-            self.interface.camera_pan_left(increment)
-            self.notify("CAMERA_PAN_LEFT")
-            
-        except InterfaceError as e:
-            self.notify("INTERFACE_ERROR", \
-                msg=e.value, \
-                function=sys._getframe().f_code.co_name)
-        
-    def _execute_camera_pan_right(self, **kwargs):
-        """command the plane to pan camera right by increment.
-        
-        args:
-        increment"""
-        
-        #reset command flag / command acknowledged
-        self.current_command = ("none", {})
-        
-        #for notational convenience
-        increment = kwargs['increment']
-        print "Communicator sending request to pan camera right"
-        
-        try:
-            self.interface.camera_pan_right(increment)
-            self.notify("CAMERA_PAN_RIGHT")
-            
-        except InterfaceError as e:
-            self.notify("INTERFACE_ERROR", \
-                msg=e.value, \
-                function=sys._getframe().f_code.co_name)
-        
-    def _execute_camera_tilt_up(self, **kwargs):
-        """command the plane to tilt camera up by increment.
-        
-        args:
-        increment"""
-        
-        #reset command flag / command acknowledged
-        self.current_command = ("none", {})
-        
-        #for notational convenience
-        increment = kwargs['increment']
-        print "Communicator sending request to tilt camera up"
-        
-        try:
-            self.interface.camera_tilt_up(increment)
-            self.notify("CAMERA_TILT_UP")
-            
-        except InterfaceError as e:
-            self.notify("INTERFACE_ERROR", \
-                msg=e.value, \
-                function=sys._getframe().f_code.co_name)
-        
-    def _execute_camera_tilt_down(self, **kwargs):
-        """command the plane to tilt camera down by increment.
-        
-        args:
-        increment"""
-        
-        #reset command flag / command acknowledged
-        self.current_command = ("none", {})
-        
-        #for notational convenience
-        increment = kwargs['increment']
-        print "Communicator sending request to tilt camera down"
-        
-        try:
-            self.interface.camera_tilt_down(increment)
-            self.notify("CAMERA_TILT_DOWN")
-            
-        except InterfaceError as e:
-            self.notify("INTERFACE_ERROR", \
-                msg=e.value, \
-                function=sys._getframe().f_code.co_name)
+    #def _execute_camera_zoom_out(self, **kwargs):
+    #    """command the plane to zoom camera out.
+    #    
+    #    args:
+    #    increment"""
+    #    
+    #    #reset command flag / command acknowledged
+    #    self.current_command = ("none", {})
+    #    
+    #    #for notational convenience
+    #    increment = kwargs['increment']
+    #    print "Communicator sending request to zoom out"
+    #    
+    #    try:
+    #        self.interface.camera_zoom_out(increment)
+    #        self.notify("CAMERA_ZOOM_OUT")
+    #        
+    #    except InterfaceError as e:
+    #        self.notify("INTERFACE_ERROR", \
+    #            msg=e.value, \
+    #            function=sys._getframe().f_code.co_name)
 
     def _execute_ping(self):
         """ping the plane and transmit back the latency."""

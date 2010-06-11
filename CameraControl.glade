@@ -69,36 +69,21 @@
         <child>
           <widget class="GtkFixed" id="fixed1">
             <property name="width_request">720</property>
-            <property name="height_request">185</property>
+            <property name="height_request">170</property>
             <property name="visible">True</property>
             <child>
               <widget class="GtkButton" id="take">
                 <property name="label" translatable="yes">Take</property>
-                <property name="width_request">100</property>
-                <property name="height_request">60</property>
+                <property name="width_request">110</property>
+                <property name="height_request">50</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <signal name="clicked" handler="on_take_clicked"/>
               </widget>
               <packing>
-                <property name="x">45</property>
+                <property name="x">245</property>
                 <property name="y">40</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkButton" id="reset">
-                <property name="label" translatable="yes">Reset</property>
-                <property name="width_request">100</property>
-                <property name="height_request">60</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_reset_clicked"/>
-              </widget>
-              <packing>
-                <property name="x">45</property>
-                <property name="y">110</property>
               </packing>
             </child>
             <child>
@@ -109,75 +94,7 @@
                 <property name="orientation">vertical</property>
               </widget>
               <packing>
-                <property name="x">180</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkButton" id="pan_counterclockwise">
-                <property name="width_request">100</property>
-                <property name="height_request">70</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_pan_left_clicked"/>
-                <child>
-                  <placeholder/>
-                </child>
-              </widget>
-              <packing>
-                <property name="x">390</property>
-                <property name="y">70</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkButton" id="pan_clockwise">
-                <property name="width_request">100</property>
-                <property name="height_request">70</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_pan_right_clicked"/>
-                <child>
-                  <placeholder/>
-                </child>
-              </widget>
-              <packing>
-                <property name="x">610</property>
-                <property name="y">70</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkButton" id="tilt_forward">
-                <property name="width_request">100</property>
-                <property name="height_request">60</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_tilt_up_clicked"/>
-                <child>
-                  <placeholder/>
-                </child>
-              </widget>
-              <packing>
-                <property name="x">500</property>
-                <property name="y">40</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkButton" id="tilt_back">
-                <property name="width_request">100</property>
-                <property name="height_request">60</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_tilt_down_clicked"/>
-                <child>
-                  <placeholder/>
-                </child>
-              </widget>
-              <packing>
-                <property name="x">500</property>
-                <property name="y">110</property>
+                <property name="x">195</property>
               </packing>
             </child>
             <child>
@@ -188,16 +105,18 @@
                 <property name="orientation">vertical</property>
               </widget>
               <packing>
-                <property name="x">360</property>
+                <property name="x">395</property>
               </packing>
             </child>
             <child>
-              <widget class="GtkLabel" id="main">
-                <property name="width_request">100</property>
+              <widget class="GtkLabel" id="camera_label">
+                <property name="width_request">110</property>
                 <property name="height_request">20</property>
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">&lt;b&gt;Control&lt;/b&gt;</property>
+                <property name="label" translatable="yes">&lt;b&gt;Camera
+&lt;/b&gt;</property>
                 <property name="use_markup">True</property>
+                <property name="justify">center</property>
               </widget>
               <packing>
                 <property name="x">45</property>
@@ -205,63 +124,136 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkLabel" id="zoom">
-                <property name="width_request">100</property>
+              <widget class="GtkLabel" id="control_label">
+                <property name="width_request">110</property>
                 <property name="height_request">20</property>
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">&lt;b&gt;Zoom&lt;/b&gt;</property>
+                <property name="label" translatable="yes">&lt;b&gt;Control&lt;/b&gt;</property>
                 <property name="use_markup">True</property>
               </widget>
               <packing>
-                <property name="x">230</property>
+                <property name="x">245</property>
                 <property name="y">12</property>
               </packing>
             </child>
             <child>
-              <widget class="GtkLabel" id="direction">
+              <widget class="GtkLabel" id="pan_label">
                 <property name="width_request">100</property>
                 <property name="height_request">20</property>
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">&lt;b&gt;Direction&lt;/b&gt;</property>
+                <property name="label" translatable="yes">&lt;b&gt;Pan&lt;/b&gt;</property>
                 <property name="use_markup">True</property>
               </widget>
               <packing>
-                <property name="x">500</property>
+                <property name="x">440</property>
                 <property name="y">12</property>
               </packing>
             </child>
             <child>
-              <widget class="GtkButton" id="zoom_in">
+              <widget class="GtkHScale" id="pan">
                 <property name="width_request">100</property>
-                <property name="height_request">60</property>
+                <property name="height_request">80</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="update_policy">delayed</property>
+                <property name="adjustment">0 -180 180 0 0 0</property>
+                <property name="digits">0</property>
+                <signal name="value_changed" handler="on_pan_value_changed"/>
+              </widget>
+              <packing>
+                <property name="x">440</property>
+                <property name="y">50</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkHScale" id="tilt">
+                <property name="width_request">100</property>
+                <property name="height_request">80</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="orientation">vertical</property>
+                <property name="update_policy">delayed</property>
+                <property name="adjustment">0 -45 45 0 0 0</property>
+                <property name="inverted">True</property>
+                <property name="digits">0</property>
+                <signal name="value_changed" handler="on_tilt_value_changed"/>
+              </widget>
+              <packing>
+                <property name="x">580</property>
+                <property name="y">50</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="tilt_label">
+                <property name="width_request">100</property>
+                <property name="height_request">20</property>
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">&lt;b&gt;Tilt&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
+              </widget>
+              <packing>
+                <property name="x">580</property>
+                <property name="y">12</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkButton" id="on_off">
+                <property name="label" translatable="yes">I / O</property>
+                <property name="width_request">110</property>
+                <property name="height_request">30</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_zoom_in_clicked"/>
-                <child>
-                  <placeholder/>
-                </child>
+                <signal name="clicked" handler="on_on_off_clicked"/>
               </widget>
               <packing>
-                <property name="x">230</property>
+                <property name="x">45</property>
                 <property name="y">40</property>
               </packing>
             </child>
             <child>
-              <widget class="GtkButton" id="zoom_out">
-                <property name="width_request">100</property>
-                <property name="height_request">60</property>
+              <widget class="GtkButton" id="camera_mode">
+                <property name="label" translatable="yes">Camera Mode</property>
+                <property name="width_request">110</property>
+                <property name="height_request">30</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_zoom_out_clicked"/>
-                <child>
-                  <placeholder/>
-                </child>
+                <signal name="clicked" handler="on_camera_mode_clicked"/>
               </widget>
               <packing>
-                <property name="x">230</property>
-                <property name="y">110</property>
+                <property name="x">45</property>
+                <property name="y">80</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkButton" id="storage_mode">
+                <property name="label" translatable="yes">Storage Mode</property>
+                <property name="width_request">110</property>
+                <property name="height_request">30</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="on_storage_mode_clicked"/>
+              </widget>
+              <packing>
+                <property name="x">45</property>
+                <property name="y">120</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkButton" id="record">
+                <property name="label" translatable="yes">Record On/Off</property>
+                <property name="width_request">110</property>
+                <property name="height_request">50</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="on_record_clicked"/>
+              </widget>
+              <packing>
+                <property name="x">245</property>
+                <property name="y">100</property>
               </packing>
             </child>
           </widget>

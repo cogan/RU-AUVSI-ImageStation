@@ -18,17 +18,37 @@ class DebugInterface(Interface):
     #* Define Abstract functions
     #*
     
+    def toggle_power(self):
+        """toggle power on and off for the camera"""
+        pass
+    
+    def set_mode(self, mode):
+        """set the mode for the camera (0 for storage, 1 for camera mode)"""
+        pass
+    
     def take_picture(self, picture_num):
         """snap a picture."""
         pass
     
-    def resume_search(self):
-        """have the camera resume it's search pattern."""
+    def toggle_record(self):
+        """toggle recording on and off for the camera"""
         pass
+    
+    def pan(self, value):
+        """set the pan servo to position (-180 to 180)"""
+        pass
+
+    def tilt(self, value):
+        """set the pan servo to position (-45 to 45)"""
+        pass
+    
+    #def resume_search(self):
+    #    """have the camera resume it's search pattern."""
+    #    pass
         
-    def lock_target(self, xa, ya):
-        """lock onto a target given pixels xa and ya."""
-        pass
+    #def lock_target(self, xa, ya):
+    #    """lock onto a target given pixels xa and ya."""
+    #    pass
         
     def download_to_flc(self):
         """download pictures form the camera memory onto the
@@ -55,33 +75,13 @@ class DebugInterface(Interface):
         time.sleep(.01)
         return ["",]
     
-    def camera_zoom_in(self, increment):
-        """have the camera zoom in."""
-        return True
+    #def camera_zoom_in(self, increment):
+    #    """have the camera zoom in."""
+    #    return True
 
-    def camera_zoom_out(self, increment):
-        """have the camera zoom out."""
-        return True
-    
-    def camera_pan_left(self, increment):
-        """have the camera pan left."""
-        return True
-        
-    def camera_pan_right(self, increment):
-        """have the camera pan right."""
-        return True
-        
-    def camera_tilt_up(self, increment):
-        """have the camera tilt upwards."""
-        return True
-        
-    def camera_tilt_down(self, increment):
-        """have the camera tilt down."""
-        return True
-    
-    def camera_reset(self):
-        """have the camera set itself to it's home coordinates"""
-        return True
+    #def camera_zoom_out(self, increment):
+    #    """have the camera zoom out."""
+    #    return True
                 
     def ping(self):
         """ping the plane"""

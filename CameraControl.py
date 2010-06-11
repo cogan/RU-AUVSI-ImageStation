@@ -32,13 +32,13 @@ class CameraControl:
         self._set_display_mode("down")
         
         # Configure update handler
-        self.update_dic = {"PICTURE_TAKEN" : self._handle_picture_taken, \
-            "CAMERA_RESET" : self._handle_camera_reset, \
-            "CAMERA_PAN_LEFT" : self._handle_camera_pan_left, \
-            "CAMERA_PAN_RIGHT" : self._handle_camera_pan_right, \
-            "CAMERA_TILT_UP" : self._handle_camera_tilt_up, \
-            "CAMERA_TILT_DOWN" : self._handle_camera_tilt_down }
-    
+        self.update_dic = {"POWER_TOGGLED" : self._handle_power_toggled, \
+            "MODE_SET" : self._handle_mode_set, \
+            "PICTURE_TAKEN" : self._handle_picture_taken, \
+            "RECORD_TOGGLED" : self._handle_record_toggled, \
+            "CAMERA_PAN" : self._handle_camera_pan, \
+            "CAMERA_TILT" : self._handle_camera_tilt }
+            
     def initialize_gui(self):
         
         #*
@@ -67,49 +67,6 @@ class CameraControl:
         self.toggle_display = self.widgets.get_widget("toggle_display")
         
         #*
-        #* Set up images on buttons
-        #*
-        
-        self.zoom_in = self.widgets.get_widget("zoom_in")
-        self.zoom_out = self.widgets.get_widget("zoom_out")
-        self.pan_counterclockwise = self.widgets.get_widget("pan_counterclockwise")
-        self.pan_clockwise = self.widgets.get_widget("pan_clockwise")
-        self.tilt_forward = self.widgets.get_widget("tilt_forward")
-        self.tilt_back = self.widgets.get_widget("tilt_back")
-        
-        image0 = gtk.Image()
-        image1 = gtk.Image()
-        image2 = gtk.Image()
-        image3 = gtk.Image()
-        image4 = gtk.Image()
-        image5 = gtk.Image()
-        
-        image0.set_from_file("images/zoom_in.png")
-        image0.show()
-        self.zoom_in.set_image(image0)
-        
-        image1.set_from_file("images/zoom_out.png")
-        image1.show()
-        self.zoom_out.set_image(image1)
-        
-        image2.set_from_file("images/clockwise.png")
-        image2.show()
-        self.pan_clockwise.set_image(image2)
-        
-        image3.set_from_file("images/counterclockwise.png")
-        image3.show()
-        self.pan_counterclockwise.set_image(image3)
-        
-        image4.set_from_file("images/up.png")
-        image4.show()
-        self.tilt_forward.set_image(image4)
-        
-        image5.set_from_file("images/down.png")
-        image5.show()
-        self.tilt_back.set_image(image5)
-        
-        
-        #*
         #* Set up drawing area
         #*
         
@@ -118,20 +75,21 @@ class CameraControl:
         
         video_dic = { "on_video_menu_streaming_toggled" : self.video_menu_streaming_toggled }
         
-        button_dic = { "on_take_clicked" : self.take_clicked, \
-                    "on_reset_clicked" : self.reset_clicked, \
-                    "on_zoom_in_clicked" : self.zoom_in_clicked, \
-                    "on_zoom_out_clicked" : self.zoom_out_clicked, \
-                    "on_pan_left_clicked" : self.pan_left_clicked, \
-                    "on_pan_right_clicked" : self.pan_right_clicked, \
-                    "on_tilt_up_clicked" : self.tilt_up_clicked, \
-                    "on_tilt_down_clicked" : self.tilt_down_clicked, \
+        button_dic = { "on_on_off_clicked" : self.on_off_clicked, \
+                    "on_camera_mode_clicked" : self.camera_mode_clicked, \
+                    "on_storage_mode_clicked" : self.storage_mode_clicked, \
+                    "on_take_clicked" : self.take_clicked, \
+                    "on_record_clicked" : self.record_clicked, \
                     "on_toggle_display_clicked" : self.toggle_display_clicked }
-
+        
+        slider_dic = {"on_pan_value_changed" : self.pan_value_changed, \
+                    "on_tilt_value_changed" : self.tilt_value_changed }
+        
         general_dic = { "on_camera_window_delete_event" : self.camera_window_delete_event }
 
         self.widgets.signal_autoconnect(video_dic)
         self.widgets.signal_autoconnect(button_dic)
+        self.widgets.signal_autoconnect(slider_dic)
         self.widgets.signal_autoconnect(general_dic)
 
     #*
@@ -145,35 +103,38 @@ class CameraControl:
     #* Button Events
     #*
     
+    def on_off_clicked(self, widget, data=None):
+        self._toggle_on_off()
+        
+    def camera_mode_clicked(self, widget, data=None):
+        self._camera_mode()
+        
+    def storage_mode_clicked(self, widget, data=None):
+        self._storage_mode()
+        
     def take_clicked(self, widget, data=None):
         self._take_picture()
-    
-    def reset_clicked(self, widget, data=None):
-        self._camera_reset()
-    
-    def zoom_in_clicked(self, widget, data=None):
-        self._camera_zoom_in(self.increment)
-     
-    def zoom_out_clicked(self, widget, data=None):
-        self._camera_zoom_out(self.increment) 
         
-    def pan_left_clicked(self, widget, data=None):
-        self._camera_pan_left(self.increment)
-        
-    def pan_right_clicked(self, widget, data=None):
-        self._camera_pan_right(self.increment)
-        
-    def tilt_up_clicked(self, widget, data=None):
-        self._camera_tilt_up(self.increment)
-        
-    def tilt_down_clicked(self, widget, data=None):
-        self._camera_tilt_down(self.increment)
+    def record_clicked(self, widget, data=None):
+        self._toggle_record()
         
     def toggle_display_clicked(self, widget, data=None):
         if self.display_mode == "down":
             self._set_display_mode("up")
         else:
             self._set_display_mode("down")
+            
+    def tilt_value_changed(self, widget, data=None):
+        # snap to 0
+        if -10 <= widget.get_adjustment().get_value() <= 10:
+            widget.get_adjustment().set_value(0)
+        self._tilt(int(widget.get_adjustment().get_value()))
+        
+    def pan_value_changed(self, widget, data=None):
+        # snap to 0
+        if -15 <= widget.get_adjustment().get_value() <= 15:
+            widget.get_adjustment().set_value(0)
+        self._pan(int(widget.get_adjustment().get_value()))
     
     #*
     #* General Events
@@ -249,37 +210,35 @@ class CameraControl:
             image.show()
             self.toggle_display.set_image(image)
     
+    def _toggle_on_off(self):
+        self.communicator.toggle_power()
+        
+    def _camera_mode(self):
+        self.communicator.set_mode(mode=0)
+        
+    def _storage_mode(self):
+        self.communicator.set_mode(mode=1)
+    
     def _take_picture(self):
         """request model to take a picture"""
         self.communicator.take_picture()
         
-    def _camera_reset(self):
-        """request model to move camera to its home position"""
-        self.communicator.camera_reset()
+    def _toggle_record(self):
+        self.communicator.toggle_record()
 
-    def _camera_zoom_in(self, inc):
-        """request model to zoom in by increment"""
-        self.communicator.camera_zoom_in(increment=inc)
+    def _tilt(self, value):
+        self.communicator.tilt(value=value)
     
-    def _camera_zoom_out(self, inc):
-        """request model to zoom out by increment"""
-        self.communicator.camera_zoom_out(increment=inc)
+    def _pan(self, value):
+        self.communicator.pan(value=value)
+
+    #def _camera_zoom_in(self, inc):
+    #    """request model to zoom in by increment"""
+    #    self.communicator.camera_zoom_in(increment=inc)
     
-    def _camera_pan_left(self, inc):
-        """request model to pan camera left by increment"""
-        self.communicator.camera_pan_left(increment=inc)
-        
-    def _camera_pan_right(self, inc):
-        """request model to pan camera right by increment"""
-        self.communicator.camera_pan_right(increment=inc)
-        
-    def _camera_tilt_up(self, inc):
-        """request model to tilt camera up by increment"""
-        self.communicator.camera_tilt_up(increment=inc)
-        
-    def _camera_tilt_down(self, inc):
-        """request model to tilt camera down by increment"""
-        self.communicator.camera_tilt_down(increment=inc)
+    #def _camera_zoom_out(self, inc):
+    #    """request model to zoom out by increment"""
+    #    self.communicator.camera_zoom_out(increment=inc)
 
     #*
     #* Update
@@ -292,21 +251,21 @@ class CameraControl:
             function_to_call(**kwargs)
         except KeyError:
             pass
-
+    
+    def _handle_power_toggled(self):
+        pass
+    
+    def _handle_mode_set(self, mode):
+        pass
+    
     def _handle_picture_taken(self, picture_num):
         pass
-
-    def _handle_camera_reset(self):
+    
+    def _handle_record_toggled(self):
         pass
     
-    def _handle_camera_pan_left(self):
-        pass
-        
-    def _handle_camera_pan_right(self):
+    def _handle_camera_pan(self, value):
         pass
     
-    def _handle_camera_tilt_up(self):
-        pass
-    
-    def _handle_camera_tilt_down(self):
+    def _handle_camera_tilt(self, value):
         pass

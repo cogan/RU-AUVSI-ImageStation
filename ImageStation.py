@@ -358,7 +358,7 @@ class ImageStation:
     def connection_menu_serial_activate(self, widget, data=None):
         """serial clicked on connection menu."""
         if widget.get_active():
-            self.communicator.set_interface("serial")
+            self.communicator.set_interface("serial", baud=115200)
         
     def connection_menu_debug_activate(self, widget, data=None):
         """serial clicked on connection menu."""
