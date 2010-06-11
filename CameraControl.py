@@ -1,26 +1,11 @@
-#ImageStation.py
-
-#****
-#TODO:
-# __critical__
-# calculate gps and orientation
-#
-# __medium__
-# redownload image feature
-# when a picture is corrupt show a corrupt image
-#****
+#CameraControl.py
 
 #import required modules
-import sys
 import os
 from subprocess import Popen
 import pygtk
 pygtk.require('2.0')
-import gtk
 import gtk.glade
-
-#import project related dependencies
-from Communicator import *
 
 class CameraControl:
     """Control panel for manipulating camera on plane."""
@@ -233,7 +218,7 @@ class CameraControl:
         
         win = self.video_canvas.window
         w,h = win.get_size()
-        color = gtk.gdk.Color(red=0, green=0, blue=0, pixel=0)		
+        #color = gtk.gdk.Color(red=0, green=0, blue=0, pixel=0)		
 
         win.draw_rectangle(self.video_canvas.get_style().black_gc, True, 2,2, w,h )
     
@@ -305,7 +290,7 @@ class CameraControl:
         try:
             function_to_call = self.update_dic[update]
             function_to_call(**kwargs)
-        except KeyError as e:
+        except KeyError:
             pass
 
     def _handle_picture_taken(self, picture_num):

@@ -1,4 +1,14 @@
-#Crop.py
+#****
+#TODO:
+# __critical__
+# test calculation gps and orientation
+# fix interface to camera on plane
+#
+# __medium__
+# fix add manually
+#****
+
+#Camera.py
 
 from numpy import matrix
 

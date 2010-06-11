@@ -50,6 +50,7 @@ class Picture(object):
         self.y_resolution = 1800
         
     def add_crop(self, x_offset=0, y_offset=0):
+        """append a new crop to the end of the crop list"""
         crop_num = len(self.crop_list)
         self.crop_list.append(Crop(self, x_offset=x_offset, y_offset=y_offset, name="crop_" + str(crop_num)))
         
@@ -57,6 +58,7 @@ class Picture(object):
         return len(self.crop_list)-1
         
     def get_crop(self, crop_num):
+        """return the crop with matching crop num"""
         return self.crop_list[crop_num]
         
     def num_crops(self):

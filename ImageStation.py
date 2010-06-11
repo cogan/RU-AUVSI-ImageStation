@@ -1,5 +1,4 @@
 #ImageStation.py
-# change gtk.entry colors: http://bytes.com/topic/python/answers/540122-gtk-entry-colors
 
 #import required modules
 import sys
@@ -280,7 +279,9 @@ class ImageStation:
         
         image_tree_dic = { "on_image_tree_button_press_event" : self.image_tree_button_press_event, \
                 "on_image_tree_menu_display_activate" : self.image_tree_menu_display_activate, \
-                "on_image_tree_menu_add_to_queue_activate" : self.image_tree_menu_add_to_queue_activate }
+                "on_image_tree_menu_add_to_queue_activate" : self.image_tree_menu_add_to_queue_activate, \
+                "on_image_tree_menu_redownload_activate" : self.image_tree_menu_redownload_activate, \
+                "on_image_tree_menu_add_manually_activate" : self.image_tree_menu_add_manually_activate }
         
         image_queue_dic = { "on_image_queue_key_press_event" : self.image_queue_key_press_event, \
                 "on_image_queue_drag_end" : self.image_queue_drag_end }
@@ -512,6 +513,27 @@ class ImageStation:
         crop_num = int(self.tree_store.get_value(treeiter, 2))
         name = self.communicator.image_store.get_crop(pic_num, crop_num).name
         self.add_to_queue(name, pic_num, crop_num)
+    
+    def image_tree_menu_redownload_activate(self, widget, data=None):
+        """reset the status of the current image so it can be redownloaded"""
+        (model, treeiter) = self.image_tree.get_selection().get_selected()
+        pic_num = int(self.tree_store.get_value(treeiter, 1))
+        crop_num = int(self.tree_store.get_value(treeiter, 2))
+        crop = self.communicator.image_store.get_crop(pic_num, crop_num)
+        crop.set_for_redownload()
+        #update the treeview to reflect the changes in the model
+        self.crop_reset(pic_num, crop_num)
+        self.add_to_queue(crop.name, pic_num, crop_num)
+        
+    def image_tree_menu_add_manually_activate(self, widget, data=None):
+        """set a crop to be marked as completed so the user can just
+        manually drag an image into the folder for manipulation"""
+        (model, treeiter) = self.image_tree.get_selection().get_selected()
+        pic_num = int(self.tree_store.get_value(treeiter, 1))
+        crop_num = int(self.tree_store.get_value(treeiter, 2))
+        crop = self.communicator.image_store.get_crop(pic_num, crop_num)
+        crop.set_for_manual()
+        self.crop_reset(pic_num, crop_num)
     
     #*
     #* Image Queue events
@@ -912,6 +934,61 @@ class ImageStation:
     #* Functions related to file manipulation
     #*
     
+    def crop_reset(self, pic_num, crop_num):
+    # determine the current state of each picture and handle accordingly            
+        pic = self.communicator.image_store.get_picture(pic_num)
+        crop = pic.get_crop(crop_num)
+        
+        if crop_num == 1:
+            #it's the parent/thumbnail, just do it
+            if crop.available == True:
+                self.tree_store[pic_num][0] = \
+                    '<span foreground="#000000"><b>' + crop.name + '</b></span>'
+            else:
+                self.tree_store[pic_num][0] = crop.name
+            self.tree_store[pic_num][1] = pic_num
+            self.tree_store[pic_num][2] = crop_num
+            self.tree_store[pic_num][3] = str(crop.get_percent_complete()) + "%"
+            if crop.target != None:
+                if crop.target.included == True:
+                    self.tree_store[self.cd_pic_num][4] = \
+                        gtk.gdk.pixbuf_new_from_file("./images/id_tar_icon.png")
+                else:
+                    self.tree_store[self.cd_pic_num][4] = \
+                        gtk.gdk.pixbuf_new_from_file("./images/unid_tar_icon.png")
+        else:
+            #it's a child, cycle through the array to find it
+            parent = self.tree_store[pic_num].iter
+            n=0
+            childiter = self.tree_store.iter_nth_child(parent, n)
+            while (self.tree_store.get_value(childiter, 2) != crop_num):
+                n += 1
+                childiter = self.tree_store.iter_nth_child(parent, n)
+            
+            if crop.available == True:
+                self.tree_store.set_value(childiter, 0, \
+                                          '<span foreground="#000000"><b>' + \
+                                          crop.name + \
+                                          '</b></span>')
+            else:  
+                self.tree_store.set_value(childiter, 0, crop.name)
+            self.tree_store.set_value(childiter, 1, pic_num)
+            self.tree_store.set_value(childiter, 2, crop_num)
+            self.tree_store.set_value(childiter, 3, str(crop.get_percent_complete()) + "%")
+            if crop.target != None:
+                if crop.target.included == True:
+                    self.tree_store.set_value(childiter, 4, \
+                        gtk.gdk.pixbuf_new_from_file("./images/id_tar_icon.png"))
+                else:
+                    self.tree_store.set_value(childiter, 4, \
+                        gtk.gdk.pixbuf_new_from_file("./images/unid_tar_icon.png"))
+            
+        # update the target list
+        if crop.target != None and crop.target.included == True:
+            while len(self.target_list)-1 < crop.target.number:
+                self.target_list.append(0)
+            self.target_list[crop.target.number] = crop.target
+    
     def project_loaded(self):
         # clear the current treeview and listview
         while 1:
@@ -1137,7 +1214,7 @@ class ImageStation:
                 self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
                                                     0, 0, 0, 0, w, h)
                 #self.drawing_area.window.resize(w, h)
-                self.drawing_area.set_size_request(w,h)
+                self.drawing_area.set_size_request(w, h)
                 
                 # render the target and compass
                 self.draw_target(pic_num, crop_num)
@@ -1145,6 +1222,11 @@ class ImageStation:
             except glib.GError as e:
                 print "picture " + str(pic_num) + " crop " + str(crop_num) + \
                     " is corrupt!"
+                self.pixbuf = gtk.gdk.pixbuf_new_from_file("images/corrupt.png")
+                self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
+                                                    0, 0, 0, 0, 234, 320)
+                self.drawing_area.set_size_request(234, 320)
+                
         else:
             #draw "incomplete" image
             path = "%s/images/incomplete.jpg" % (os.path.dirname(__file__),)
@@ -1320,8 +1402,8 @@ class ImageStation:
         print "info received, gps_x: %f, gps_y: %f" % (gps_x, gps_y)
     
     def _handle_size_calculated(self, picture_num, crop_num, size):
-    	print "picture %d, crop %d has size %d" % (picture_num, crop_num, size)
-    	self.queue_changed()
+        print "picture %d, crop %d has size %d" % (picture_num, crop_num, size)
+        self.queue_changed()
         
     def _handle_image_downloaded(self, picture_num, crop_num, percent_complete):
         #part or all of a picture has finished downloading

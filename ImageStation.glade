@@ -898,6 +898,22 @@ Use mapping software like libchamplain or NASA World Wind to display a map with 
         <signal name="activate" handler="on_image_tree_menu_add_to_queue_activate"/>
       </widget>
     </child>
+    <child>
+      <widget class="GtkMenuItem" id="image_tree_menu_redownload">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">redownload</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_image_tree_menu_redownload_activate"/>
+      </widget>
+    </child>
+    <child>
+      <widget class="GtkMenuItem" id="image_tree_menu_add_manually">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">add manually</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_image_tree_menu_add_manually_activate"/>
+      </widget>
+    </child>
   </widget>
   <widget class="GtkFileChooserDialog" id="open_dialog">
     <property name="border_width">5</property>

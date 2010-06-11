@@ -43,6 +43,22 @@ class Crop:
         #picture data
         self.segment_size = 250
 
+    def set_for_redownload(self):
+        """reset crop properties for redownloading"""
+        self.completed = False
+        self.inqueue = False
+        self.segments_downloaded = 0
+        self.segments_total = 0
+        self.size = 0
+        self.target = None
+
+    def set_for_manual(self):
+        """set crop to be completed for manually picture dragging"""
+        self.available = True
+        self.completed = True
+        self.segments_downloaded = 1
+        self.segments_total = 1
+        
     def calculate_total_segments(self):
         self.segments_total = math.ceil(float(self.size)/float(self.segment_size))  
         
@@ -66,9 +82,12 @@ class Crop:
         self.segments_downloaded = self.segments_downloaded + 1;
         
     def get_percent_complete(self):
-        percent_complete = \
-            math.floor( (self.segments_downloaded*100) / (self.total_segments()) )
-        return percent_complete
+        if self.total_segments() == 0:
+            return 0
+        else:
+            percent_complete = \
+                math.floor( (self.segments_downloaded*100) / (self.total_segments()) )
+            return percent_complete
         
     def calculate_real_coordinates(self, crop_x, crop_y):
         """ takes the actual coordinates on the crop and returns the
