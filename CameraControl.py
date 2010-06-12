@@ -171,9 +171,11 @@ class CameraControl:
     def _setup_video(self):
         """do video stuff"""
 
-        MPLAYER_CMD="mplayer tv:// -tv driver=v4l2:input=1:norm=ntsc:device=%s -wid %i -slave -idle"
+        #MPLAYER_CMD="mplayer tv:// -tv driver=v4l2:input=1:norm=ntsc:device=%s -wid %i -slave -idle"
+        MPLAYER_CMD="mplayer -dumpfile /home/cogan/Desktop/test.mpg tv:// -tv driver=v4l2:input=1:norm=ntsc:device=%s -wid %i -slave -idle"
 
         command = MPLAYER_CMD  % (self.video_device, self.xid)
+        print command
         commandList = command.split()
         self.proc_inst = Popen(commandList)
         

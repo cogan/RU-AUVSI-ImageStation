@@ -7,6 +7,7 @@ REQUIREMENTS:
 pySerial
 GTK+
 pyGTK
+numpy (sudo apt-get install python-numpy)
 
 ABOUT:
 
