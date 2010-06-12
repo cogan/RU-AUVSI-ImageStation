@@ -23,7 +23,7 @@ class CameraControl:
         self.initialize_gui()
         
         # Initialize video streaming
-        self.video_device = "/dev/video0"
+        tes = "/dev/video0"
         self.streaming = False
         #self.video_menu_streaming.set_active(True)
         

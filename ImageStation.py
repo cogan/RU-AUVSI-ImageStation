@@ -516,18 +516,40 @@ class ImageStation:
     
     def image_tree_menu_redownload_activate(self, widget, data=None):
         """reset the status of the current image so it can be redownloaded"""
+        
+        # TODO: this uses bad design principles! all access of the image_store
+        # should go through the communicator, then crop_reset should be
+        # moved to an update procedure.
+        
+        # TODO: fix this so it doesn't display the image when you click redownload
+        # to do this you need to do a little fixin
+        
         (model, treeiter) = self.image_tree.get_selection().get_selected()
         pic_num = int(self.tree_store.get_value(treeiter, 1))
         crop_num = int(self.tree_store.get_value(treeiter, 2))
         crop = self.communicator.image_store.get_crop(pic_num, crop_num)
+        
+        # if the image in question is currently selected, make sure everything
+        # is honky dorey with the display and target list before proceeding
+        
+        # display the image
+        self.image_tree_menu_display_activate(widget, None)
+        if crop.target != None and crop.target.included == True:
+            self.include_target.set_active(False)
+                
+        # now redownload and update the view
         crop.set_for_redownload()
-        #update the treeview to reflect the changes in the model
         self.crop_reset(pic_num, crop_num)
         self.add_to_queue(crop.name, pic_num, crop_num)
-        
+        self.display_image(pic_num, crop_num)
+
     def image_tree_menu_add_manually_activate(self, widget, data=None):
         """set a crop to be marked as completed so the user can just
         manually drag an image into the folder for manipulation"""
+        
+        # TODO: this uses bad design principles! all access of the image_store
+        # should go through the communicator, then crop_reset should be
+        # moved to an update procedure.
         (model, treeiter) = self.image_tree.get_selection().get_selected()
         pic_num = int(self.tree_store.get_value(treeiter, 1))
         crop_num = int(self.tree_store.get_value(treeiter, 2))
@@ -845,7 +867,7 @@ class ImageStation:
                 
     def include_target_toggled(self, widget, data=None):
         """include target button toggled"""
-        
+                
         crop = self.communicator.image_store.get_crop(self.cd_pic_num, 
                                                         self.cd_crop_num)
 
@@ -1095,9 +1117,6 @@ class ImageStation:
     def _identify_target(self):
         """identify a target on the image"""
         
-        # ^
-        # |
-        
         # change the cursor for the drawing area
         x_cursor = gtk.gdk.Cursor(gtk.gdk.X_CURSOR)
         self.drawing_area.window.set_cursor(x_cursor)
@@ -1236,6 +1255,7 @@ class ImageStation:
             #draw the image
             self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
                                                 0, 0, 0, 0, w, h)
+            self.drawing_area.set_size_request(w, h)
         
         # show the picture info and update it
         self.update_target_info(pic_num, crop_num)

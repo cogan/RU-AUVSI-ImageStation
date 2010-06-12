@@ -114,27 +114,27 @@ class SerialInterface(Interface):
         else:
             raise InterfaceError("no serial connection")
     
-    def resume_search(self):
-        """have the camera resume it's search pattern."""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("")
-                return self.tx_rx_decode(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
+    #def resume_search(self):
+    #    """have the camera resume it's search pattern."""
+    #    if self.enabled == True:
+    #        try:
+    #            msg_to_send = self.encoder.encode("")
+    #            return self.tx_rx_decode(msg_to_send)
+    #        except InterfaceError as e:
+    #            raise InterfaceError(e.value)
+    #    else:
+    #        raise InterfaceError("no serial connection")
         
-    def lock_target(self, xa, ya):
-        """lock onto a target given pixels xa and ya."""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("", xa, ya)
-                return self.tx_rx_decode(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
+    #def lock_target(self, xa, ya):
+    #    """lock onto a target given pixels xa and ya."""
+    #    if self.enabled == True:
+    #        try:
+    #            msg_to_send = self.encoder.encode("", xa, ya)
+    #            return self.tx_rx_decode(msg_to_send)
+    #        except InterfaceError as e:
+    #            raise InterfaceError(e.value)
+    #    else:
+    #        raise InterfaceError("no serial connection")
         
     def download_to_flc(self):
         """download pictures form the camera memory onto the
@@ -198,82 +198,27 @@ class SerialInterface(Interface):
         else:
             raise InterfaceError("no serial connection")
 
-    def camera_zoom_in(self, increment):
-        """have the camera zoom in."""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("CZI", increment)
-                return self.tx_rx_decode(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
+    #def camera_zoom_in(self, increment):
+    #    """have the camera zoom in."""
+    #    if self.enabled == True:
+    #        try:
+    #            msg_to_send = self.encoder.encode("CZI", increment)
+    #            return self.tx_rx_decode(msg_to_send)
+    #        except InterfaceError as e:
+    #            raise InterfaceError(e.value)
+    #    else:
+    #        raise InterfaceError("no serial connection")
 
-    def camera_zoom_out(self, increment):
-        """have the camera zoom out."""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("CZO", increment)
-                return self.tx_rx_decode(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
-        
-    def camera_pan_left(self, increment):
-        """have the camera pan left."""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("CLT", increment)
-                return self.tx_rx_decode(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
-        
-    def camera_pan_right(self, increment):
-        """have the camera pan right."""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("CRT", increment)
-                return self.tx_rx_decode(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
-        
-    def camera_tilt_up(self, increment):
-        """have the camera tilt upwards."""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("CUP", increment)
-                return self.tx_rx_decode(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
-        
-    def camera_tilt_down(self, increment):
-        """have the camera tilt down."""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("CDN", increment)
-                return self.tx_rx_decode(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
-    
-    def camera_reset(self):
-        """have the camera set itself to it's home coordinates"""
-        if self.enabled == True:
-            try:
-                msg_to_send = self.encoder.encode("CRE")
-                return self.tx_rx_decode(msg_to_send)
-            except InterfaceError as e:
-                raise InterfaceError(e.value)
-        else:
-            raise InterfaceError("no serial connection")
+    #def camera_zoom_out(self, increment):
+    #    """have the camera zoom out."""
+    #    if self.enabled == True:
+    #        try:
+    #            msg_to_send = self.encoder.encode("CZO", increment)
+    #            return self.tx_rx_decode(msg_to_send)
+    #        except InterfaceError as e:
+    #            raise InterfaceError(e.value)
+    #    else:
+    #        raise InterfaceError("no serial connection")
                 
     def ping(self):
         """ping the plane"""

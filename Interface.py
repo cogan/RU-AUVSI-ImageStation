@@ -7,8 +7,28 @@ class Interface:
     It uses the syntax methodname(self): abstract defined in the Python IAQ.
     This will raise a NameError if the method is not defined"""
     
+    def toggle_power(self):
+        """toggle power on and off for the camera"""
+        abstract
+    
+    def set_mode(self, mode):
+        """set the mode for the camera (0 for storage, 1 for camera mode)"""
+        abstract
+    
     def take_picture(self, picture_num):
         """snap a picture."""
+        abstract
+
+    def toggle_record(self):
+        """toggle recording on and off for the camera"""
+        abstract
+
+    def pan(self, value):
+        """set the pan servo to position (-180 to 180)"""
+        abstract
+        
+    def tilt(self, value):
+        """set the pan servo to position (-45 to 45)"""
         abstract
         
     def resume_search(self):
