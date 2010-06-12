@@ -48,7 +48,12 @@ class Communicator(Subject):
     
     def new_project(self, path):
         # create the project in the filesystem
-        os.mkdir(path)
+        try:
+            os.mkdir(path)
+        except OSError as e:
+            self.notify("NEW_PROJECT", status=False)
+            return
+        
         if not (path[-1] == '/'):
             path = path + '/'
         open(path + 'imagestore.obj', 'w')
@@ -59,20 +64,30 @@ class Communicator(Subject):
         self.save_project(path)
         self.image_store.set_project_path(path)
         
+        # notify
+        self.notify("NEW_PROJECT", status=True)
+        
     def save_project(self, path=None):
         if not path:
             path = self.image_store.project_path
         file_handler = open(path + 'imagestore.obj', 'w')
         pickle.dump(self.image_store, file_handler)
         
+        # notify
+        self.notify("SAVE_PROJECT", status=True)
+        
     def load_project(self, path):
         if not (path[-13:] == "save_file.isp"):
-            print "invalid save file"
-            return False
+            self.notify("LOAD_PROJECT", status=False)
+            return
+            #print "invalid save file"
+            #return False
         file_handler = open(path[:-13] + 'imagestore.obj', 'r')
         self.image_store = pickle.load(file_handler)
-        return True
 
+        # notify
+        self.notify("LOAD_PROJECT", status=True)
+    
     #*
     #* Functions to be called by a "controller" to initiate Communicator actions
     #*

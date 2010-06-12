@@ -41,10 +41,13 @@ class ImageStation:
         
         #debugging load
         self.communicator.load_project('/home/cogan/Desktop/newISP/save_file.isp')
-        self.project_loaded()
+        self._project_loaded()
         
         # Configure update handler
-        self.update_dic = {"PICTURE_TAKEN" : self._handle_picture_taken, \
+        self.update_dic = { "NEW_PROJECT" : self._handle_new_project, \
+            "LOAD_PROJECT" : self._handle_load_project, \
+            "SAVE_PROJECT" : self._handle_save_project, \
+            "PICTURE_TAKEN" : self._handle_picture_taken, \
             "SEARCH_RESUMED" : self._handle_search_resumed, \
             "LOCKED_TARGET" : self._handle_locked_target, \
             "DOWNLOADED_TO_FLC" : self._handle_downloaded_to_flc, \
@@ -340,7 +343,6 @@ class ImageStation:
     def file_menu_save_activate(self, widget, data=None):
         """save clicked on file menu."""
         self.communicator.save_project()
-        self.saved = True
     
     def file_menu_quit_activate(self, widget, data=None):
         """quit clicked on file menu."""
@@ -407,7 +409,6 @@ class ImageStation:
     def tool_save_clicked(self, widget, data=None):
         """save clicked on the toolbar menu."""
         self.communicator.save_project()
-        self.saved = True
         
     def tool_dl2flc_clicked(self, widget, data=None):
         """dl2flc clicked on the toolbar menu."""
@@ -433,8 +434,6 @@ class ImageStation:
         """save clicked in file choose dialog."""
         filename = self.new_chooser.get_filename()
         self.communicator.new_project(filename)
-        self.new_chooser.hide()
-        self.project_loaded()
     
     def nd_cancel_clicked(self, widget, data=None):
         """cancel clicked in file choose dialog."""
@@ -443,9 +442,7 @@ class ImageStation:
     def od_open_clicked(self, widget, data=None):
         """save clicked in file choose dialog."""
         filename = self.open_chooser.get_filename()
-        if (self.communicator.load_project(filename)):
-            self.open_chooser.hide()
-        self.project_loaded()
+        self.communicator.load_project(filename)
         
     def od_cancel_clicked(self, widget, data=None):
         """cancel clicked in file choose dialog."""
@@ -1011,7 +1008,7 @@ class ImageStation:
                 self.target_list.append(0)
             self.target_list[crop.target.number] = crop.target
     
-    def project_loaded(self):
+    def _project_loaded(self):
         # clear the current treeview and listview
         while 1:
             iters = self.tree_store.get_iter_first()
@@ -1376,11 +1373,32 @@ class ImageStation:
     def update(self, update, **kwargs):
         """update to reflect the model"""
         try:
+            self.saved = False
             function_to_call = self.update_dic[update]
             function_to_call(**kwargs)
-            self.saved = False
         except KeyError as e:
             pass
+
+    def _handle_new_project(self, status):
+        if status == True:
+            self.new_chooser.hide()
+            self._project_loaded()
+            self.communicator.save_project()
+        else:
+            print "directory already exists"
+
+    def _handle_load_project(self, status):
+        if status == True:
+            self.open_chooser.hide()
+            self._project_loaded()
+        else:
+            print "invalid save file"
+        
+    def _handle_save_project(self, status):
+        if status == True:
+            self.saved = True
+        else:
+            print "you're fuckin' up, everything is probably corrupt"
 
     def _handle_picture_taken(self, picture_num):
         #add the picture to tree!
