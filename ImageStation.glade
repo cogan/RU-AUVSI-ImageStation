@@ -5,7 +5,6 @@
   <widget class="GtkWindow" id="ImageWindow">
     <property name="visible">True</property>
     <property name="extension_events">all</property>
-    <property name="window_position">center</property>
     <signal name="destroy" handler="on_ImageWindow_destroy"/>
     <signal name="delete_event" handler="on_ImageWindow_delete_event"/>
     <child>
