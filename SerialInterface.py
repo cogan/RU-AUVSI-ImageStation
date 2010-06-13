@@ -19,6 +19,10 @@ class SerialInterface(Interface):
         #create a connection on the selected port
         self.initialize_connection(port, baud)
         
+        #try to open on ttyUSB1 if ttyUSB0 fails
+        if self.enabled == False:
+            self.initialize_connection("/dev/ttyUSB1", baud)
+        
         #talker identifier = IS (ImageStation)
         self.identifier = "IS"
         
@@ -248,10 +252,10 @@ class SerialInterface(Interface):
             self.ser.rtscts = 1
             self.ser.timeout = 1
             self.enabled = True
-            print "serial connection successful at %d baud" % (baud)
+            print "serial connection successful on port %s at %d baud" % (port, baud,)
         except serial.serialutil.SerialException as e:
             self.enabled = False
-            print "serial connection failed"
+            print "serial connection failed on port %s" % (port,)
             print e
 
     def tx_rx_decode(self, msg_to_send):

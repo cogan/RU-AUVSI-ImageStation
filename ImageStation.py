@@ -104,6 +104,8 @@ class ImageStation:
         connection_menu_serial.show()
         connection_menu_debug.show()
         
+        connection_menu_serial.set_active(True)
+        
         #*
         #* Set up TreeView
         #*

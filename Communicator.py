@@ -30,7 +30,7 @@ class Communicator(Subject):
         self.image_store = ImageStore()
         
         #set default interface
-        self.interface = SerialInterface("/dev/ttyUSB0", 9600)
+        self.interface = SerialInterface("/dev/ttyUSB0", 115200)
         #self.interface = DebugInterface()
         
     def set_interface(self, interface, **kwargs):
