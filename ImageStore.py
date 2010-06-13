@@ -9,7 +9,7 @@ class ImageStore:
     def __init__(self):
         self.picture_list = []
         self.picture_count = 0
-        self.project_path = "/tmp/"
+        self.project_path = "/tmp/myProject/"
     
     def set_project_path(self, path):
         if path[-1] != '/':

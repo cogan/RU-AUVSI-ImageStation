@@ -16,12 +16,21 @@ class NmeaDecoder:
         sentence = sentence.replace('\r', '')
         sentence = sentence.replace('\n', '')
         
+        # check for garbage
+        for char in sentence:
+            if not (33 <= ord(char) <= 126):
+                raise DecodeError("received garbage message containing illegal characters")
+        
         # parse args out of sentence
         args = sentence.split(',')
 
-        # if code is $PVERR raise exception
+        # if code is $PVERR raise exception 
         if args[0] == "$PVERR":
             raise DecodeError("received $PVERR message from plane")
+
+        # if the header is not the proper length raise an exeception
+        if len(args[0]) != 6:
+            raise DecodeError("received garbage message containing an illegal header")
 
         # if there are arguments a checksum is required
         if len(args) > 1:
@@ -38,7 +47,7 @@ class NmeaDecoder:
                     
             # subtract one comma value in order to be consistent
             calc_chksum -= ord(',')
-                    
+
             # compare and return arguments if correct
             if chksum == calc_chksum:
                 return args[1:-1]
@@ -65,6 +74,10 @@ class NmeaDecoder:
         # if code is $PVERR raise exception
         if args[0] == "$PVERR":
             raise DecodeError("received $PVERR message from plane")
+        
+        # if the header is not the proper length raise an exeception
+        if len(args[0]) != 6:
+            raise DecodeError("received garbage message containing an illegal header")
 
         # if there are arguments a checksum is required
         if len(args) > 1:

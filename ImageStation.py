@@ -39,10 +39,15 @@ class ImageStation:
         # Configure the GUI with Glade
         self.initialize_gui()
         
-        #debugging load
-        self.communicator.load_project('/home/cogan/Desktop/newISP/save_file.isp')
-        self._project_loaded()
-        
+        #create project
+        #self.communicator.load_project('/home/cogan/Desktop/newISP/save_file.isp')
+        #self._project_loaded()
+        if self.communicator.new_project("/tmp/myProject/"):
+            self._project_loaded()
+        else:
+            self.communicator.load_project("/tmp/myProject/save_file.isp")
+            self._project_loaded()
+            
         # Configure update handler
         self.update_dic = { "NEW_PROJECT" : self._handle_new_project, \
             "LOAD_PROJECT" : self._handle_load_project, \
@@ -1381,6 +1386,7 @@ class ImageStation:
 
     def _handle_new_project(self, status):
         if status == True:
+            print "in handle new project"
             self.new_chooser.hide()
             self._project_loaded()
             self.communicator.save_project()
@@ -1396,6 +1402,7 @@ class ImageStation:
         
     def _handle_save_project(self, status):
         if status == True:
+            print "project saved"
             self.saved = True
         else:
             print "you're fuckin' up, everything is probably corrupt"

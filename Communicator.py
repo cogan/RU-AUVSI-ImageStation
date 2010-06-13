@@ -30,9 +30,9 @@ class Communicator(Subject):
         self.image_store = ImageStore()
         
         #set default interface
-        #self.interface = SerialInterface("/dev/ttyUSB0", 9600)
-        self.interface = DebugInterface()
-
+        self.interface = SerialInterface("/dev/ttyUSB0", 9600)
+        #self.interface = DebugInterface()
+        
     def set_interface(self, interface, **kwargs):
         """sets the interface used to communicate with the plane"""
         if interface == "serial":
@@ -48,11 +48,12 @@ class Communicator(Subject):
     
     def new_project(self, path):
         # create the project in the filesystem
+        
         try:
             os.mkdir(path)
         except OSError as e:
             self.notify("NEW_PROJECT", status=False)
-            return
+            return False
         
         if not (path[-1] == '/'):
             path = path + '/'
@@ -64,8 +65,11 @@ class Communicator(Subject):
         self.save_project(path)
         self.image_store.set_project_path(path)
         
+        print "about to notify"
+        
         # notify
         self.notify("NEW_PROJECT", status=True)
+        return True
         
     def save_project(self, path=None):
         if not path:
