@@ -94,17 +94,20 @@ class ImageStation:
         
         connection_menu_none = gtk.RadioMenuItem(None, "None")
         connection_menu_serial = gtk.RadioMenuItem(connection_menu_none, "Serial")
+        connection_menu_framegrabber = gtk.RadioMenuItem(connection_menu_none, "Frame Grabber")
         connection_menu_debug = gtk.RadioMenuItem(connection_menu_none, "Debug")
         
         connection_menu.append(connection_menu_none)
         connection_menu.append(connection_menu_serial)
+        connection_menu.append(connection_menu_framegrabber)
         connection_menu.append(connection_menu_debug)
         
         connection_menu_none.show()
         connection_menu_serial.show()
+        connection_menu_framegrabber.show()
         connection_menu_debug.show()
         
-        connection_menu_serial.set_active(True)
+        connection_menu_framegrabber.set_active(True)
         
         #*
         #* Set up TreeView
@@ -268,6 +271,7 @@ class ImageStation:
                 
         connection_menu_none.connect("activate", self.connection_menu_none_activate)
         connection_menu_serial.connect("activate", self.connection_menu_serial_activate)
+        connection_menu_framegrabber.connect("activate", self.connection_menu_framegrabber_activate)
         connection_menu_debug.connect("activate", self.connection_menu_debug_activate)
             
         view_dic = { "on_view_menu_cc_activate" : self.view_menu_cc_activate }
@@ -369,6 +373,11 @@ class ImageStation:
         if widget.get_active():
             self.communicator.set_interface("serial", baud=115200)
         
+    def connection_menu_framegrabber_activate(self, widget, data=None):
+        """frame grabber cicked on connection menu"""
+        if widget.get_active():
+            self.communicator.set_interface("framegrabber")
+    
     def connection_menu_debug_activate(self, widget, data=None):
         """serial clicked on connection menu."""
         if widget.get_active():
@@ -1153,11 +1162,18 @@ class ImageStation:
     
     def insert_in_tree(self, pic_name, pic_num, crop_num, is_crop=False):
         """inserts a row into the imagetree"""
+        
+        crop = self.communicator.image_store.get_crop(pic_num, crop_num)
+        
         # insert the picture/crop name in column 0
         if (is_crop == False):
             myiter = self.tree_store.append(None, None)
-            self.tree_store.set_value(myiter, \
-                0, '<span foreground="#A0A0A0"><b>' + pic_name + '</b></span>')
+            if crop.available == True:
+                self.tree_store.set_value(myiter, \
+                    0, '<span foreground="#000000"><b>' + pic_name + '</b></span>')
+            else:
+                self.tree_store.set_value(myiter, \
+                    0, '<span foreground="#A0A0A0"><b>' + pic_name + '</b></span>')
         elif (is_crop == True):
             #determine iter that points to row containing pic_num
             # in column 1
@@ -1414,6 +1430,8 @@ class ImageStation:
         picture_name = self.communicator.image_store.get_crop(picture_num, 1).name
         self.insert_in_tree(picture_name, picture_num, 1, False)
         self.add_to_queue(picture_name, picture_num, 1)
+        if self.communicator.image_store.get_crop(picture_num, 1).completed == True:
+            self._handle_image_downloaded(picture_num, 1, 100)
         
     def _handle_search_resumed(self):
         pass
@@ -1453,8 +1471,10 @@ class ImageStation:
         self.queue_changed()
         
     def _handle_image_downloaded(self, picture_num, crop_num, percent_complete):
+        print "in handle image downloaded"
         #part or all of a picture has finished downloading
-        if (self.communicator.image_store.get_crop(picture_num, crop_num).completed == True):
+        if (self.communicator.image_store.get_crop(picture_num, crop_num).completed == True and
+            self.communicator.image_store.get_crop(picture_num, crop_num).inqueue == True):
             del self.list_store[0]
 
         # update the progress

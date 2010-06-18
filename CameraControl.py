@@ -7,6 +7,8 @@ import pygtk
 pygtk.require('2.0')
 import gtk.glade
 
+from Communicator import *
+
 class CameraControl:
     """Control panel for manipulating camera on plane."""
     
@@ -23,7 +25,7 @@ class CameraControl:
         self.initialize_gui()
         
         # Initialize video streaming
-        tes = "/dev/video0"
+        self.video_device = "/dev/video0"
         self.streaming = False
         #self.video_menu_streaming.set_active(True)
         
@@ -128,13 +130,13 @@ class CameraControl:
         # snap to 0
         if -10 <= widget.get_adjustment().get_value() <= 10:
             widget.get_adjustment().set_value(0)
-        self._tilt(int(widget.get_adjustment().get_value()))
+        self._tilt(int(widget.get_adjustment().get_value()) + 180)
         
     def pan_value_changed(self, widget, data=None):
         # snap to 0
         if -15 <= widget.get_adjustment().get_value() <= 15:
             widget.get_adjustment().set_value(0)
-        self._pan(int(widget.get_adjustment().get_value()))
+        self._pan(int(widget.get_adjustment().get_value()) + 90)
     
     #*
     #* General Events
@@ -155,10 +157,10 @@ class CameraControl:
             self._set_display_mode("up")
             
             # make sure the video device exists, if not exit
-            if not os.path.exists(self.video_device):
-                self.video_menu_streaming.set_active(False)
-                print "%s does not exist" % (self.video_device,)
-                return
+            #if not os.path.exists(self.video_device):
+            #    self.video_menu_streaming.set_active(False)
+            #    print "%s does not exist" % (self.video_device,)
+            #    return
             
             # display video
             self._setup_video()
@@ -171,13 +173,22 @@ class CameraControl:
     def _setup_video(self):
         """do video stuff"""
 
-        #MPLAYER_CMD="mplayer tv:// -tv driver=v4l2:input=1:norm=ntsc:device=%s -wid %i -slave -idle"
-        MPLAYER_CMD="mplayer -dumpfile /home/cogan/Desktop/test.mpg tv:// -tv driver=v4l2:input=1:norm=ntsc:device=%s -wid %i -slave -idle"
-
-        command = MPLAYER_CMD  % (self.video_device, self.xid)
+        # SPECIAL CASE: change the command based on interface
+        command = ""
+        if isinstance(self.communicator.interface, FrameGrabberInterface):
+            #MPLAYER_CMD= "mplayer /tmp/myProject/DELTA.MPG -wid %i -slave -idle -loop 0 -vf screenshot -input file=%s"
+            MPLAYER_CMD= "mplayer tv:// -tv driver=v4l2:input=1:norm=ntsc:device=%s -wid %i -slave -idle -loop 0 -vf screenshot -input file=%s"
+            #command = MPLAYER_CMD % (self.xid, os.getcwd() + '/' + self.communicator.interface.fifo_name)
+            command = MPLAYER_CMD % (self.video_device, self.xid, os.getcwd() + '/' + self.communicator.interface.fifo_name)
+        else:
+            MPLAYER_CMD= "mplayer tv:// -tv driver=v4l2:input=1:norm=ntsc:device=%s -wid %i -slave -idle"    
+            command = MPLAYER_CMD  % (self.video_device, self.xid)
+        
         print command
         commandList = command.split()
-        self.proc_inst = Popen(commandList)
+        
+        # run mplayer from the project directory (for saving screenshots here)
+        self.proc_inst = Popen(commandList, cwd=self.communicator.image_store.project_path)
         
         win = self.video_canvas.window
         w,h = win.get_size()

@@ -8,8 +8,9 @@ import time
 
 #import project related dependencies
 from Subject import *
-from SerialInterface import *
 from NoneInterface import *
+from SerialInterface import *
+from FrameGrabberInterface import *
 from DebugInterface import *
 from ImageStore import *
 
@@ -30,15 +31,18 @@ class Communicator(Subject):
         self.image_store = ImageStore()
         
         #set default interface
-        self.interface = SerialInterface("/dev/ttyUSB0", 115200)
+        #self.interface = SerialInterface("/dev/ttyUSB0", 115200)
+        self.interface = FrameGrabberInterface()
         #self.interface = DebugInterface()
         
     def set_interface(self, interface, **kwargs):
         """sets the interface used to communicate with the plane"""
-        if interface == "serial":
-            self.interface = SerialInterface(**kwargs)
-        elif interface == "none":
+        if interface == "none":
             self.interface = NoneInterface()
+        elif interface == "serial":
+            self.interface = SerialInterface(**kwargs)
+        elif interface == "framegrabber":
+            self.interface = FrameGrabberInterface()
         elif interface == "debug":
             self.interface = DebugInterface()
 
@@ -256,6 +260,21 @@ class Communicator(Subject):
             
             #add a new picture to image store
             pic_num = self.image_store.add_picture()
+            print "pic_num is %d" % (pic_num,) 
+
+            # SPECIAL CASE: if we are using the frame grabber interface
+            if isinstance(self.interface, FrameGrabberInterface):
+                # update the picture with the path to the screenshot
+                pic_name = pic_num + 1
+                if pic_name < 10:
+                    self.image_store.get_crop(pic_num, 1).path = self.image_store.project_path + 'shot000' + str(pic_name) + '.png'
+                elif pic_name < 100:
+                    self.image_store.get_crop(pic_num, 1).path = self.image_store.project_path + 'shot00' + str(pic_name) + '.png'
+                else:
+                    self.image_store.get_crop(pic_num, 1).path = self.image_store.project_path + 'shot0' + str(pic_name) + '.png'
+                # set the crop properties
+                crop = self.image_store.get_crop(pic_num, 1)
+                crop.set_for_manual()
             
             self.notify("PICTURE_TAKEN", picture_num=pic_num)
             
