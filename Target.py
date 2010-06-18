@@ -152,8 +152,11 @@ class Target(object):
         #
         
         # TODO: conversions go here
-        self.latitude = "1234.12.12"
-        self.longitude = "9876.98.98"
+        #self.latitude = "1234.12.12"
+        #self.longitude = "9876.98.98"
+        self.latitude = self.crop.picture.latitude
+        self.longitude = self.crop.picture.longitude
+        self.orientation = self.crop.picture.orientation
         
     def format_info(self):
         """return target info in string format specified by 2010 UAVSI

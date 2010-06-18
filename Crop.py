@@ -138,6 +138,5 @@ class Crop:
         # FINALLY: pass all this info to the calculate_gps function, which
         # will do matrix mults and math described in the blue notebook
         #
-        #TODO: change this to take the required args
         self.target.calculate_gps(M_int, real_x, real_y, gps_x, gps_y, \
                 pan, tilt, yaw, pitch, roll, plane_orientation, altitude)

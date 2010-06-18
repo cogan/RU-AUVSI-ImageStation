@@ -3,9 +3,11 @@
 from Interface import *
 from NmeaEncoder import *
 from NmeaDecoder import *
+from ivy.std_api import *
 
 import time
 import subprocess
+import thread
 
 class FrameGrabberInterface(Interface):
     """interface class to use when debugging."""
@@ -16,6 +18,15 @@ class FrameGrabberInterface(Interface):
         
         # fifo to communicate with mplayer
         self.fifo_name = "mplayer_fifo"
+        
+        thread.start_new_thread(self.ivy_setup, ())
+        
+        self.heading = str(0.0)
+        self.latitude = str(0.0)
+        self.longitude = str(0.0)
+    
+    def __del__(self):
+        print "framegrabber destructor called, killing ivy bus"
     
     #*
     #* Define Abstract functions
@@ -89,3 +100,54 @@ class FrameGrabberInterface(Interface):
     def ping(self):
         """ping the plane"""
         pass
+    
+    def lprint(self, fmt,*arg):
+        print "GroundStationIvy:" + ": " + fmt % arg
+
+    def oncxproc(self, agent, connected):
+        """connection callback"""
+        if connected == IvyApplicationDisconnected:
+            self.lprint( "Ivy application %r was disconnected", agent)
+        else:
+            self.lprint( "Ivy application %r was connected", agent)
+            self.lprint("currents Ivy application are [%s]", IvyGetApplicationList())
+
+    def ondieproc(self, agent, id):
+        """die callback"""
+        self.lprint( "received the order to die from %r with id = %d", agent, id)
+
+    def ongpsproc(self, agent, *larg):
+        #self.lprint("Received from %r: [%s] ", agent, larg[0])
+        # parse gps info
+        if len(larg) > 0:
+            try:
+                data_str = larg[2]
+                data_arr = data_str.split(" ")
+                self.heading = str(data_arr[4])
+                self.latitude = str(data_arr[5])
+                self.longitude = str(data_arr[6])
+                print "set that shit"
+                print str(self.heading)
+                print str(self.latitude)
+                print str(self.longitude)
+            except Exception as e:
+                pass
+
+    def ivy_setup(self):
+        # initialize
+        IvyInit("GroundStationIvy",   # application name for Ivy
+          "Ground Station Ivy is Ready" , # ready message
+          0,            # main loop is local (ie. using IvyMainloop)
+          self.oncxproc,     # handler called on connection/deconnection
+          self.ondieproc     # handler called when a diemessage is received 
+        )
+
+        # start the bus
+        sivybus = "192.168.1.255:2010"
+        IvyStart(sivybus)
+
+        # check for messages containing gps information
+        IvyBindMsg(self.ongpsproc, "^([0-9]+\.[0-9]+ )?([^ ]*) +(FLIGHT_PARAM( .*|$))")
+
+        # loop
+        IvyMainLoop()

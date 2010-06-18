@@ -278,6 +278,16 @@ class Communicator(Subject):
             
             self.notify("PICTURE_TAKEN", picture_num=pic_num)
             
+            # SPECIAL CASE: if we are using the frame grabber interface
+            # we need to get the info too
+            if isinstance(self.interface, FrameGrabberInterface):
+                pic = self.image_store.get_picture(pic_num)
+                pic.orientation = self.interface.heading
+                pic.latitude = self.interface.latitude
+                pic.longitude = self.interface.longitude
+            
+            #self.notify("INFO_RECEIVED")
+            
         except InterfaceError as e:
             self.notify("INTERFACE_ERROR", \
                 msg=e.value, \
