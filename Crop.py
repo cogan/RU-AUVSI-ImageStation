@@ -106,8 +106,8 @@ class Crop:
         
         # need this stuff for calculating latitude and longitude
         # * needs pitch, yaw, roll, pan, tilt from picture, etc.
-        gps_x = self.picture.gps_x
-        gps_y = self.picture.gps_y
+        gps_x = float(self.picture.gps_x)
+        gps_y = float(self.picture.gps_y)
         pan = self.picture.pan
         tilt = self.picture.tilt
         yaw = self.picture.yaw
@@ -133,8 +133,9 @@ class Crop:
         # *** to get x_offset and y_offset
         # --> look at '_execute_generate_crop' and make it so xa and ya are stored
         (real_x, real_y) = self.calculate_real_coordinates(crop_x, crop_y)
-        print "crop_coords are x: %d, y%d" % (crop_x, crop_y)
-        print "real coords are x: %d, y%d" % (real_x, real_y,)
+        print "lat is: %f and long is %f" % (gps_x, gps_y,)
+        print "crop_coords are x: %d, y: %d" % (crop_x, crop_y,)
+        print "real coords are x: %d, y: %d" % (real_x, real_y,)
         # FINALLY: pass all this info to the calculate_gps function, which
         # will do matrix mults and math described in the blue notebook
         #

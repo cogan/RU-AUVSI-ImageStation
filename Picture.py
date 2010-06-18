@@ -11,13 +11,13 @@ class Picture(object):
         
         # mission relevant attributes
         # TODO: move these to target class
-        self._latitude = "uncalculated"
-        self._longitude = "uncalculated"
-        self._shape = "unknown"
-        self._alpha = "unknown"
-        self._alphacolor = "unknown"
-        self._color = "unknown"
-        self._orientation = "unknown"
+        # self._latitude = "uncalculated"
+        # self._longitude = "uncalculated"
+        # self._shape = "unknown"
+        # self._alpha = "unknown"
+        # self._alphacolor = "unknown"
+        # self._color = "unknown"
+        # self._orientation = "unknown"
         
         # "intermediate" attributes
         self._gps_x = 0.0

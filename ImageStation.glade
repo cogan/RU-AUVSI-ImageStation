@@ -692,12 +692,13 @@
                                             </child>
                                             <child>
                                               <widget class="GtkEntry" id="picture_lat_entry">
-                                                <property name="width_request">90</property>
+                                                <property name="width_request">105</property>
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
                                                 <property name="editable">False</property>
                                                 <property name="has_frame">False</property>
                                                 <property name="invisible_char">&#x25CF;</property>
+                                                <property name="xalign">0.5</property>
                                               </widget>
                                               <packing>
                                                 <property name="expand">False</property>
@@ -727,12 +728,13 @@
                                             </child>
                                             <child>
                                               <widget class="GtkEntry" id="picture_long_entry">
-                                                <property name="width_request">90</property>
+                                                <property name="width_request">105</property>
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
                                                 <property name="editable">False</property>
                                                 <property name="has_frame">False</property>
                                                 <property name="invisible_char">&#x25CF;</property>
+                                                <property name="xalign">0.5</property>
                                               </widget>
                                               <packing>
                                                 <property name="expand">False</property>

@@ -21,10 +21,10 @@ class FrameGrabberInterface(Interface):
         
         thread.start_new_thread(self.ivy_setup, ())
         
-        self.heading = str(0.0)
-        self.latitude = str(0.0)
-        self.longitude = str(0.0)
-    
+        self.heading = "NW"
+        self.latitude = "38.1454"
+        self.longitude = "76.431586"
+            
     def __del__(self):
         print "framegrabber destructor called, killing ivy bus"
     
@@ -123,13 +123,9 @@ class FrameGrabberInterface(Interface):
             try:
                 data_str = larg[2]
                 data_arr = data_str.split(" ")
-                self.heading = str(data_arr[4])
-                self.latitude = str(data_arr[5])
-                self.longitude = str(data_arr[6])
-                print "set that shit"
-                print str(self.heading)
-                print str(self.latitude)
-                print str(self.longitude)
+                self.heading = data_arr[4]
+                self.latitude = data_arr[5]
+                self.longitude = data_arr[6]
             except Exception as e:
                 pass
 

@@ -1304,9 +1304,9 @@ class ImageStation:
             self.picture_color.set_text(crop.target.color)
             self.picture_alpha.set_text(crop.target.alpha)
             self.picture_alphacolor.set_text(crop.target.alphacolor)
-            self.picture_orientation.set_text(crop.target.orientation)
-            self.picture_longitude.set_text(crop.target.longitude)
-            self.picture_latitude.set_text(crop.target.latitude)
+            self.picture_orientation.set_text(str(crop.target.orientation))
+            self.picture_longitude.set_text(str(crop.target.longitude))
+            self.picture_latitude.set_text(str(crop.target.latitude))
             
             if crop.target.included == True:
                 self.user_toggled = False

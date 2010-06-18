@@ -260,7 +260,13 @@ class Communicator(Subject):
             
             #add a new picture to image store
             pic_num = self.image_store.add_picture()
+
             print "pic_num is %d" % (pic_num,) 
+            pict = self.image_store.get_picture(pic_num)
+            print pict.gps_x
+            print pict.gps_y
+            
+
 
             # SPECIAL CASE: if we are using the frame grabber interface
             if isinstance(self.interface, FrameGrabberInterface):
@@ -282,9 +288,9 @@ class Communicator(Subject):
             # we need to get the info too
             if isinstance(self.interface, FrameGrabberInterface):
                 pic = self.image_store.get_picture(pic_num)
-                pic.orientation = self.interface.heading
-                pic.latitude = self.interface.latitude
-                pic.longitude = self.interface.longitude
+                pic.plane_orientation = self.interface.heading
+                pic.gps_x = self.interface.latitude
+                pic.gps_y = self.interface.longitude
             
             #self.notify("INFO_RECEIVED")
             
