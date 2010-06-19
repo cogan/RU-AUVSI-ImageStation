@@ -33,8 +33,8 @@ class Target(object):
     def calculate_gps(self, M_int, x_im, y_im, gps_x, gps_y, pan, tilt, \
                         yaw, pitch, roll, plane_orientation, altitude):
         
-        # TODO: implement this code
         if 0:
+            # TODO: implement this code
             #
             # get the angles of the target in the camera view
             #  ________________
@@ -50,6 +50,8 @@ class Target(object):
                             [1   ] ])
             
             p_c = M_int_inv * p_im
+            f = M_int[0,0]
+            p_c = p_c * f
             
             angle_y = math.atan( p_c[1,0] / p_c[2,0] )
             angle_x = math.atan( p_c[0,0] / p_c[2,0] )
@@ -57,18 +59,16 @@ class Target(object):
             #
             # solve for Z using trig
             #
-            # Z =   alt * cos(angle_y)
-            #     -----------------------
-            #     cos(tilt + (-angle_y) )
-            #
-            Z = ( altitude * math.cos(angle_y) ) / math.cos(tilt - angle_y)
+            
+            Z = altitude
             
             #
             # multiply p_c by Z to get P_c
             # PS if at this point you think my notation is confusing... too bad.
             #
             
-            P_c = p_c * Z
+            # TODO: change this code to account for slanted landscape
+            P_c = p_c * (Z / f)
             P_c = matrix([[ P_c[0,0] ],\
                           [ P_c[1,0] ],\
                           [ P_c[2,0] ],\
@@ -133,21 +133,21 @@ class Target(object):
                           [ 0, math.sin(theta_tilt),  math.cos(theta_tilt) ]])
             
             R = R_tilt * R_pan * R_image * R_roll * R_pitch * R_yaw * R_orient
-
+    
             #
             # Obtain T
             #
-
+    
             T = matrix([[  gps_x    ],\
                         [  gps_y    ],\
                         [ -altitude ]])
-
+    
             M_ext = matrix([[ R[0,0], R[0,1], R[0,2], T[0,0] ],\
                             [ R[1,0], R[1,1], R[2,1], T[1,0] ],\
                             [ R[2,0], R[2,1], R[2,2], T[2,0] ],\
                             [ 0,      0,      0,      1      ]])
             
-            P_gps = M_ext * P_c
+            P_gps = M_ext * P_c        
             
         #
         # Convert P_gps into latitude and longitude in proper format
@@ -155,7 +155,6 @@ class Target(object):
             
         self.latitude = self.gps_lat_dec2dms(gps_x)
         self.longitude = self.gps_long_dec2dms(gps_y)
-        self.orientation = plane_orientation
 
     def gps_lat_dec2dms(self, gps_decimal):
         gps_dms_str = ""

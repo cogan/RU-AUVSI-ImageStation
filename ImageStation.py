@@ -8,6 +8,8 @@ pygtk.require('2.0')
 import gtk
 import gtk.glade
 import glib
+import math
+import pango
 
 #import project related dependencies
 from Communicator import *
@@ -651,11 +653,6 @@ class ImageStation:
                     crop.target.included = False
                     crop.target.number = -1
                     self.cd_target_num = -1
-                    
-                # draw target on image
-                # TODO: make it cooler
-                self.drawing_area.window.draw_arc(self.gc, False, x-10, y-10, 20, 20, 0, 360*64)
-                self.drawing_area.window.draw_arc(self.gc, False, x-20, y-20, 40, 40, 0, 360*64)
                 
                 # set the target column to show the "unincluded target image"
                 if self.cd_crop_num == 1:
@@ -676,7 +673,9 @@ class ImageStation:
                 # create target
                 crop.set_target(x, y)
                 
+                # update info to match model and redraw image to display target
                 self.update_target_info(self.cd_pic_num, self.cd_crop_num)
+                self.redraw_current_image()
             
                 # go back to generate crop mode
                 self.drawing_area_mode = "GENERATE_CROP_TRANSITION"
@@ -1257,6 +1256,7 @@ class ImageStation:
                 
                 # render the target and compass
                 self.draw_target(pic_num, crop_num)
+                self.draw_compass(pic_num)
                 
             except glib.GError as e:
                 print "picture " + str(pic_num) + " crop " + str(crop_num) + \
@@ -1284,15 +1284,73 @@ class ImageStation:
         self.drawing_area.window.draw_pixbuf(self.gc, self.pixbuf, \
                                                     0, 0, 0, 0, -1, -1)
         self.draw_target(self.cd_pic_num, self.cd_crop_num)
+        self.draw_compass(self.cd_pic_num)
 
     def draw_target(self, pic_num, crop_num):
-            crop = self.communicator.image_store.get_crop(pic_num, crop_num)
-            if crop.target != None:
-                x = crop.target.x_coord
-                y = crop.target.y_coord
-                self.drawing_area.window.draw_arc(self.gc, False, x-10, y-10, 20, 20, 0, 360*64)
-                self.drawing_area.window.draw_arc(self.gc, False, x-20, y-20, 40, 40, 0, 360*64)
+        # set graphics context
+        self.gc.set_line_attributes(line_width=3, line_style=gtk.gdk.LINE_SOLID, cap_style=gtk.gdk.CAP_BUTT, join_style=gtk.gdk.JOIN_MITER)
+        red = self.drawing_area.get_colormap().alloc_color("red")
+        black = self.drawing_area.get_colormap().alloc_color("black")
+        self.gc.foreground = red
 
+        crop = self.communicator.image_store.get_crop(pic_num, crop_num)
+        if crop.target != None:
+            x = crop.target.x_coord
+            y = crop.target.y_coord
+            self.drawing_area.window.draw_arc(self.gc, False, x-10, y-10, 20, 20, 0, 360*64)
+            self.drawing_area.window.draw_arc(self.gc, False, x-20, y-20, 40, 40, 0, 360*64)
+            
+        # reset graphics context
+        self.gc.foreground = black
+        
+    def draw_compass(self, pic_num):
+        pic = self.communicator.image_store.get_picture(pic_num)
+        
+        # size of compass in pixels
+        size = 100
+        radius = size / 2
+        
+        # size of drawing area
+        (w, h) = self.drawing_area.get_size_request()
+        
+        # compass position
+        offset = 75
+        center_x = w - offset
+        center_y = h - offset
+        
+        # calculate coordinates for drawing lines
+        angle = (float(pic.plane_orientation) + 90) * (math.pi / 180.0)
+        x1 = int(radius * math.cos(angle))
+        y1 = int(radius * math.sin(angle))
+        x2 = int(-x1)
+        y2 = int(-y1)
+        x3 = int(radius * math.cos(angle + math.pi/2))
+        y3 = int(radius * math.sin(angle + math.pi/2))
+        x4 = int(-x3)
+        y4 = int(-y3)
+                
+        # set graphics context
+        self.gc.set_line_attributes(line_width=2, line_style=gtk.gdk.LINE_SOLID, cap_style=gtk.gdk.CAP_BUTT, join_style=gtk.gdk.JOIN_MITER)
+        
+        # draw the beautiful compass rose
+        self.drawing_area.window.draw_line(self.gc, center_x + x1, center_y - y1, center_x + x2, center_y - y2)
+        self.drawing_area.window.draw_line(self.gc, center_x + x3, center_y - y3, center_x + x4, center_y - y4)
+        
+        # draw the N
+        font_desc = pango.FontDescription('Serif 12')
+        north_char = self.drawing_area.create_pango_layout('N')
+        north_char.set_font_description(font_desc)
+        
+        # pick coordinates to draw N in
+        north_x = center_x + int((radius+10) * math.cos(angle)) - 7
+        north_y = center_y - int((radius+10) * math.sin(angle)) - 7
+        
+        self.drawing_area.window.draw_layout(self.gc, north_x, north_y, north_char)
+        
+        # reset graphics context
+        self.gc.set_line_attributes(line_width=1, line_style=gtk.gdk.LINE_SOLID, cap_style=gtk.gdk.CAP_BUTT, join_style=gtk.gdk.JOIN_MITER)
+
+        
     def update_target_info(self, pic_num, crop_num):
         """update the fields containing a crop's target info"""
         crop = self.communicator.image_store.get_crop(pic_num, crop_num)

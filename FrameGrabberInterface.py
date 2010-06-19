@@ -21,9 +21,9 @@ class FrameGrabberInterface(Interface):
         
         thread.start_new_thread(self.ivy_setup, ())
         
-        self.heading = "NW"
-        self.latitude = "38.1454"
-        self.longitude = "76.431586"
+        self.heading = "0.0"
+        self.latitude = "0.0"
+        self.longitude = "0.0"
             
     def __del__(self):
         print "framegrabber destructor called, killing ivy bus"
