@@ -1,5 +1,3 @@
-#Target.py
-
 import os.path
 from numpy import matrix
 import math

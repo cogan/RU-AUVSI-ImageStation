@@ -1,5 +1,3 @@
-#Picture.py
-
 from Crop import *
 from Camera import *
 

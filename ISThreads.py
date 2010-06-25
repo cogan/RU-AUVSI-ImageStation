@@ -1,6 +1,3 @@
-#ISThreads.py (Image Station Threads)
-
-#import required modules
 import threading
 import sys
 import pygtk
@@ -8,7 +5,6 @@ pygtk.require('2.0')
 import gtk
 import time
 
-#import project related dependencies
 from Communicator import *
 
 #*

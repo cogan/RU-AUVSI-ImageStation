@@ -1,5 +1,3 @@
-#NmeaDecoder.py
-
 from DecodeError import *
 
 class NmeaDecoder:

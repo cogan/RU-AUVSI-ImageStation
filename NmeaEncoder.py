@@ -1,5 +1,3 @@
-#NmeaEncoder.py
-
 class NmeaEncoder:
     """class used for encoding messages into NMEA format"""
     

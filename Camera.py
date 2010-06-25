@@ -1,15 +1,3 @@
-#****
-#TODO:
-# __critical__
-# test calculation gps and orientation
-# fix interface to camera on plane
-#
-# __medium__
-# fix add manually and redownload (especially target list bugs)
-#****
-
-#Camera.py
-
 from numpy import matrix
 
 class Camera(object):

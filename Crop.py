@@ -1,5 +1,3 @@
-#Crop.py
-
 import os
 import math
 from Target import *

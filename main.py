@@ -1,11 +1,7 @@
+
 #!/usr/bin/env python
-
-#main.py
-
-#import required modules
 import sys
 
-#import project related dependencies
 from Communicator import *
 from ImageStation import *
 from CameraControl import *

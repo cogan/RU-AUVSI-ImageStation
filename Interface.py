@@ -1,5 +1,3 @@
-#Interface.py
-
 from InterfaceError import *
 
 class Interface:

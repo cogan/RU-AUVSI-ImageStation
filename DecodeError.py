@@ -1,5 +1,3 @@
-#InterfaceError.py
-
 class DecodeError(Exception):
     """exception generated during the NmeaDecoding process."""
     def __init__(self, value):

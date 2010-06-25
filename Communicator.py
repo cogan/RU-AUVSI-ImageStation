@@ -1,12 +1,8 @@
-#Communicator.py
-
-#import required modules
 import math
 import sys
 import os
 import time
 
-#import project related dependencies
 from Subject import *
 from NoneInterface import *
 from SerialInterface import *

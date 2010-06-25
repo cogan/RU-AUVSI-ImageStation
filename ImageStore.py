@@ -1,5 +1,3 @@
-#ImageStore.py
-
 from Picture import *
 import pickle
 

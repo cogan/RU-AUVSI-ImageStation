@@ -1,5 +1,3 @@
-#SerialInterface.py
-
 from Interface import *
 from NmeaEncoder import *
 from NmeaDecoder import *

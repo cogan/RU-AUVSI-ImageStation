@@ -58,7 +58,13 @@ Picture vs. Crop
     A 'crop' is the actual image.  It has a path to an image file and information specific to itself.  Each picture has at least 1 crop.
     
 TODO:
-    Prevent the framegrabber interface from giving an error if it is not connected to a Network
-    Write working code to determine the GPS coordinates of a target in an image
-    Add in support for GoogleEarth / NASA WorldWind type program (there is already a tab for this in the ImageStation.glade file)
-    Various minor usability improvements (eg. allowing the user to hit enter when opening a file instead of forcing them to click the open button)
+    - Prevent the framegrabber interface from giving an error if it is not 
+      connected to a Network
+    - Write working code to determine the GPS coordinates of a target in image
+    - Test the "manually add" and "redownload" functions for images, there is a
+      high chance these fucntions contain bugs related to targets
+    - Add in support for GoogleEarth / NASA WorldWind type program (there is 
+      already a tab for this in the ImageStation.glade file)
+    - Various minor usability improvements (eg. allowing the user to hit enter 
+      when opening a file instead of forcing them to click the open button)
+    - Other Stuff???

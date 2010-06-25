@@ -1,5 +1,3 @@
-#NoneInterface.py
-
 from Interface import *
 
 class NoneInterface(Interface):

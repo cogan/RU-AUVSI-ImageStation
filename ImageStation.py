@@ -1,6 +1,3 @@
-#ImageStation.py
-
-#import required modules
 import sys
 import os.path
 import pygtk
@@ -11,7 +8,6 @@ import glib
 import math
 import pango
 
-#import project related dependencies
 from Communicator import *
 import CameraControl
 

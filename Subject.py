@@ -1,5 +1,3 @@
-#Subject.py
-
 class Subject:
     """Used to implement observer pattern"""
     

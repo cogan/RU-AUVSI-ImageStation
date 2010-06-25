@@ -1,6 +1,3 @@
-#CameraControl.py
-
-#import required modules
 import os
 from subprocess import Popen
 import pygtk
