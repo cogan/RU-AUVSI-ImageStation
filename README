@@ -1,7 +1,11 @@
-This is the ImageStation software to be used by Rutgers for the AUVSI 2010 Student UAS competition
+This is the ImageStation software used by Rutgers for the 
+AUVSI 2010 Student UAS competition
 
 RUNNING the Program (must have python installed):
-to run the program simply type ./main.py, or python main.py
+ 1) to run the program simply type ./main.py, or python main.py
+ 2) if you want to use the framegrabber interface with mplayer, you must create
+    a fifo ( $ mkfifo mplayer_fifo ) to capture images. make sure you give
+    it proper permissions as well
 
 REQUIREMENTS:
 pySerial
@@ -26,13 +30,35 @@ here is a diagram of the basic structure of the program
     ImageStation.py     CameraControl.py
     
 ImageStation + CameraControl:
-    These files correspond to the user interface.  Their respective glade files have all the user interface info contained within them.  They send messages to the Communicator in order to communicate with the plane.  They also are observers to the Communicator, so they receive messages through the communicator calling the update() method.
+    These files correspond to the user interface.  Their respective glade files
+    have all the user interface info contained within them.  They call 
+    functions in the Communicator in order to communicate with the plane.  
+    They also are observers to the Communicator, so they receive messages 
+    through the communicator calling the notify() method.
 
 Communicator:
-    Calls methods in the selected interface in order to communicate with the plane.  Uses a queue to determine the next command or request to be sent
+    Calls methods in the selected interface in order to communicate with the 
+    plane.  Uses a queue to determine the next command or request to be sent.
 
 ImageStore:
-    Contains all the data for saving/loading the project as well as all picture and crop information.
+    Contains all the data for saving/loading the project as well as all 
+    picture and crop information.
 
 SerialInterface:
-    Uses NmeaEncoder and NmeaDecoder as well as the pySerial interface to actually communicate with the plane
+    Uses NmeaEncoder and NmeaDecoder as well as the pySerial interface to 
+    actually communicate with the plane
+    
+FrameGrabberInterface:
+    When the "Take" button is clicked it takes a screenshot from the mplayer
+    video stream by sending commands through the 'mplayer_fifo'.  It pulls
+    metadata about the picture over the IVY bus from the PPZ ground station.
+    
+Picture vs. Crop
+    A 'picture' is not an actual image, it simply contains data about an image (such as the time it was taken and it's gps location)
+    A 'crop' is the actual image.  It has a path to an image file and information specific to itself.  Each picture has at least 1 crop.
+    
+TODO:
+    Prevent the framegrabber interface from giving an error if it is not connected to a Network
+    Write working code to determine the GPS coordinates of a target in an image
+    Add in support for GoogleEarth / NASA WorldWind type program (there is already a tab for this in the ImageStation.glade file)
+    Various minor usability improvements (eg. allowing the user to hit enter when opening a file instead of forcing them to click the open button)

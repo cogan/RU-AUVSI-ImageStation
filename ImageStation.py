@@ -109,7 +109,7 @@ class ImageStation:
         connection_menu_framegrabber.show()
         connection_menu_debug.show()
         
-        connection_menu_framegrabber.set_active(True)
+        connection_menu_debug.set_active(True)
         
         #*
         #* Set up TreeView

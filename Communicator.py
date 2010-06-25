@@ -32,8 +32,8 @@ class Communicator(Subject):
         
         #set default interface
         #self.interface = SerialInterface("/dev/ttyUSB0", 115200)
-        self.interface = FrameGrabberInterface()
-        #self.interface = DebugInterface()
+        #self.interface = FrameGrabberInterface()
+        self.interface = DebugInterface()
         
     def set_interface(self, interface, **kwargs):
         """sets the interface used to communicate with the plane"""
