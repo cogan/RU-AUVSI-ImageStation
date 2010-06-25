@@ -1,3 +1,12 @@
+###############################################################################
+#
+# file: Interface.py 
+# author: Cogan Noll
+# email: colgate360@gmail.com
+# last modified: 2010
+#
+###############################################################################
+
 from InterfaceError import *
 
 class Interface:

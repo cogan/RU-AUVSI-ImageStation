@@ -1,3 +1,12 @@
+###############################################################################
+#
+# file: Subject.py 
+# author: Cogan Noll
+# email: colgate360@gmail.com
+# last modified: 2010
+#
+###############################################################################
+
 class Subject:
     """Used to implement observer pattern"""
     

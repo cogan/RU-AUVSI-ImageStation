@@ -1,3 +1,12 @@
+###############################################################################
+#
+# file: Target.py 
+# author: Cogan Noll
+# email: colgate360@gmail.com
+# last modified: 2010
+#
+###############################################################################
+
 import os.path
 from numpy import matrix
 import math

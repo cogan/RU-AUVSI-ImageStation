@@ -1,3 +1,12 @@
+###############################################################################
+#
+# file: ImageStation.py 
+# author: Cogan Noll
+# email: colgate360@gmail.com
+# last modified: 2010
+#
+###############################################################################
+
 import sys
 import os.path
 import pygtk

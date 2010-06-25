@@ -1,5 +1,14 @@
-
 #!/usr/bin/env python
+
+###############################################################################
+#
+# file: main.py
+# author: Cogan Noll
+# email: colgate360@gmail.com
+# last modified: 2010
+#
+###############################################################################
+
 import sys
 
 from Communicator import *

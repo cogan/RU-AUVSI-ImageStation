@@ -1,3 +1,12 @@
+###############################################################################
+#
+# file: NoneInterface.py 
+# author: Cogan Noll
+# email: colgate360@gmail.com
+# last modified: 2010
+#
+###############################################################################
+
 from Interface import *
 
 class NoneInterface(Interface):

@@ -1,3 +1,12 @@
+###############################################################################
+#
+# file: Picture.py 
+# author: Cogan Noll
+# email: colgate360@gmail.com
+# last modified: 2010
+#
+###############################################################################
+
 from Crop import *
 from Camera import *
 

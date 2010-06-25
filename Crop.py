@@ -1,3 +1,12 @@
+###############################################################################
+#
+# file: Crop.py 
+# author: Cogan Noll
+# email: colgate360@gmail.com
+# last modified: 2010
+#
+###############################################################################
+
 import os
 import math
 from Target import *

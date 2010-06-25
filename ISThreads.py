@@ -1,3 +1,12 @@
+###############################################################################
+#
+# file: ISThreads.py (Image Station Threads)
+# author: Cogan Noll
+# email: colgate360@gmail.com
+# last modified: 2010
+#
+###############################################################################
+
 import threading
 import sys
 import pygtk

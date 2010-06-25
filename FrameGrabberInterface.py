@@ -1,3 +1,12 @@
+###############################################################################
+#
+# file: FrameGrabberInterface.py 
+# author: Cogan Noll
+# email: colgate360@gmail.com
+# last modified: 2010
+#
+###############################################################################
+
 from Interface import *
 from NmeaEncoder import *
 from NmeaDecoder import *

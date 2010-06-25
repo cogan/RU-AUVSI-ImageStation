@@ -1,3 +1,12 @@
+###############################################################################
+#
+# file: CameraControl.py 
+# author: Cogan Noll
+# email: colgate360@gmail.com
+# last modified: 2010
+#
+###############################################################################
+
 import os
 from subprocess import Popen
 import pygtk

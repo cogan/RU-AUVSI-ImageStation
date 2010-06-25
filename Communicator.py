@@ -1,3 +1,12 @@
+###############################################################################
+#
+# file: Communicator.py 
+# author: Cogan Noll
+# email: colgate360@gmail.com
+# last modified: 2010
+#
+###############################################################################
+
 import math
 import sys
 import os

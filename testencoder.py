@@ -1,3 +1,12 @@
+###############################################################################
+#
+# file: testencoder.py 
+# author: Cogan Noll
+# email: colgate360@gmail.com
+# last modified: 2010
+#
+###############################################################################
+
 from NmeaEncoder import *
 from NmeaDecoder import *
 from Interface import *

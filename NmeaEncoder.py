@@ -1,3 +1,12 @@
+###############################################################################
+#
+# file: NmeaEncoder.py 
+# author: Cogan Noll
+# email: colgate360@gmail.com
+# last modified: 2010
+#
+###############################################################################
+
 class NmeaEncoder:
     """class used for encoding messages into NMEA format"""
     
